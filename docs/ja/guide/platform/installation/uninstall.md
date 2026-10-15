@@ -2,106 +2,103 @@
 outline: deep
 ---
 
-# Disable and Uninstall
+# 無効化とアンインストール {#disable-and-uninstall}
 
-To pause a platform without removing its data:
+データを削除せずにプラットフォームを一時停止するには、次のようにします。
 
 ```sh
 void platform disable [id] --plan
 void platform disable [id]
 ```
 
-Disabled platforms reject application traffic while retaining domains and routes. The platform API also rejects requests, so CLI commands that use it, including login and deploy, fail until you enable the platform again. Only the administrator status page at `<api-url>/admin/status` and administrator sign-in stay available. Repair and upgrade preserve that state.
+無効化されたプラットフォームは、ドメインとルートを保持したまま、アプリケーションのトラフィックを拒否します。プラットフォーム API もリクエストを拒否するため、ログインやデプロイを含め、それを使用する CLI コマンドは、プラットフォームを再び有効にするまで失敗します。利用できるのは、`<api-url>/admin/status` にある管理者用のステータスページと管理者のサインインのみです。修復とアップグレードでは、この状態が維持されます。
 
-Enabling redeploys the platform Workers from the selected runtime, verifies them, and then restores traffic. Pass `--runtime <path>` to enable with a custom platform build:
+有効化すると、選択したランタイムからプラットフォームの Worker が再デプロイされ、検証されたのちにトラフィックが復元されます。カスタムのプラットフォームビルドで有効化するには、`--runtime <path>` を渡します。
 
 ```sh
 void platform enable [id] --plan
 void platform enable [id]
 ```
 
-Add `--yes` to commands that make changes in a non-interactive shell.
+非対話型のシェルで変更を行うコマンドには、`--yes` を追加します。
 
-While disabled, the platform retries queue batches after five minutes instead of delivering them to apps. Queue retention and retry limits still apply. For a long pause, plan a dead-letter queue or another way to recover messages.
+無効化されている間、プラットフォームはキューのバッチをアプリに配信せず、5 分後に再試行します。キューの保持期間と再試行の制限は引き続き適用されます。長期間の停止では、デッドレターキューか、メッセージを復旧する別の方法を計画してください。
 
-## Uninstall
+## アンインストール {#uninstall}
 
-Preview removal before applying it:
+適用する前に、削除内容をプレビューします。
 
 ```sh
 void platform uninstall [id] --plan
 void platform uninstall [id]
 ```
 
-Uninstall blocks platform traffic, removes Queues that no remaining platform Worker uses, and lists the resources left for you to review. Use `--plan` to review deletions and retained resources before making changes. By default, Workers, the Queues they use, KV, R2, Hyperdrive, the dispatch namespace, and AI Gateway remain in your account. Adopted resources, external PostgreSQL, and zones are always retained. To install a platform again, use a new empty PostgreSQL database. Email Routing settings are retained; `--purge-resources` removes only the rules that send mail to the platform. DNS records, routes, custom domains, and Cloudflare Access resources are retained unless you use `--purge-resources`.
+アンインストールはプラットフォームのトラフィックをブロックし、残っているプラットフォームの Worker が使用していないキューを削除し、確認のために残されたリソースを一覧表示します。変更を行う前に、`--plan` を使用して、削除されるリソースと保持されるリソースを確認してください。デフォルトでは、Worker、それらが使用するキュー、KV、R2、Hyperdrive、ディスパッチ名前空間、AI Gateway はあなたのアカウントに残ります。取り込まれたリソース、外部の PostgreSQL、ゾーンは常に保持されます。プラットフォームを再びインストールするには、新しい空の PostgreSQL データベースを使用してください。Email Routing の設定は保持されます。`--purge-resources` は、プラットフォームにメールを送信するルールのみを削除します。DNS レコード、ルート、カスタムドメイン、Cloudflare Access のリソースは、`--purge-resources` を使用しない限り保持されます。
 
-When uninstall finishes, the record of what was kept stays at `~/.void/platforms/<account-id>/<installation-id>.json`. Without `--purge-data`, the encrypted credentials file `<installation-id>.recovery.enc` next to it is kept too. Delete both once you have finished the manual cleanup below.
+アンインストールが完了すると、何が保持されたかの記録が `~/.void/platforms/<account-id>/<installation-id>.json` に残ります。`--purge-data` を指定しない場合、その隣にある暗号化された認証情報ファイル `<installation-id>.recovery.enc` も保持されます。以下の手動クリーンアップが完了したら、両方を削除してください。
 
-To also remove eligible data resources owned by the installer:
+インストーラーが所有する、対象のデータリソースも削除するには、次のようにします。
 
 ```sh
 void platform uninstall [id] --purge-data
 ```
 
-Even with `--purge-data`, Void retains Workers, the Queues they use, R2, AI Gateway, DNS records, routes, custom domains, Access resources, adopted resources, external PostgreSQL, and zones. Review those in the Cloudflare dashboard if you want to remove them, or use `--purge-resources`.
+`--purge-data` を指定しても、Void は Worker、それらが使用するキュー、R2、AI Gateway、DNS レコード、ルート、カスタムドメイン、Access のリソース、取り込まれたリソース、外部の PostgreSQL、ゾーンを保持します。これらを削除したい場合は、Cloudflare ダッシュボードで確認するか、`--purge-resources` を使用してください。
 
-### Remove everything Void created
+### Void が作成したものをすべて削除する {#remove-everything-void-created}
 
-To delete every Cloudflare resource the installation created:
+インストールが作成したすべての Cloudflare リソースを削除するには、次のようにします。
 
 ```sh
 void platform uninstall [id] --purge-resources --plan
 void platform uninstall [id] --purge-resources
 ```
 
-`--purge-resources` includes `--purge-data`. It also deletes the platform Workers, Queues, the application Workers left in the dispatch namespace, the R2 bucket and its objects, the AI Gateway, the platform DNS record, Worker routes and custom domains, and the Access applications and service tokens the installer created. The plan lists each resource in deletion order, and everything that stays. If Cloudflare shows that the AI Gateway was created after installation, for example because it was deleted and created again under the same name, it is kept and listed.
+`--purge-resources` には `--purge-data` が含まれます。さらに、プラットフォームの Worker、キュー、ディスパッチ名前空間に残っているアプリケーションの Worker、R2 バケットとそのオブジェクト、AI Gateway、プラットフォームの DNS レコード、Worker のルートとカスタムドメイン、インストーラーが作成した Access のアプリケーションとサービストークンを削除します。プランには、削除順に各リソースと、残されるすべてのものが一覧表示されます。たとえば、同じ名前で削除して再作成されたなど、AI Gateway がインストール後に作成されたものであることが Cloudflare に示されている場合は、保持され、一覧に表示されます。
 
-If the platform sends email, it first deletes the Email Routing rules in the sender domain's zone that send mail to the platform email gateway Worker, and resets such a catch-all rule to drop mail. It leaves Email Routing enabled and keeps the sender domain's MX, SPF, and DKIM records.
+プラットフォームがメールを送信する場合は、まず、送信元ドメインのゾーンにある、プラットフォームのメールゲートウェイ Worker にメールを送信する Email Routing のルールを削除し、そのような catch-all ルールをメールの破棄にリセットします。Email Routing は有効なままにし、送信元ドメインの MX、SPF、DKIM レコードは保持します。
 
-It never removes zones, adopted resources, external PostgreSQL, other Email Routing settings, Analytics Engine datasets, Access policies or identity providers you chose, or API tokens. Revoke the API tokens you created for the platform afterward.
+ゾーン、取り込まれたリソース、外部の PostgreSQL、その他の Email Routing の設定、Analytics Engine のデータセット、選択した Access ポリシーや ID プロバイダー、API トークンは決して削除しません。プラットフォーム用に作成した API トークンは、後で取り消してください。
 
-Before making changes, `--purge-resources` checks that no projects remain and that it can read the resources it plans to delete. Delete any projects with `void project delete <name>` first.
+変更を行う前に、`--purge-resources` は、プロジェクトが残っていないこと、および削除する予定のリソースを読み取れることを確認します。先に `void project delete <name>` でプロジェクトを削除してください。
 
-Set `CLOUDFLARE_API_TOKEN` to a token with the Edit permissions listed by `--plan`. Browser login cannot delete DNS records or Access resources. Access resources in a separate identity account need permissions in that account; email-enabled platforms also need **Zone → Email Routing Rules → Edit** for the sender domain's zone.
+`CLOUDFLARE_API_TOKEN` には、`--plan` に表示される Edit 権限を持つトークンを設定してください。ブラウザのログインでは、DNS レコードや Access のリソースを削除できません。別の ID アカウントにある Access のリソースには、そのアカウントでの権限が必要です。メールが有効なプラットフォームでは、送信元ドメインのゾーンに対する **Zone → Email Routing Rules → Edit** も必要です。
 
-The read checks cannot verify Edit permissions. If a deletion is denied, uninstall may have already disabled traffic or removed resources. Update the token permissions and rerun the command to resume.
+読み取りのチェックでは、Edit 権限を確認できません。削除が拒否された場合、アンインストールがすでにトラフィックを無効化していたり、リソースを削除していたりする可能性があります。トークンの権限を更新し、コマンドを再実行して再開してください。
 
-If a route, custom domain, DNS record, or Access resource no longer matches what the installation recorded, for example a route that now sends traffic to another Worker, it is kept and listed with the reason, and uninstall continues. Do not run `--purge-resources` while someone else is changing the platform's Workers, routes, or custom domains: a change made after Void checks a resource and before it deletes it is not detected.
+ルート、カスタムドメイン、DNS レコード、Access のリソースが、インストールが記録した内容と一致しなくなった場合 (たとえば、ルートが別の Worker にトラフィックを送るようになった場合) は、そのリソースは保持され、理由とともに一覧表示され、アンインストールは続行されます。他の誰かがプラットフォームの Worker、ルート、カスタムドメインを変更している間は、`--purge-resources` を実行しないでください。Void がリソースを確認してから削除するまでの間に行われた変更は、検出されません。
 
-If Cloudflare refuses a deletion, for example because a Worker you created yourself still sends logs to the platform tail Worker, uninstall stops and names the resource. Fix it, then rerun the same command to continue.
+自分で作成した Worker がまだプラットフォームの tail Worker にログを送信している場合など、Cloudflare が削除を拒否した場合、アンインストールは停止し、そのリソース名を示します。修正してから、同じコマンドを再実行して続行してください。
 
-If a plain or `--purge-data` uninstall stopped before it finished, rerun it with `--purge-resources` to also delete what it kept. Once an uninstall finishes, use the manual steps below instead.
+通常のアンインストールまたは `--purge-data` 付きのアンインストールが完了前に停止した場合は、`--purge-resources` を付けて再実行すると、保持されていたものも削除されます。アンインストールが完了した後は、代わりに以下の手動の手順を使用してください。
 
-### Remove retained resources
+### 保持されたリソースを削除する {#remove-retained-resources}
 
-After an uninstall without `--purge-resources`, Cloudflare refuses to delete a resource while a platform Worker still uses it. In the Cloudflare dashboard, remove what is left in this order, skipping anything already gone:
+`--purge-resources` なしでアンインストールした後は、プラットフォームの Worker がまだ使用しているリソースを、Cloudflare は削除しません。Cloudflare ダッシュボードで、残っているものを次の順序で削除してください。すでに存在しないものはスキップします。
 
-1. Delete the platform DNS record, Worker routes, and custom domains.
-2. If the platform sends email, open **Email Routing** for the sender domain's zone. Delete the routing rules and any catch-all rule that send mail to the platform email gateway Worker. Then remove the sender subdomain from Email Routing, or disable Email Routing if you enabled it only for the platform.
-3. Open each platform Queue and remove the platform API Worker from its consumers.
-4. Delete the platform Workers, except the tail Worker (its name ends in `-tail`).
-5. Delete the platform Queues.
-6. Delete the application Workers in the dispatch namespace, then delete the namespace.
-7. Delete the tail Worker. Cloudflare refuses while other Workers still send logs to it.
-8. Delete the platform KV namespaces and Hyperdrive configuration.
-9. Empty the R2 bucket, then delete it.
-10. Delete the AI Gateway.
+1. プラットフォームの DNS レコード、Worker のルート、カスタムドメインを削除します。
+2. プラットフォームがメールを送信する場合は、送信元ドメインのゾーンの **Email Routing** を開きます。プラットフォームのメールゲートウェイ Worker にメールを送信するルーティングルールと catch-all ルールを削除します。その後、Email Routing から送信元のサブドメインを削除するか、プラットフォームのためだけに Email Routing を有効にした場合は、Email Routing を無効にします。
+3. 各プラットフォームのキューを開き、コンシューマーからプラットフォームの API Worker を削除します。
+4. tail Worker (名前が `-tail` で終わるもの) を除く、プラットフォームの Worker を削除します。
+5. プラットフォームのキューを削除します。
+6. ディスパッチ名前空間内のアプリケーションの Worker を削除し、その後、名前空間を削除します。
+7. tail Worker を削除します。他の Worker がまだログを送信している間は、Cloudflare は削除を拒否します。
+8. プラットフォームの KV 名前空間と Hyperdrive の設定を削除します。
+9. R2 バケットを空にしてから、削除します。
+10. AI Gateway を削除します。
 
-If installation configured Cloudflare Access, the uninstall plan lists its recorded applications and service tokens with their ownership and IDs. Review them in Zero Trust after uninstall. Remove installer-created resources only when nothing else uses them; resources connected from an existing company setup remain under their owner's control.
+インストールで Cloudflare Access が設定されていた場合、アンインストールのプランには、記録されたアプリケーションとサービストークンが、その所有者と ID とともに一覧表示されます。アンインストール後に、Zero Trust でそれらを確認してください。インストーラーが作成したリソースは、他に使用しているものがない場合にのみ削除してください。既存の社内環境から接続されたリソースは、その所有者の管理下に残ります。
 
-Uninstall does not remove the applications created for [project Zero Trust](/guide/platform/administration/zero-trust). While Zero Trust is enabled or still has Access applications, uninstall and `--plan` stop before any change and list those applications. Run `void platform zero-trust disable` first. Uninstall reads this from the installation database, so it also stops when the database cannot be reached.
+アンインストールでは、[プロジェクトの Zero Trust](/ja/guide/platform/administration/zero-trust) 用に作成されたアプリケーションは削除されません。Zero Trust が有効な間、またはまだ Access のアプリケーションがある間は、アンインストールと `--plan` は、変更を行う前に停止し、それらのアプリケーションを一覧表示します。先に `void platform zero-trust disable` を実行してください。アンインストールはこの情報をインストールのデータベースから読み取るため、データベースに到達できない場合も停止します。
 
-If no platform user exists yet, for example because first administrator setup did
-not finish, nobody can run `zero-trust disable`. Uninstall then turns off project
-Zero Trust and deletes its applications itself. Run it on the computer that installed
-the platform. If the uninstall asks you to, update an older platform runtime first.
+最初の管理者のセットアップが完了していないなどの理由で、プラットフォームのユーザーがまだ存在しない場合、`zero-trust disable` を実行できる人はいません。その場合、アンインストールはプロジェクトの Zero Trust を無効にし、そのアプリケーションを自分で削除します。プラットフォームをインストールしたコンピューターで実行してください。アンインストールから求められた場合は、先に古いプラットフォームのランタイムを更新してください。
 
-::: details Why some resources require manual cleanup
+::: details 一部のリソースで手動のクリーンアップが必要な理由 {#why-some-resources-require-manual-cleanup}
 
-Resources that may have been shared or repurposed require manual review before deletion. Void verifies ownership, keeps those resources in place, and blocks platform traffic.
+共有されていたり、用途が変更されていたりする可能性のあるリソースは、削除前に手動での確認が必要です。Void は所有権を確認し、それらのリソースをそのまま保持して、プラットフォームのトラフィックをブロックします。
 
-If removal is interrupted, rerun the command to continue. If a resource has changed ownership, resolve the reported conflict before retrying.
+削除が中断された場合は、コマンドを再実行して続行してください。リソースの所有権が変わっている場合は、再試行する前に、報告された競合を解決してください。
 
-External PostgreSQL and its data always remain under your control.
+外部の PostgreSQL とそのデータは、常にあなたの管理下に残ります。
 
 :::

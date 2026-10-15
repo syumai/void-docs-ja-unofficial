@@ -95,7 +95,7 @@ footer_subheading: サーバーコード、リソース、デプロイを 1 つ�
 ---
 
 <script setup>
-import Home from './.vitepress/theme/Home.vue'
+import Home from '../.vitepress/theme/Home.vue'
 </script>
 
 <Home />

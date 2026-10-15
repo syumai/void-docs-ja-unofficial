@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Handlers and Middleware {#handlers}
+# ハンドラーとミドルウェア {#handlers}
 
-Imported from `"void"` or `"void/handler"`.
+`"void"` または `"void/handler"` からインポートします。
 
 ## `defineHandler(handler)` {#definehandler-handler}
 
-Wraps a route handler function. The handler receives a [`CloudContext`](./types.md#cloudcontext) and can return a plain value (auto-converted to a Response) or use the Hono `c.json()` / `c.text()` APIs directly.
+ルートハンドラー関数をラップします。ハンドラーは [`CloudContext`](./types.md#cloudcontext) を受け取り、プレーンな値を返す (自動的に Response に変換されます) か、Hono の `c.json()` / `c.text()` API を直接使用できます。
 
 ```ts
 import { defineHandler } from 'void';
@@ -18,7 +18,7 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineHandler<R>(handler: (c: CloudContext) => R): TypedHandler<{}, R>;
@@ -26,7 +26,7 @@ function defineHandler<R>(handler: (c: CloudContext) => R): TypedHandler<{}, R>;
 
 ## `defineHandler(middleware..., handler)` {#definehandler-middleware-handler}
 
-Composes up to 5 per-route middleware with a final handler. Middleware runs in order before the handler.
+最大 5 つのルートごとのミドルウェアと、最後のハンドラーを組み合わせます。ミドルウェアは、ハンドラーの前に順番に実行されます。
 
 ```ts
 export const GET = defineHandler(authMiddleware, rateLimiter, (c) => {
@@ -36,9 +36,9 @@ export const GET = defineHandler(authMiddleware, rateLimiter, (c) => {
 
 ## `defineHandler.withValidator(validators)` {#definehandler-withvalidator-validators}
 
-Creates a handler with input validation using any [Standard Schema](https://github.com/standard-schema/standard-schema) compatible library (zod, valibot, arktype, etc.). Returns a curried function that accepts the handler.
+[Standard Schema](https://github.com/standard-schema/standard-schema) 互換の任意のライブラリ (zod、valibot、arktype など) を使用して、入力バリデーション付きのハンドラーを作成します。ハンドラーを受け取るカリー化された関数を返します。
 
-Validated input is passed as the second argument to the handler.
+検証済みの入力は、ハンドラーの第 2 引数として渡されます。
 
 ```ts
 import * as v from 'valibot';
@@ -54,7 +54,7 @@ export const POST = defineHandler.withValidator({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function withValidator<V extends ValidatorSlots>(
@@ -62,7 +62,7 @@ function withValidator<V extends ValidatorSlots>(
 ): <R>(handler: (c: CloudContext, input: HandlerInput<V>) => R) => TypedHandler<V, R>;
 ```
 
-**Type: `ValidatorSlots`**
+**型: `ValidatorSlots`**
 
 ```ts
 interface ValidatorSlots {
@@ -72,13 +72,13 @@ interface ValidatorSlots {
 }
 ```
 
-**Type: `HandlerInput<V>`**
+**型: `HandlerInput<V>`**
 
-The inferred output types of each validator slot. For a `ValidatorSlots` with `body` and `query`, the input object has `{ body: ..., query: ... }` with types inferred from the schema output.
+各バリデータースロットから推論される出力の型です。`body` と `query` を持つ `ValidatorSlots` の場合、入力オブジェクトは `{ body: ..., query: ... }` となり、型はスキーマの出力から推論されます。
 
 ## `defineMiddleware(handler)` {#definemiddleware-handler}
 
-Type-safe wrapper for Hono middleware.
+Hono ミドルウェアの型安全なラッパーです。
 
 ```ts
 import { defineMiddleware } from 'void';
@@ -89,7 +89,7 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineMiddleware(handler: MiddlewareHandler<CloudEnv>): MiddlewareHandler<CloudEnv>;
@@ -97,15 +97,15 @@ function defineMiddleware(handler: MiddlewareHandler<CloudEnv>): MiddlewareHandl
 
 ## `basicAuth(options)` {#basicauth-options}
 
-Built-in Basic authentication middleware for temporary site gates and pre-launch protection. Use it from `middleware/` with credentials from `void/env` to protect the whole app, or pass it to `defineHandler()` for a single route.
+一時的なサイトのゲートやリリース前の保護のための、組み込みの Basic 認証ミドルウェアです。`middleware/` から `void/env` の認証情報とともに使用するとアプリ全体を保護でき、`defineHandler()` に渡すと単一のルートを保護できます。
 
-Void’s reserved `/__void` endpoints use their own authentication and are excluded from Basic auth.
+Void が予約している `/__void` エンドポイントは独自の認証を使用するため、Basic 認証の対象外です。
 
-When credentials come from `void/env`, wrap the reads in functions so they are resolved per request after Void has bound the runtime env.
+認証情報を `void/env` から取得する場合は、Void がランタイムの env をバインドした後にリクエストごとに解決されるよう、読み取りを関数でラップしてください。
 
-If `password` resolves to an empty value, requests fail with a server error instead of passing the gate.
+`password` が空の値に解決された場合、リクエストはゲートを通過せず、サーバーエラーで失敗します。
 
-For app-specific bypasses such as health checks or public webhooks, compose that logic in your own middleware before calling `basicAuth()`.
+ヘルスチェックや公開 Webhook など、アプリ固有のバイパスが必要な場合は、`basicAuth()` を呼び出す前に、そのロジックを独自のミドルウェアに組み込んでください。
 
 ```ts
 // env.ts
@@ -129,7 +129,7 @@ export default basicAuth({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function basicAuth(options: {
@@ -142,7 +142,7 @@ function basicAuth(options: {
 
 ## `defineScheduled(handler)` {#definescheduled-handler}
 
-Wraps a Cloudflare [Scheduled handler](https://developers.cloudflare.com/workers/runtime-apis/handlers/scheduled/) with type inference.
+Cloudflare の [Scheduled ハンドラー](https://developers.cloudflare.com/workers/runtime-apis/handlers/scheduled/)を、型推論付きでラップします。
 
 ```ts
 import { defineScheduled } from 'void';
@@ -153,7 +153,7 @@ export default defineScheduled(async (controller, env, ctx) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineScheduled(
@@ -167,7 +167,7 @@ function defineScheduled(
 
 ## `defineQueue<T>(handler)` {#definequeue-t-handler}
 
-Wraps a [queue](../../guide/queues.md) consumer handler with typed message bodies. The generic `<T>` defines the message body type, which flows through to the typed `queues` proxy for `send()` calls.
+[キュー](../../guide/queues.md)のコンシューマーハンドラーを、型付きのメッセージ本体でラップします。ジェネリクスの `<T>` はメッセージ本体の型を定義し、その型は `send()` 呼び出し用の型付き `queues` プロキシに引き継がれます。
 
 ```ts
 import { defineQueue } from 'void';
@@ -179,7 +179,7 @@ export default defineQueue<{ to: string; subject: string }>(async (batch, env) =
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineQueue<T>(
@@ -189,7 +189,7 @@ function defineQueue<T>(
 
 ## `defineRender(handler)` {#definerender-handler}
 
-Wraps an SSR render entry. The second argument provides pre-built `<head>` and `<body>` asset tags for injecting client scripts and styles.
+SSR のレンダーエントリーをラップします。第 2 引数は、クライアントのスクリプトとスタイルを挿入するための、あらかじめ生成された `<head>` と `<body>` のアセットタグを提供します。
 
 ```ts
 import { defineRender } from "void";
@@ -203,7 +203,7 @@ export default defineRender((c, assetTags) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineRender(
@@ -211,19 +211,19 @@ function defineRender(
 ): RenderFn;
 ```
 
-**Type: `RenderAssetTags`**
+**型: `RenderAssetTags`**
 
 ```ts
 interface RenderAssetTags {
-  css: string; // Stylesheet links for <head>
-  preloads: string; // Modulepreload and dev client tags for <head>
-  body: string; // Script tags for before </body>
+  css: string; // <head> 用のスタイルシートのリンク
+  preloads: string; // <head> 用の modulepreload と開発用クライアントのタグ
+  body: string; // </body> の前に置くスクリプトタグ
 }
 ```
 
 ## `defineHead<P>(handler)` {#definehead-p-handler}
 
-Type-safe wrapper for the page `head()` export in `.server.ts` files. Provides [`CloudContext`](./types.md#cloudcontext) typing for the first argument and generic props typing for the second.
+`.server.ts` ファイルのページの `head()` エクスポート向けの、型安全なラッパーです。第 1 引数には [`CloudContext`](./types.md#cloudcontext) の型を、第 2 引数にはジェネリクスによる props の型を提供します。
 
 ```ts
 import { defineHandler, defineHead } from 'void';
@@ -247,7 +247,7 @@ export const head = defineHead<Props>((c, props) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineHead<P = Record<string, unknown>>(

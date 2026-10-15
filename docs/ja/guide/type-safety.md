@@ -17,7 +17,7 @@ Void は、データベーススキーマ、ルートハンドラー、ページ
 
 生成された型はすべて `.void/` に置かれ、ソースファイルやスキーマが変更されると自動的に更新されます。
 
-## データベース → ハンドラー → クライアント {#database-handler-client}
+## データベース → ハンドラー → クライアント {#database-→-handler-→-client}
 
 型は、手動のアノテーションなしで、Drizzle スキーマからハンドラーを経てクライアントまで流れます。
 
@@ -48,7 +48,7 @@ await fetch('/api/users', {
 
 Drizzle スキーマは、データベースのカラム、実行時のバリデーション、ハンドラーの入力型、クライアント側の型チェックをすべて同時に定義します。テーブルに対応しないエンドポイントでは、任意の [Standard Schema](./server-routing.md#manual-validators) ライブラリを使用できます。
 
-## ローダー → ページ props {#loader-page-props}
+## ローダー → ページ props {#loader-→-page-props}
 
 [Pages モード](./pages-routing/overview)では、ローダーの戻り値の型が `InferProps` を介してページコンポーネントに渡されます。
 
@@ -71,7 +71,7 @@ defineProps<Props>(); // ← { users: { id: number; name: string; ... }[] }
 
 手動でインターフェースを書く必要はありません。props は、ローダーが返す内容と常に同期します。
 
-## アクション → useForm {#action-useform}
+## アクション → useForm {#action-→-useform}
 
 ページアクションが `withValidator()` を使用している場合、ボディのスキーマは `useForm` に渡されます。これにより、型付きの `data`、型付きの `errors` のキー、URL の自動補完が得られます。
 

@@ -2,15 +2,15 @@
 outline: deep
 ---
 
-# Pages Adapters {#framework-adaptors}
+# Pages アダプター {#framework-adaptors}
 
-Framework adaptors for [Pages Routing](../../guide/pages-routing/overview). Each adaptor provides a Vite plugin and client-side runtime.
+[Pages ルーティング](../../guide/pages-routing/overview)向けのフレームワークアダプターです。各アダプターは、Vite プラグインとクライアントサイドのランタイムを提供します。
 
 ## `@void/vue` {#void-vue}
 
 ### `voidVue(options?)` {#voidvue-options}
 
-Imported from `"@void/vue/plugin"`. Returns an array of Vite plugins that handle Vue SFC compilation and SSR or hydration entry generation. It already includes `@vitejs/plugin-vue`, so you do not need to install or configure that separately.
+`"@void/vue/plugin"` からインポートします。Vue SFC のコンパイルと、SSR またはハイドレーションのエントリー生成を扱う Vite プラグインの配列を返します。`@vitejs/plugin-vue` はすでに含まれているため、別途インストールや設定をする必要はありません。
 
 ```ts
 import { voidVue } from '@void/vue/plugin';
@@ -20,13 +20,13 @@ export default defineConfig({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function voidVue(options?: VoidVueOptions): Plugin[];
 ```
 
-**Options:**
+**オプション:**
 
 ```ts
 interface VoidVueOptions {
@@ -39,30 +39,30 @@ interface VoidVueOptions {
 }
 ```
 
-### Vue Runtime {#vue-runtime}
+### Vue ランタイム {#vue-runtime}
 
-Imported from `"@void/vue"`.
+`"@void/vue"` からインポートします。
 
-| Export                             | Description                                                                                                                                                                                                                                       |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Link`                             | Vue component for SPA navigation. Renders `<a>` for GET, `<button>` for non-GET methods. Props: `href`, `method`, `data`, `prefetch`, `cacheFor`, `preserveScroll`, `preserveState`, `replace`, `reloadDocument`, `viewTransition`, `onNavigate`. |
-| `useRouter()`                      | Returns the Void Router with current route state (`url`, `path`, `query`, `params`) and navigation methods: `visit`, `refresh`, awaitable `prefetch`, `flush`, `flushAll`.                                                                        |
-| `useParams()`                      | Returns dynamic route params for the page currently being rendered.                                                                                                                                                                               |
-| `useNavigation()`                  | Returns pending navigation state: `{ state, location, method }`, where `state` is `"idle"`, `"loading"`, or `"submitting"` and `location` is the pending destination.                                                                             |
-| `useForm(url, defaults, options?)` | Typed reactive form helper bound to a page action URL. Returns `{ data, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }`.                                       |
-| `useIslandForm(defaults)`          | Form helper for island components. Same form state as `useForm()`, plus `submit(url, method)`. `post(url)`, `put(url)`, `patch(url)`, and `delete(url)` take the action URL and submit with `fetch()`.                                            |
-| `action(url, options?)`            | Awaitable one-shot page action helper. Uses `POST` by default and accepts `{ data, method, params }`, where `method` can be `"PUT"`, `"PATCH"`, or `"DELETE"`. Returns an `ActionResult`.                                                         |
-| `useShared()`                      | Returns shared data injected by middleware via `c.set("shared", {...})`.                                                                                                                                                                          |
+| エクスポート                       | 説明                                                                                                                                                                                                                                                                             |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Link`                             | SPA ナビゲーション用の Vue コンポーネントです。GET では `<a>`、GET 以外のメソッドでは `<button>` をレンダリングします。props: `href`、`method`、`data`、`prefetch`、`cacheFor`、`preserveScroll`、`preserveState`、`replace`、`reloadDocument`、`viewTransition`、`onNavigate`。 |
+| `useRouter()`                      | 現在のルートの状態(`url`、`path`、`query`、`params`)と、ナビゲーションメソッド(`visit`、`refresh`、await 可能な `prefetch`、`flush`、`flushAll`)を持つ Void Router を返します。                                                                                                  |
+| `useParams()`                      | 現在レンダリング中のページの動的ルートパラメーターを返します。                                                                                                                                                                                                                   |
+| `useNavigation()`                  | 保留中のナビゲーションの状態 `{ state, location, method }` を返します。`state` は `"idle"`、`"loading"`、`"submitting"` のいずれかで、`location` は保留中の宛先です。                                                                                                            |
+| `useForm(url, defaults, options?)` | ページアクションの URL に紐づく、型付きのリアクティブなフォームヘルパーです。`{ data, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }` を返します。                                            |
+| `useIslandForm(defaults)`          | アイランドコンポーネント用のフォームヘルパーです。`useForm()` と同じフォーム状態に加えて、`submit(url, method)` を持ちます。`post(url)`、`put(url)`、`patch(url)`、`delete(url)` はアクションの URL を受け取り、`fetch()` で送信します。                                         |
+| `action(url, options?)`            | await 可能な、1 回限りのページアクションヘルパーです。既定では `POST` を使用し、`{ data, method, params }` を受け付けます。`method` には `"PUT"`、`"PATCH"`、`"DELETE"` を指定できます。`ActionResult` を返します。                                                              |
+| `useShared()`                      | ミドルウェアが `c.set("shared", {...})` で注入した共有データを返します。                                                                                                                                                                                                         |
 
-Vue `Link` GET `data` is merged into the rendered `href` query string. Primitive values are serialized with `String(value)`, arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw. `prefetch` and `reloadDocument` are GET-only and throw for mutation links.
+Vue の `Link` の GET の `data` は、レンダリングされる `href` のクエリ文字列にマージされます。プリミティブ値は `String(value)` でシリアライズされ、配列は繰り返しのキーになり、`null` と `undefined` は省略され、ネストされたオブジェクトはスローされます。`prefetch` と `reloadDocument` は GET 専用で、変更系のリンクではスローされます。
 
-Vue GET navigation remounts the page so `useForm()` picks up the destination record's URL and defaults; layouts persist. Mutations and `router.refresh()` preserve page state by default. Set `preserveState` explicitly to override the default for navigation within the same record.
+Vue の GET ナビゲーションはページを再マウントするため、`useForm()` は宛先レコードの URL とデフォルト値を取得します。レイアウトは維持されます。変更系の操作と `router.refresh()` は、既定でページの状態を保持します。同じレコード内のナビゲーションで既定の動作を上書きするには、`preserveState` を明示的に設定します。
 
 ## `@void/react` {#void-react}
 
 ### `voidReact(options?)` {#voidreact-options}
 
-Imported from `"@void/react/plugin"`. Returns an array of Vite plugins that handle SSR and hydration entry generation. It already includes `@vitejs/plugin-react`, so you do not need to install or configure that separately.
+`"@void/react/plugin"` からインポートします。SSR とハイドレーションのエントリー生成を扱う Vite プラグインの配列を返します。`@vitejs/plugin-react` はすでに含まれているため、別途インストールや設定をする必要はありません。
 
 ```ts
 import { voidReact } from '@void/react/plugin';
@@ -72,13 +72,13 @@ export default defineConfig({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function voidReact(options?: VoidReactOptions): Plugin[];
 ```
 
-**Options:**
+**オプション:**
 
 ```ts
 interface VoidReactOptions {
@@ -91,38 +91,31 @@ interface VoidReactOptions {
 }
 ```
 
-### React Runtime {#react-runtime}
+### React ランタイム {#react-runtime}
 
-Imported from `"@void/react"`.
+`"@void/react"` からインポートします。
 
-| Export                             | Description                                                                                                                                                                                                                                         |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Link`                             | React component for SPA navigation. Renders `<a>` for GET, `<button>` for non-GET methods. Props: `href`, `method`, `data`, `prefetch`, `cacheFor`, `preserveScroll`, `preserveState`, `replace`, `reloadDocument`, `viewTransition`, `onNavigate`. |
-| `useRouter()`                      | Returns the Void Router with current route state (`url`, `path`, `query`, `params`) and navigation methods: `visit`, `refresh`, awaitable `prefetch`, `flush`, `flushAll`. React navigations are scheduled as transitions.                          |
-| `useParams()`                      | Returns dynamic route params for the page currently being rendered.                                                                                                                                                                                 |
-| `useNavigation()`                  | Returns pending navigation state: `{ state, location, method }`, where `state` is `"idle"`, `"loading"`, or `"submitting"` and `location` is the pending destination.                                                                               |
-| `useForm(url, defaults, options?)` | Form helper hook. Returns `{ data, setData, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }`.                                                                     |
-| `useIslandForm(defaults)`          | Form helper hook for island components. Same form state as `useForm()`. `post(url)`, `put(url)`, `patch(url)`, and `delete(url)` take the action URL and submit with `fetch()`.                                                                     |
-| `action(url, options?)`            | Awaitable one-shot page action helper. Uses `POST` by default and accepts `{ data, method, params }`, where `method` can be `"PUT"`, `"PATCH"`, or `"DELETE"`. Returns an `ActionResult`.                                                           |
-| `useShared()`                      | Returns shared data injected by middleware via `c.set("shared", {...})`.                                                                                                                                                                            |
-| `Deferred<T>`                      | React-only prop type for `defer()` results. It is `Promise<T>` and is consumed with React `use()`.                                                                                                                                                  |
+| エクスポート                       | 説明                                                                                                                                                                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Link`                             | SPA ナビゲーション用の React コンポーネントです。GET では `<a>`、GET 以外のメソッドでは `<button>` をレンダリングします。props: `href`、`method`、`data`、`prefetch`、`cacheFor`、`preserveScroll`、`preserveState`、`replace`、`reloadDocument`、`viewTransition`、`onNavigate`。 |
+| `useRouter()`                      | 現在のルートの状態(`url`、`path`、`query`、`params`)と、ナビゲーションメソッド(`visit`、`refresh`、await 可能な `prefetch`、`flush`、`flushAll`)を持つ Void Router を返します。React のナビゲーションはトランジションとしてスケジュールされます。                                  |
+| `useParams()`                      | 現在レンダリング中のページの動的ルートパラメーターを返します。                                                                                                                                                                                                                     |
+| `useNavigation()`                  | 保留中のナビゲーションの状態 `{ state, location, method }` を返します。`state` は `"idle"`、`"loading"`、`"submitting"` のいずれかで、`location` は保留中の宛先です。                                                                                                              |
+| `useForm(url, defaults, options?)` | フォームヘルパーフックです。`{ data, setData, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }` を返します。                                                                                      |
+| `useIslandForm(defaults)`          | アイランドコンポーネント用のフォームヘルパーフックです。`useForm()` と同じフォーム状態を持ちます。`post(url)`、`put(url)`、`patch(url)`、`delete(url)` はアクションの URL を受け取り、`fetch()` で送信します。                                                                     |
+| `action(url, options?)`            | await 可能な、1 回限りのページアクションヘルパーです。既定では `POST` を使用し、`{ data, method, params }` を受け付けます。`method` には `"PUT"`、`"PATCH"`、`"DELETE"` を指定できます。`ActionResult` を返します。                                                                |
+| `useShared()`                      | ミドルウェアが `c.set("shared", {...})` で注入した共有データを返します。                                                                                                                                                                                                           |
+| `Deferred<T>`                      | `defer()` の結果に対する、React 専用の props 型です。`Promise<T>` であり、React の `use()` で読み取ります。                                                                                                                                                                        |
 
-React `Link` GET `data` is merged into the rendered `href` query string. Primitive values are serialized with `String(value)`, arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw. `prefetch` and `reloadDocument` are GET-only and throw for mutation links.
+React の `Link` の GET の `data` は、レンダリングされる `href` のクエリ文字列にマージされます。プリミティブ値は `String(value)` でシリアライズされ、配列は繰り返しのキーになり、`null` と `undefined` は省略され、ネストされたオブジェクトはスローされます。`prefetch` と `reloadDocument` は GET 専用で、変更系のリンクではスローされます。
 
-React deferred props returned from `defer()` are Suspense resources. Read them
-with React's `use()` inside a `<Suspense>` boundary. React Pages requires React
-19 and uses streaming SSR for the initial deferred shell. Rejections throw from
-`use()`, so use a normal React error boundary for custom deferred error UI. Vue,
-Svelte, and Solid keep the `{ loading, value, error }` deferred state object.
-When explicitly annotating props, import `Deferred` from the framework adapter
-package (`@void/react`, `@void/vue`, `@void/svelte`, or `@void/solid`) so the
-type matches that adapter's client runtime shape.
+`defer()` が返す React の遅延 props は Suspense リソースです。`<Suspense>` 境界の内側で、React の `use()` で読み取ってください。React Pages は React 19 を必要とし、最初の遅延シェルにストリーミング SSR を使用します。拒否(rejection)は `use()` からスローされるため、遅延のエラー UI をカスタマイズするには、通常の React のエラーバウンダリーを使用してください。Vue、Svelte、Solid は、`{ loading, value, error }` の遅延状態オブジェクトを維持します。props に明示的に型注釈を付ける場合は、型がそのアダプターのクライアントランタイムの形と一致するように、フレームワークアダプターのパッケージ(`@void/react`、`@void/vue`、`@void/svelte`、`@void/solid`)から `Deferred` をインポートしてください。
 
 ## `@void/svelte` {#void-svelte}
 
 ### `voidSvelte(options?)` {#voidsvelte-options}
 
-Imported from `"@void/svelte/plugin"`. Returns an array of Vite plugins that handle SSR and hydration entry generation for Svelte 5. It already includes `@sveltejs/vite-plugin-svelte`, so you do not need to install or configure that separately.
+`"@void/svelte/plugin"` からインポートします。Svelte 5 向けの、SSR とハイドレーションのエントリー生成を扱う Vite プラグインの配列を返します。`@sveltejs/vite-plugin-svelte` はすでに含まれているため、別途インストールや設定をする必要はありません。
 
 ```ts
 import { voidSvelte } from '@void/svelte/plugin';
@@ -132,13 +125,13 @@ export default defineConfig({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function voidSvelte(options?: VoidSvelteOptions): Plugin[];
 ```
 
-**Options:**
+**オプション:**
 
 ```ts
 interface VoidSvelteOptions {
@@ -151,28 +144,28 @@ interface VoidSvelteOptions {
 }
 ```
 
-### Svelte Runtime {#svelte-runtime}
+### Svelte ランタイム {#svelte-runtime}
 
-Imported from `"@void/svelte"`.
+`"@void/svelte"` からインポートします。
 
-| Export                             | Description                                                                                                                                                                                                                                          |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Link`                             | Svelte component for SPA navigation. Renders `<a>` for GET, `<button>` for non-GET methods. Props: `href`, `method`, `data`, `prefetch`, `cacheFor`, `preserveScroll`, `preserveState`, `replace`, `reloadDocument`, `viewTransition`, `onNavigate`. |
-| `useForm(url, defaults, options?)` | Form helper using Svelte 5 runes. Returns `{ data, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }`.                                                               |
-| `useIslandForm(defaults)`          | Form helper for island components. Same form state as `useForm()`, plus `submit(url, method)`. `post(url)`, `put(url)`, `patch(url)`, and `delete(url)` take the action URL and submit with `fetch()`.                                               |
-| `action(url, options?)`            | Awaitable one-shot page action helper. Uses `POST` by default and accepts `{ data, method, params }`, where `method` can be `"PUT"`, `"PATCH"`, or `"DELETE"`. Returns an `ActionResult`.                                                            |
-| `useShared()`                      | Returns shared data injected by middleware via `c.set("shared", {...})`.                                                                                                                                                                             |
-| `useRouter()`                      | Returns the Void Router with current route state (`url`, `path`, `query`, `params`) and navigation methods: `visit`, `refresh`, awaitable `prefetch`, `flush`, `flushAll`.                                                                           |
-| `useParams()`                      | Returns dynamic route params for the page currently being rendered.                                                                                                                                                                                  |
-| `useNavigation()`                  | Returns pending navigation state: `{ state, location, method }`, where `state` is `"idle"`, `"loading"`, or `"submitting"` and `location` is the pending destination.                                                                                |
+| エクスポート                       | 説明                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Link`                             | SPA ナビゲーション用の Svelte コンポーネントです。GET では `<a>`、GET 以外のメソッドでは `<button>` をレンダリングします。props: `href`、`method`、`data`、`prefetch`、`cacheFor`、`preserveScroll`、`preserveState`、`replace`、`reloadDocument`、`viewTransition`、`onNavigate`。 |
+| `useForm(url, defaults, options?)` | Svelte 5 の runes を使用するフォームヘルパーです。`{ data, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }` を返します。                                                                          |
+| `useIslandForm(defaults)`          | アイランドコンポーネント用のフォームヘルパーです。`useForm()` と同じフォーム状態に加えて、`submit(url, method)` を持ちます。`post(url)`、`put(url)`、`patch(url)`、`delete(url)` はアクションの URL を受け取り、`fetch()` で送信します。                                            |
+| `action(url, options?)`            | await 可能な、1 回限りのページアクションヘルパーです。既定では `POST` を使用し、`{ data, method, params }` を受け付けます。`method` には `"PUT"`、`"PATCH"`、`"DELETE"` を指定できます。`ActionResult` を返します。                                                                 |
+| `useShared()`                      | ミドルウェアが `c.set("shared", {...})` で注入した共有データを返します。                                                                                                                                                                                                            |
+| `useRouter()`                      | 現在のルートの状態(`url`、`path`、`query`、`params`)と、ナビゲーションメソッド(`visit`、`refresh`、await 可能な `prefetch`、`flush`、`flushAll`)を持つ Void Router を返します。                                                                                                     |
+| `useParams()`                      | 現在レンダリング中のページの動的ルートパラメーターを返します。                                                                                                                                                                                                                      |
+| `useNavigation()`                  | 保留中のナビゲーションの状態 `{ state, location, method }` を返します。`state` は `"idle"`、`"loading"`、`"submitting"` のいずれかで、`location` は保留中の宛先です。                                                                                                               |
 
-Svelte `Link` GET `data` is merged into the rendered `href` query string. Primitive values are serialized with `String(value)`, arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw. `prefetch` and `reloadDocument` are GET-only and throw for mutation links.
+Svelte の `Link` の GET の `data` は、レンダリングされる `href` のクエリ文字列にマージされます。プリミティブ値は `String(value)` でシリアライズされ、配列は繰り返しのキーになり、`null` と `undefined` は省略され、ネストされたオブジェクトはスローされます。`prefetch` と `reloadDocument` は GET 専用で、変更系のリンクではスローされます。
 
 ## `@void/solid` {#void-solid}
 
 ### `voidSolid(options?)` {#voidsolid-options}
 
-Imported from `"@void/solid/plugin"`. Returns an array of Vite plugins that handle SSR and hydration entry generation for Solid. It already includes `vite-plugin-solid`, so you do not need to install or configure that separately.
+`"@void/solid/plugin"` からインポートします。Solid 向けの、SSR とハイドレーションのエントリー生成を扱う Vite プラグインの配列を返します。`vite-plugin-solid` はすでに含まれているため、別途インストールや設定をする必要はありません。
 
 ```ts
 import { voidSolid } from '@void/solid/plugin';
@@ -182,13 +175,13 @@ export default defineConfig({
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function voidSolid(options?: VoidSolidOptions): Plugin[];
 ```
 
-**Options:**
+**オプション:**
 
 ```ts
 interface VoidSolidOptions {
@@ -201,28 +194,28 @@ interface VoidSolidOptions {
 }
 ```
 
-### Solid Runtime {#solid-runtime}
+### Solid ランタイム {#solid-runtime}
 
-Imported from `"@void/solid"`.
+`"@void/solid"` からインポートします。
 
-| Export                             | Description                                                                                                                                                                                                                                         |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Link`                             | Solid component for SPA navigation. Renders `<a>` for GET, `<button>` for non-GET methods. Props: `href`, `method`, `data`, `prefetch`, `cacheFor`, `preserveScroll`, `preserveState`, `replace`, `reloadDocument`, `viewTransition`, `onNavigate`. |
-| `useForm(url, defaults, options?)` | Form helper using Solid stores. Returns `{ data, setData, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }`.                                                       |
-| `useIslandForm(defaults)`          | Form helper for island components. Same form state as `useForm()`. `post(url)`, `put(url)`, `patch(url)`, and `delete(url)` take the action URL and submit with `fetch()`.                                                                          |
-| `action(url, options?)`            | Awaitable one-shot page action helper. Uses `POST` by default and accepts `{ data, method, params }`, where `method` can be `"PUT"`, `"PATCH"`, or `"DELETE"`. Returns an `ActionResult`.                                                           |
-| `useShared()`                      | Returns shared data injected by middleware via `c.set("shared", {...})`.                                                                                                                                                                            |
-| `useRouter()`                      | Returns the Void Router with current route state (`url`, `path`, `query`, `params`) and navigation methods: `visit`, `refresh`, awaitable `prefetch`, `flush`, `flushAll`.                                                                          |
-| `useParams()`                      | Returns dynamic route params for the page currently being rendered.                                                                                                                                                                                 |
-| `useNavigation()`                  | Returns pending navigation state: `{ state, location, method }`, where `state` is `"idle"`, `"loading"`, or `"submitting"` and `location` is the pending destination.                                                                               |
+| エクスポート                       | 説明                                                                                                                                                                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Link`                             | SPA ナビゲーション用の Solid コンポーネントです。GET では `<a>`、GET 以外のメソッドでは `<button>` をレンダリングします。props: `href`、`method`、`data`、`prefetch`、`cacheFor`、`preserveScroll`、`preserveState`、`replace`、`reloadDocument`、`viewTransition`、`onNavigate`。 |
+| `useForm(url, defaults, options?)` | Solid のストアを使用するフォームヘルパーです。`{ data, setData, post, put, patch, delete, pending, errors, error, hasChanges, wasSuccessful, recentlySuccessful, reset, clearErrors, clearError }` を返します。                                                                    |
+| `useIslandForm(defaults)`          | アイランドコンポーネント用のフォームヘルパーです。`useForm()` と同じフォーム状態を持ちます。`post(url)`、`put(url)`、`patch(url)`、`delete(url)` はアクションの URL を受け取り、`fetch()` で送信します。                                                                           |
+| `action(url, options?)`            | await 可能な、1 回限りのページアクションヘルパーです。既定では `POST` を使用し、`{ data, method, params }` を受け付けます。`method` には `"PUT"`、`"PATCH"`、`"DELETE"` を指定できます。`ActionResult` を返します。                                                                |
+| `useShared()`                      | ミドルウェアが `c.set("shared", {...})` で注入した共有データを返します。                                                                                                                                                                                                           |
+| `useRouter()`                      | 現在のルートの状態(`url`、`path`、`query`、`params`)と、ナビゲーションメソッド(`visit`、`refresh`、await 可能な `prefetch`、`flush`、`flushAll`)を持つ Void Router を返します。                                                                                                    |
+| `useParams()`                      | 現在レンダリング中のページの動的ルートパラメーターを返します。                                                                                                                                                                                                                     |
+| `useNavigation()`                  | 保留中のナビゲーションの状態 `{ state, location, method }` を返します。`state` は `"idle"`、`"loading"`、`"submitting"` のいずれかで、`location` は保留中の宛先です。                                                                                                              |
 
-Solid `Link` GET `data` is merged into the rendered `href` query string. Primitive values are serialized with `String(value)`, arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw. `prefetch` and `reloadDocument` are GET-only and throw for mutation links.
+Solid の `Link` の GET の `data` は、レンダリングされる `href` のクエリ文字列にマージされます。プリミティブ値は `String(value)` でシリアライズされ、配列は繰り返しのキーになり、`null` と `undefined` は省略され、ネストされたオブジェクトはスローされます。`prefetch` と `reloadDocument` は GET 専用で、変更系のリンクではスローされます。
 
-Solid re-creates the page on GET navigation and whenever the route or its params change, so `useForm()` picks up the destination record's URL and defaults; layouts persist. Within the same record, back/forward, mutations, and `router.refresh()` keep the page and update its props in place, as do resolved deferred props, so read props inside JSX or memos instead of copying them in the component body. Set `preserveState` explicitly to override the default for navigation within the same record.
+Solid は、GET ナビゲーションのとき、およびルートまたはそのパラメーターが変更されるたびにページを再作成するため、`useForm()` は宛先レコードの URL とデフォルト値を取得します。レイアウトは維持されます。同じレコード内では、戻る/進む、変更系の操作、`router.refresh()` はページを維持して props をその場で更新します。解決された遅延 props も同様です。そのため、props はコンポーネント本体にコピーせず、JSX またはメモの内側で読み取ってください。同じレコード内のナビゲーションで既定の動作を上書きするには、`preserveState` を明示的に設定します。
 
-## Markdown Package {#markdown-package}
+## Markdown パッケージ {#markdown-package}
 
-The optional `@void/md` package adds Markdown pages to Pages Routing. Install it alongside a Pages adapter and add `voidMarkdown()` to your Vite plugins.
+オプションの `@void/md` パッケージは、Pages ルーティングに Markdown ページを追加します。Pages アダプターと一緒にインストールし、Vite プラグインに `voidMarkdown()` を追加します。
 
 ```ts
 import { voidMarkdown } from '@void/md/plugin';
@@ -232,18 +225,18 @@ export default defineConfig({
 });
 ```
 
-| Import path                  | Contents                                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `@void/md/plugin`            | `voidMarkdown(options?)`, `MarkdownOptions`, `MdPage`                                    |
-| `@void/md`                   | `useFrontmatter()`, `MdPage`                                                             |
-| `@void/md/pages`             | Generated metadata for Markdown pages, used for navigation, sidebars, and search indexes |
-| `@void/md/theme.css`         | Full Markdown theme styles                                                               |
-| `@void/md/theme-content.css` | Content-only Markdown styles for apps that provide their own shell/layout                |
+| インポートパス               | 内容                                                                                                |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| `@void/md/plugin`            | `voidMarkdown(options?)`、`MarkdownOptions`、`MdPage`                                               |
+| `@void/md`                   | `useFrontmatter()`、`MdPage`                                                                        |
+| `@void/md/pages`             | Markdown ページ用に生成されるメタデータ。ナビゲーション、サイドバー、検索インデックスに使用されます |
+| `@void/md/theme.css`         | Markdown テーマの完全なスタイル                                                                     |
+| `@void/md/theme-content.css` | 独自のシェル/レイアウトを提供するアプリ向けの、コンテンツのみの Markdown スタイル                   |
 
-`FrontmatterContext` and `setFrontmatter()` are deprecated. Use `useFrontmatter()`.
+`FrontmatterContext` と `setFrontmatter()` は非推奨です。`useFrontmatter()` を使用してください。
 
-See [Markdown Pages](../../guide/pages-routing/markdown.md) for setup and framework-specific examples.
+セットアップとフレームワーク別の例については、[Markdown ページ](../../guide/pages-routing/markdown.md)を参照してください。
 
-## Form
+## Form {#form}
 
-Each Pages adapter exports `Form`. Pass the object returned by `useForm()` as `form`; `method` defaults to `post`. It renders validation and action errors, preserves controlled input, and respects known quota retry deadlines without submitting automatically. `renderError` customizes action-error presentation; Svelte uses a snippet. See [Actions and Forms](../../guide/pages-routing/actions-and-forms.md).
+各 Pages アダプターは `Form` をエクスポートします。`useForm()` が返すオブジェクトを `form` として渡します。`method` の既定値は `post` です。バリデーションエラーとアクションエラーを表示し、制御された入力を維持し、既知のクォータの再試行期限を、自動的には送信せずに尊重します。`renderError` はアクションエラーの表示方法をカスタマイズします。Svelte ではスニペットを使用します。[アクションとフォーム](../../guide/pages-routing/actions-and-forms.md)を参照してください。

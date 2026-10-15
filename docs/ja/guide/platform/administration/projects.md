@@ -2,18 +2,18 @@
 outline: deep
 ---
 
-# Users and Projects
+# ユーザーとプロジェクト {#users-and-projects}
 
-## Managing Users and Projects
+## ユーザーとプロジェクトの管理 {#managing-users-and-projects}
 
-Start by finding the user you want to inspect:
+まず、確認したいユーザーを検索します。
 
 ```sh
 void platform user list --search teammate
 void platform user show <user-id>
 ```
 
-Use the ID from the list in the second command. The detail view shows the user's projects and usage. You can change their plan or list just their projects:
+2 番目のコマンドには、一覧に表示された ID を使用します。詳細ビューには、ユーザーのプロジェクトと使用量が表示されます。プランを変更したり、そのユーザーのプロジェクトだけを一覧表示したりできます。
 
 ```sh
 void platform user plan <user-id> pro
@@ -21,39 +21,27 @@ void platform project list --user <user-id>
 void platform project show <project-id>
 ```
 
-Project details include resources, domains, and recent builds and deployments. The [command reference](../../../reference/cli/platform.md#operator-commands) also covers suspending and restoring users, deleting projects, and removing accounts.
+プロジェクトの詳細には、リソース、ドメイン、最近のビルドとデプロイが含まれます。ユーザーの停止と復元、プロジェクトの削除、アカウントの削除については、[コマンドリファレンス](../../../reference/cli/platform.md#operator-commands)も参照してください。
 
-In the admin dashboard, open a project to view its team. Search for a platform user and choose a role to add them immediately; an email address is not required. You can also change or remove existing members. Pending invitations created through other project workflows remain visible until accepted or revoked. If email is unavailable for a pending invitation, share its ID so the user can accept it with `void project team accept <invitation-id>`. The owner cannot be removed from the team; transfer ownership first. Removing a collaborator or admin, changing one to reader, or suspending or deleting their account [replaces the project's platform credentials](../../project-collaboration.md#change-or-remove-access), the same as the CLI.
+管理ダッシュボードでは、プロジェクトを開くとそのチームを確認できます。プラットフォームのユーザーを検索してロールを選択すると、すぐに追加できます。メールアドレスは不要です。既存のメンバーを変更または削除することもできます。他のプロジェクトのワークフローで作成された保留中の招待は、承認または取り消しされるまで表示されたままです。保留中の招待でメールが使用できない場合は、その ID を共有してください。ユーザーは `void project team accept <invitation-id>` で承認できます。オーナーはチームから削除できません。先にオーナーを移譲してください。コラボレーターや管理者の削除、リーダーへの変更、またはそのアカウントの停止や削除を行うと、CLI の場合と同様に、[プロジェクトのプラットフォーム認証情報が置き換えられます](../../project-collaboration.md#change-or-remove-access)。
 
-### Transferring Project Ownership
+### プロジェクトオーナーの移譲 {#transferring-project-ownership}
 
-Only an installation administrator can change a project's owner. The new owner must already have an account on this platform. In the dashboard, search for the new owner on the project page and preview the transfer before applying it. The CLI accepts a user ID:
+プロジェクトのオーナーを変更できるのは、インストールの管理者のみです。新しいオーナーは、このプラットフォームにすでにアカウントを持っている必要があります。ダッシュボードでは、プロジェクトのページで新しいオーナーを検索し、適用する前に移譲のプレビューを確認します。CLI ではユーザー ID を指定します。
 
 ```sh
 void platform project owner <project-id> <new-owner-user-id> --plan
 void platform project owner <project-id> <new-owner-user-id> --yes
 ```
 
-The preview shows both owners, their plans and suspension state, blockers, and the changes to routing and usage counters. Wait for active rollbacks and builds to finish. For an ordinary active deployment, wait or use `void platform deployment cancel <id>`; rollback deployments cannot be canceled. A managed Sandbox controller also blocks transfer until its cleanup completes, even if no Sandbox container is running; the preview identifies the deployment that owns it.
+プレビューには、両方のオーナー、そのプランと停止状態、阻害要因、ルーティングと使用量カウンターへの変更が表示されます。実行中のロールバックとビルドが完了するまで待ってください。通常のアクティブなデプロイでは、完了を待つか、`void platform deployment cancel <id>` を使用します。ロールバックのデプロイはキャンセルできません。マネージドの Sandbox コントローラーも、Sandbox コンテナーが実行されていない場合でも、そのクリーンアップが完了するまで移譲をブロックします。プレビューには、それを所有するデプロイが示されます。
 
-After the transfer, the former owner becomes a project administrator. Existing project-scoped CI deploy credentials are revoked; create replacements as the new owner. The new owner's plan and limits apply immediately. Usage before the transfer remains charged to the former owner; later usage is charged to the new owner. If an apply reports partial convergence, inspect the project and operator event log before repeating it.
+移譲後、以前のオーナーはプロジェクト管理者になります。プロジェクトスコープの既存の CI デプロイ認証情報は取り消されるため、新しいオーナーとして置き換えを作成してください。新しいオーナーのプランと制限は直ちに適用されます。移譲前の使用量は以前のオーナーに課金されたままで、それ以降の使用量は新しいオーナーに課金されます。適用が部分的な収束を報告した場合は、繰り返す前に、プロジェクトとオペレーターのイベントログを確認してください。
 
-By default, new users on a self-hosted installation start with the `custom` profile, which
-does not cap application requests, AI usage, deployment frequency, or retained
-Worker deployments. Named profiles such as `pro` apply the platform's quota and
-retention policies; they do not purchase Cloudflare services or bill your users.
-Storage figures are not a hard storage-quota boundary. Set an operating budget
-and retention policy before opening signup beyond your invited team.
+セルフホストのインストールでは、新しいユーザーはデフォルトで `custom` プロファイルから始まります。このプロファイルには、アプリケーションのリクエスト、AI の使用量、デプロイの頻度、保持される Worker デプロイの上限がありません。`pro` などの名前付きプロファイルは、プラットフォームのクォータと保持ポリシーを適用します。これらは Cloudflare のサービスを購入するものではなく、ユーザーに課金するものでもありません。ストレージの数値は、厳密なストレージクォータの境界ではありません。招待したチーム以外にサインアップを開放する前に、運用予算と保持ポリシーを設定してください。
 
-Use [Plans and Limits](/guide/platform/administration/plans) to define your own
-plans, change limits, or choose a different default for new accounts.
+独自のプランの定義、制限の変更、新規アカウントのデフォルトの変更については、[プランと制限](/ja/guide/platform/administration/plans)を使用してください。
 
-The last active administrator cannot be deleted or suspended, including through
-the browser admin UI. Another administrator must still have access. Automatic
-usage limits do not remove administrator access and do not count as a manual
-suspension.
+最後のアクティブな管理者は、ブラウザの管理 UI からを含め、削除も停止もできません。別の管理者がアクセスできる状態である必要があります。自動的な使用量制限は、管理者のアクセスを取り除くことはなく、手動の停止としてもカウントされません。
 
-When removing another administrator, Void revokes their administrator access
-before changing application traffic or deleting resources. If cleanup fails,
-access stays revoked and the error describes the partial result. A remaining
-administrator can inspect it and retry cleanup.
+別の管理者を削除する場合、Void はアプリケーションのトラフィックを変更したりリソースを削除したりする前に、その管理者のアクセスを取り消します。クリーンアップが失敗した場合も、アクセスは取り消されたままで、エラーには部分的な結果が示されます。残っている管理者がそれを確認し、クリーンアップを再試行できます。
