@@ -2,9 +2,9 @@
 outline: deep
 ---
 
-# Static Site Generation (SSG)
+# 静的サイト生成 (SSG) {#static-site-generation-ssg}
 
-Set `output: "static"` in `void.config.ts` to prerender all pages at build time:
+`void.config.ts` で `output: "static"` を設定すると、すべてのページをビルド時にプリレンダリングします。
 
 ```json
 {
@@ -12,23 +12,23 @@ Set `output: "static"` in `void.config.ts` to prerender all pages at build time:
 }
 ```
 
-When `output` is `"static"`:
+`output` が `"static"` の場合:
 
-- Pages default to `prerender = true` and are written as HTML files to `dist/client/`.
-- Use `export const prerender = false` in a page's `.server.ts` to opt out. That page will be server-rendered on request.
-- Dynamic pages without `getPrerenderPaths()` are implicitly not prerendered (the paths aren't known at build time).
-- The build output is self-contained and works for direct Cloudflare deployment, self-hosting, or `void deploy`.
+- ページはデフォルトで `prerender = true` となり、HTML ファイルとして `dist/client/` に書き出されます。
+- オプトアウトするには、ページの `.server.ts` で `export const prerender = false` を使用します。そのページはリクエスト時にサーバーレンダリングされます。
+- `getPrerenderPaths()` のない動的ページは、暗黙的にプリレンダリングされません（パスがビルド時にわからないためです）。
+- ビルド出力は自己完結しており、Cloudflare への直接デプロイ、セルフホスティング、`void deploy` のいずれでも動作します。
 
-## Per-page overrides
+## ページごとの上書き {#per-page-overrides}
 
-Individual pages can opt out of prerendering:
+個々のページで、プリレンダリングをオプトアウトできます。
 
 ```ts
 // pages/dashboard.server.ts
 export const prerender = false;
 ```
 
-Dynamic pages with `getPrerenderPaths()` are prerendered for the returned param combinations:
+`getPrerenderPaths()` を持つ動的ページは、返されたパラメーターの組み合わせごとにプリレンダリングされます。
 
 ```ts
 // pages/blog/[slug].server.ts
@@ -37,28 +37,28 @@ export async function getPrerenderPaths() {
 }
 ```
 
-## Comparison with edge prerendering
+## エッジプリレンダリングとの比較 {#comparison-with-edge-prerendering}
 
-| `output` value       | Default prerender | Per-page override                | Prerender timing           |
-| -------------------- | ----------------- | -------------------------------- | -------------------------- |
-| `"server"` (default) | `false`           | `export const prerender = true`  | Deploy-time (platform ISR) |
-| `"static"`           | `true`            | `export const prerender = false` | Build or deploy post-build |
+| `output` の値        | デフォルトのプリレンダリング | ページごとの上書き               | プリレンダリングのタイミング         |
+| -------------------- | ---------------------------- | -------------------------------- | ------------------------------------ |
+| `"server"` (default) | `false`                      | `export const prerender = true`  | デプロイ時（プラットフォームの ISR） |
+| `"static"`           | `true`                       | `export const prerender = false` | ビルド時、またはデプロイのビルド後   |
 
-With the default `output: "server"`, use `export const prerender = true` for deploy-time [edge prerendering](./edge/prerendering.md).
+デフォルトの `output: "server"` では、デプロイ時の[エッジプリレンダリング](./edge/prerendering.md)に `export const prerender = true` を使用します。
 
-## Deployment behavior
+## デプロイの動作 {#deployment-behavior}
 
-`void deploy` chooses the deployment automatically:
+`void deploy` は、デプロイ方法を自動的に選択します。
 
-- **Fully static:** if every page is prerendered and there are no API routes, middleware, cron jobs, or queues, Void deploys as a pure static site with no worker.
-- **Hybrid:** if any pages are not prerenderable, such as dynamic pages without `getPrerenderPaths()` or pages with `export const prerender = false`, a worker is deployed to handle those routes at runtime. Prerendered pages are still served as static assets.
+- **完全な静的サイト:** すべてのページがプリレンダリングされ、API ルート、ミドルウェア、cron ジョブ、キューがない場合、Void は Worker なしの純粋な静的サイトとしてデプロイします。
+- **ハイブリッド:** `getPrerenderPaths()` のない動的ページや `export const prerender = false` のページなど、プリレンダリングできないページがある場合は、それらのルートを実行時に処理する Worker がデプロイされます。プリレンダリングされたページは、引き続き静的アセットとして配信されます。
 
-## Relationship to `inference.appType: "static"`
+## `inference.appType: "static"` との関係 {#relationship-to-inference-apptype-static}
 
-The `inference.appType` field describes app type (SPA, static, void), while `output` controls rendering strategy:
+`inference.appType` フィールドはアプリの種類（SPA、static、void）を表し、`output` はレンダリング戦略を制御します。
 
-|              | `inference.appType: "static"`                   | `output: "static"`                            |
-| ------------ | ----------------------------------------------- | --------------------------------------------- |
-| **What**     | Deploy a pre-built static site (no Void plugin) | Prerender a Void app at build time            |
-| **Worker**   | None (static assets only)                       | Only if some pages can't be prerendered       |
-| **Use case** | VitePress, plain HTML, external SSG tools       | Void apps with mostly or fully static content |
+|                  | `inference.appType: "static"`                               | `output: "static"`                                   |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| **内容**         | ビルド済みの静的サイトをデプロイする（Void プラグインなし） | ビルド時に Void アプリをプリレンダリングする         |
+| **Worker**       | なし（静的アセットのみ）                                    | プリレンダリングできないページがある場合のみ         |
+| **ユースケース** | VitePress、プレーンな HTML、外部の SSG ツール               | ほぼ、または完全に静的なコンテンツを持つ Void アプリ |

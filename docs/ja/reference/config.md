@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Config
+# 設定 {#config}
 
-## Config File Format
+## 設定ファイルの形式 {#config-file-format}
 
-Use `void.config.ts` to configure your app. For a guided introduction, start with [What is Void?](../guide/).
+アプリの設定には `void.config.ts` を使用します。入門的な説明については、[Void とは?](../guide/)から始めてください。
 
-Put `void.config.ts` at the project root and import `defineConfig` from `void/config`. All fields are optional. `void init`, `void deploy`, and `void migrate` can convert older Void and Cloudflare JSON config files, saving backups under `.void/config-migration/`. Commit `void.config.ts` and `void.lock.json` when Void creates the lock; it records resource IDs and migration history.
+`void.config.ts` はプロジェクトのルートに置き、`void/config` から `defineConfig` をインポートします。すべてのフィールドは省略可能です。`void init`、`void deploy`、`void migrate` は、古い Void と Cloudflare の JSON 設定ファイルを変換でき、バックアップを `.void/config-migration/` に保存します。`void.config.ts` と、Void が作成した場合は `void.lock.json` をコミットしてください。これにはリソース ID とマイグレーション履歴が記録されます。
 
 ```ts
 // void.config.ts
@@ -41,41 +41,41 @@ export default defineConfig({
 });
 ```
 
-TypeScript provides editor completion and checks. Void validates the config again when it runs, including values computed at runtime.
+TypeScript によって、エディターでの補完とチェックが利用できます。Void は、実行時に計算された値を含め、実行時にも設定を再度検証します。
 
-The shorter JSON fragments below show individual fields to place inside `defineConfig({ ... })`.
+以下の短い JSON の断片は、`defineConfig({ ... })` の中に記述する個々のフィールドを示しています。
 
-## Fields
+## フィールド {#fields}
 
-### `sourceDir`
+### `sourceDir` {#sourcedir}
 
-Directory containing Void source conventions, relative to the project root.
+Void のソース規約を含むディレクトリです。プロジェクトルートからの相対パスで指定します。
 
-When omitted, Void uses the existing project-root conventions: `pages/`, `routes/`, `middleware/`, `crons/`, `queues/`, `db/`, `auth.ts`, and `env.ts`.
+省略した場合、Void はプロジェクトルートにある既存の規約を使用します。`pages/`、`routes/`、`middleware/`、`crons/`、`queues/`、`db/`、`auth.ts`、`env.ts` です。
 
-When set, those conventions move under the configured directory:
+設定した場合、これらの規約は、設定したディレクトリの下に移動します。
 
 ```json
 { "sourceDir": "src" }
 ```
 
-With that config, Void reads `src/pages`, `src/routes`, `src/db/schema.ts`, `src/db/migrations`, `src/auth.ts`, and `src/env.ts`. Project files such as `void.config.ts`, `vite.config.ts`, `package.json`, `tsconfig.json`, `public/`, and the local-only `.env` stay at the project root. Void does not scan both locations; if source conventions exist in both places during dev/build, remove one copy so the active source tree is unambiguous.
+この設定では、Void は `src/pages`、`src/routes`、`src/db/schema.ts`、`src/db/migrations`、`src/auth.ts`、`src/env.ts` を読み取ります。`void.config.ts`、`vite.config.ts`、`package.json`、`tsconfig.json`、`public/`、ローカル専用の `.env` といったプロジェクトのファイルは、プロジェクトルートに残ります。Void は両方の場所をスキャンしません。dev/build 中にソース規約が両方の場所に存在する場合は、有効なソースツリーが曖昧にならないよう、どちらか一方を削除してください。
 
-### `ai`
+### `ai` {#ai}
 
-`ai.gateway` names the Cloudflare AI Gateway that `ai.provider().fetch()` uses when your app runs on your own Cloudflare account. `ai.run()`, `ai.stream()`, and `ai.image()` use the Workers AI binding and do not need a gateway. On a Void platform, the platform selects the gateway and ignores this setting.
+`ai.gateway` は、アプリが自分の Cloudflare アカウントで動作する場合に `ai.provider().fetch()` が使用する Cloudflare AI Gateway を指定します。`ai.run()`、`ai.stream()`、`ai.image()` は Workers AI バインディングを使用するため、ゲートウェイは不要です。Void プラットフォームでは、プラットフォームがゲートウェイを選択するため、この設定は無視されます。
 
 ```json
 { "ai": { "gateway": "my-gateway" } }
 ```
 
-See [AI on your Cloudflare account](../integrations/cloudflare.md#ai-self-host).
+[Cloudflare アカウントでの AI](../integrations/cloudflare.md#ai-self-host) を参照してください。
 
-### `auth`
+### `auth` {#auth}
 
-High-level Better Auth configuration.
+Better Auth の高レベルな設定です。
 
-Use `auth.providers` to select which built-in auth providers Void should enable by default. Include `"email"` for email/password auth. Social providers read credentials from `AUTH_<PROVIDER>_CLIENT_ID` and `AUTH_<PROVIDER>_CLIENT_SECRET`. `cognito` also needs a domain, region, and user pool ID: set `AUTH_COGNITO_DOMAIN`, `AUTH_COGNITO_REGION`, and `AUTH_COGNITO_USER_POOL_ID`, or set them in `auth.ts`.
+`auth.providers` を使って、Void がデフォルトで有効にする組み込みの認証プロバイダーを選択します。メール/パスワード認証を使う場合は `"email"` を含めます。ソーシャルプロバイダーは、`AUTH_<PROVIDER>_CLIENT_ID` と `AUTH_<PROVIDER>_CLIENT_SECRET` から認証情報を読み取ります。`cognito` には、ドメイン、リージョン、ユーザープール ID も必要です。`AUTH_COGNITO_DOMAIN`、`AUTH_COGNITO_REGION`、`AUTH_COGNITO_USER_POOL_ID` を設定するか、`auth.ts` で設定してください。
 
 ```json
 {
@@ -85,9 +85,9 @@ Use `auth.providers` to select which built-in auth providers Void should enable 
 }
 ```
 
-If `auth` is omitted but auth is active via imports, Void enables email/password only. For provider-specific options, scopes, plugins, or custom OAuth flows, use a root `auth.ts` with `defineAuth(...)`.
+`auth` を省略していても、インポートによって認証が有効になっている場合、Void はメール/パスワードのみを有効にします。プロバイダー固有のオプション、スコープ、プラグイン、カスタムの OAuth フローには、ルートの `auth.ts` で `defineAuth(...)` を使用します。
 
-Supported values for `auth.providers`:
+`auth.providers` でサポートされる値:
 
 - `email`
 - `apple`
@@ -125,9 +125,9 @@ Supported values for `auth.providers`:
 - `vk`
 - `zoom`
 
-### `database`
+### `database` {#database}
 
-Database backend. Omit for D1/SQLite (default). Set to `"pg"` or `"mysql"` for an external database through Hyperdrive.
+データベースのバックエンドです。D1/SQLite(デフォルト)の場合は省略します。Hyperdrive 経由の外部データベースを使う場合は、`"pg"` または `"mysql"` を設定します。
 
 ```json
 {
@@ -135,22 +135,22 @@ Database backend. Omit for D1/SQLite (default). Set to `"pg"` or `"mysql"` for a
 }
 ```
 
-| Value       | Description                                             |
-| ----------- | ------------------------------------------------------- |
-| _(omitted)_ | D1 (SQLite), fully managed by Void with no extra config |
-| `"pg"`      | PostgreSQL via Hyperdrive; bring your own database      |
-| `"mysql"`   | MySQL via Hyperdrive; bring your own database           |
+| 値        | 説明                                                       |
+| --------- | ---------------------------------------------------------- |
+| _(省略)_  | D1 (SQLite)。Void が完全に管理し、追加の設定は不要         |
+| `"pg"`    | Hyperdrive 経由の PostgreSQL。データベースは自分で用意する |
+| `"mysql"` | Hyperdrive 経由の MySQL。データベースは自分で用意する      |
 
-When using an external database:
+外部データベースを使用する場合:
 
-- Add `DATABASE_URL` to `.env` for local development
-- Import schema helpers from `void/schema-pg` or `void/schema-mysql`
-- `void/db` connects via Hyperdrive in production, direct connection locally
-- `void gen model` generates dialect-appropriate table and column builders
+- ローカル開発用に、`.env` に `DATABASE_URL` を追加します
+- スキーマのヘルパーは `void/schema-pg` または `void/schema-mysql` からインポートします
+- `void/db` は、本番では Hyperdrive 経由で、ローカルでは直接接続します
+- `void gen model` は、そのダイアレクトに適したテーブルとカラムのビルダーを生成します
 
-### `email`
+### `email` {#email}
 
-Configuration for the [email integration](../guide/email.md).
+[メール連携](../guide/email.md)の設定です。
 
 ```json
 {
@@ -160,27 +160,27 @@ Configuration for the [email integration](../guide/email.md).
 }
 ```
 
-| Field  | Type     | Description                                                                                                    |
-| ------ | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `from` | `string` | Default sender for `sendEmail()`: one address, optionally with a display name (`Acme <noreply@mail.acme.com>`) |
+| フィールド | 型       | 説明                                                                                                               |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `from`     | `string` | `sendEmail()` のデフォルトの送信元。1 つのアドレスで、表示名を付けることもできます(`Acme <noreply@mail.acme.com>`) |
 
-During development, `email.from` is the default sender in the local inbox. On a Void platform, use your project's shared sender or registered domain.
+開発中は、`email.from` がローカル受信箱でのデフォルトの送信元になります。Void プラットフォームでは、プロジェクトの共有送信元または登録済みのドメインを使用します。
 
-For direct Cloudflare deployment, this address selects the mail domain and default sender. Use a zone or subdomain in your account; an existing mail provider's MX records are preserved. Without `email.from`, Void skips automatic setup and preserves authored `cloudflare.send_email` bindings and `cloudflare.addresses`; check their readiness yourself. `--require-email` still refuses deployment when automatic setup cannot be verified. See [Email setup](../guide/email/domains.md#your-own-cloudflare-account).
+Cloudflare への直接デプロイでは、このアドレスがメールドメインとデフォルトの送信元を決定します。自分のアカウント内のゾーンまたはサブドメインを使用してください。既存のメールプロバイダーの MX レコードは保持されます。`email.from` がない場合、Void は自動セットアップをスキップし、自分で記述した `cloudflare.send_email` バインディングと `cloudflare.addresses` を保持します。それらの準備状況は自分で確認してください。自動セットアップを検証できない場合、`--require-email` を指定していればデプロイは引き続き拒否されます。[メールのセットアップ](../guide/email/domains.md#your-own-cloudflare-account)を参照してください。
 
-### `head`
+### `head` {#head}
 
-Site-wide HTML `<head>` defaults for pages mode. Sets a title template, default meta tags, links, scripts, and HTML/body attributes. Per-page `head()` exports and middleware defaults merge on top of these with clear precedence: **page > middleware > config**.
+Pages モードにおける、サイト全体の HTML `<head>` のデフォルトです。タイトルテンプレート、デフォルトの meta タグ、リンク、スクリプト、HTML/body の属性を設定します。ページごとの `head()` のエクスポートとミドルウェアのデフォルトは、これらの上にマージされ、優先順位は明確です: **ページ > ミドルウェア > 設定**。
 
-| Field           | Type                     | Description                                                      |
-| --------------- | ------------------------ | ---------------------------------------------------------------- |
-| `title`         | `string`                 | Default page title (overridden by page `head()`)                 |
-| `titleTemplate` | `string`                 | Wraps the resolved title. `%s` is replaced with the page title.  |
-| `meta`          | `Array<object>`          | Default `<meta>` tags (deduped by `name`/`property`, page wins)  |
-| `link`          | `Array<object>`          | Default `<link>` tags (concatenated: config, middleware, page)   |
-| `script`        | `Array<object>`          | Default `<script>` tags (concatenated: config, middleware, page) |
-| `htmlAttrs`     | `Record<string, string>` | Attributes on `<html>` (shallow merge, page wins)                |
-| `bodyAttrs`     | `Record<string, string>` | Attributes on `<body>` (shallow merge, page wins)                |
+| フィールド      | 型                       | 説明                                                                               |
+| --------------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| `title`         | `string`                 | デフォルトのページタイトル(ページの `head()` で上書きされます)                     |
+| `titleTemplate` | `string`                 | 解決されたタイトルをラップします。`%s` はページタイトルに置き換えられます。        |
+| `meta`          | `Array<object>`          | デフォルトの `<meta>` タグ(`name`/`property` で重複排除され、ページが優先されます) |
+| `link`          | `Array<object>`          | デフォルトの `<link>` タグ(連結されます: 設定、ミドルウェア、ページの順)           |
+| `script`        | `Array<object>`          | デフォルトの `<script>` タグ(連結されます: 設定、ミドルウェア、ページの順)         |
+| `htmlAttrs`     | `Record<string, string>` | `<html>` の属性(浅いマージで、ページが優先されます)                                |
+| `bodyAttrs`     | `Record<string, string>` | `<body>` の属性(浅いマージで、ページが優先されます)                                |
 
 ```json
 {
@@ -196,48 +196,48 @@ Site-wide HTML `<head>` defaults for pages mode. Sets a title template, default 
 }
 ```
 
-See [Head Management](../guide/pages-routing/head) for the full merge behavior, `HeadDescriptor` shape, and per-page usage.
+マージの詳細な動作、`HeadDescriptor` の形、ページごとの使い方については、[Head 管理](../guide/pages-routing/head)を参照してください。
 
-### `output`
+### `output` {#output}
 
-Output mode. Controls the default rendering strategy for pages.
+出力モードです。ページのデフォルトのレンダリング戦略を制御します。
 
-| Value                | Default prerender | Per-page override                | Prerender timing           |
-| -------------------- | ----------------- | -------------------------------- | -------------------------- |
-| `"server"` (default) | `false`           | `export const prerender = true`  | Deploy-time (platform ISR) |
-| `"static"`           | `true`            | `export const prerender = false` | Build or deploy post-build |
+| 値                     | デフォルトのプリレンダリング | ページごとの上書き               | プリレンダリングのタイミング       |
+| ---------------------- | ---------------------------- | -------------------------------- | ---------------------------------- |
+| `"server"`(デフォルト) | `false`                      | `export const prerender = true`  | デプロイ時(プラットフォームの ISR) |
+| `"static"`             | `true`                       | `export const prerender = false` | ビルド時、またはデプロイのビルド後 |
 
-When set to `"static"`, pages are prerendered to HTML in `dist/client/`. Individual pages can opt out with `export const prerender = false`. Dynamic pages need `getPrerenderPaths()` to be prerendered.
+`"static"` に設定すると、ページは `dist/client/` に HTML としてプリレンダリングされます。個々のページは `export const prerender = false` でオプトアウトできます。動的なページをプリレンダリングするには、`getPrerenderPaths()` が必要です。
 
-When omitted or set to `"server"`, pages are server-rendered on request. Individual pages can opt into deploy-time prerendering with `export const prerender = true`, or opt out of server-rendered component HTML with `export const ssr = false`.
+省略した場合、または `"server"` に設定した場合、ページはリクエスト時にサーバーでレンダリングされます。個々のページは、`export const prerender = true` でデプロイ時のプリレンダリングにオプトインしたり、`export const ssr = false` でサーバーレンダリングされるコンポーネントの HTML をオプトアウトしたりできます。
 
 ```json
 { "output": "static" }
 ```
 
-### `remote`
+### `remote` {#remote}
 
-Use a deployed Void project's D1, KV, and R2 resources during local development. Writes affect real data. See [Remote Development](../guide/remote-dev.md).
+ローカル開発中に、デプロイ済みの Void プロジェクトの D1、KV、R2 リソースを使用します。書き込みは実際のデータに影響します。[リモート開発](../guide/remote-dev.md)を参照してください。
 
 ```json
 { "remote": true }
 ```
 
-**Requirements:**
+**要件:**
 
-- Must be logged in (`void account login`)
-- Must have a linked project (`void project link`)
-- Only affects D1 (`DB`), KV (`KV`), and R2 (`STORAGE`) bindings
+- ログインしている必要があります(`void account login`)
+- リンク済みのプロジェクトが必要です(`void project link`)
+- D1(`DB`)、KV(`KV`)、R2(`STORAGE`)のバインディングにのみ影響します
 
-You can also enable remote mode via the `VOID_REMOTE=1` environment variable without modifying `void.config.ts`:
+`void.config.ts` を変更せずに、環境変数 `VOID_REMOTE=1` でリモートモードを有効にすることもできます。
 
 ```bash
 VOID_REMOTE=1 pnpm dev
 ```
 
-### `sandbox`
+### `sandbox` {#sandbox}
 
-Enable and configure Cloudflare Sandboxes. Importing from `void/sandbox` enables this automatically.
+Cloudflare Sandbox を有効にして設定します。`void/sandbox` からインポートすると、自動的に有効になります。
 
 ```json
 {
@@ -249,49 +249,49 @@ Enable and configure Cloudflare Sandboxes. Importing from `void/sandbox` enables
 }
 ```
 
-| Field               | Type     | Default                     |
-| ------------------- | -------- | --------------------------- |
-| `binding`           | `string` | `SANDBOX`                   |
-| `className`         | `string` | `SandboxV1`                 |
-| `containerName`     | `string` | `void-sandbox-v1`           |
-| `image`             | `string` | Packaged Node.js Dockerfile |
-| `imageBuildContext` | `string` | Directory of `image`        |
-| `platformImage`     | `string` | `cloudflare/debian-trixie`  |
-| `instanceType`      | `string` | `lite`                      |
+| フィールド          | 型       | デフォルト                 |
+| ------------------- | -------- | -------------------------- |
+| `binding`           | `string` | `SANDBOX`                  |
+| `className`         | `string` | `SandboxV1`                |
+| `containerName`     | `string` | `void-sandbox-v1`          |
+| `image`             | `string` | 同梱の Node.js Dockerfile  |
+| `imageBuildContext` | `string` | `image` のディレクトリ     |
+| `platformImage`     | `string` | `cloudflare/debian-trixie` |
+| `instanceType`      | `string` | `lite`                     |
 
-Supported sizes are `lite` and `standard-1` through `standard-4`. Native deploys build Dockerfiles with Docker; registry images must be digest-pinned references from the Cloudflare managed registry. Custom images must include the matching Sandbox SDK helper. For a local Dockerfile, supply `platformImage` when deploying to a managed platform. See [Sandboxes](../guide/sandboxes.md) for image setup and runtime examples.
+サポートされるサイズは、`lite` と `standard-1` から `standard-4` です。ネイティブなデプロイでは、Docker で Dockerfile をビルドします。レジストリのイメージは、Cloudflare のマネージドレジストリからの、ダイジェストで固定された参照である必要があります。カスタムイメージには、対応する Sandbox SDK のヘルパーを含める必要があります。ローカルの Dockerfile を使う場合は、マネージドなプラットフォームにデプロイする際に `platformImage` を指定してください。イメージの設定とランタイムの例については、[Sandboxes](../guide/sandboxes.md)を参照してください。
 
-Sandbox requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Managed runtime tokens need Account / Containers: Edit and Account / Cloudchamber: Edit. See [Sandbox deployment](../guide/sandboxes.md#deployment).
+Sandbox には、[Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) と Containers へのアクセスが必要です。マネージドなランタイムトークンには、Account / Containers: Edit と Account / Cloudchamber: Edit が必要です。[Sandbox のデプロイ](../guide/sandboxes.md#deployment)を参照してください。
 
-### `target`
+### `target` {#target}
 
-Deploy target runtime. Defaults to `"cloudflare"`.
+デプロイ先のランタイムです。デフォルトは `"cloudflare"` です。
 
-| Value          | Description                                               |
-| -------------- | --------------------------------------------------------- |
-| `"cloudflare"` | Cloudflare Workers (default), with full platform features |
-| `"node"`       | Node.js, using `@hono/node-server`                        |
-| `"bun"`        | Bun, using `Bun.serve()`                                  |
-| `"deno"`       | Deno, using `Deno.serve()`                                |
+| 値             | 説明                                                                   |
+| -------------- | ---------------------------------------------------------------------- |
+| `"cloudflare"` | Cloudflare Workers(デフォルト)。プラットフォームの全機能が利用できます |
+| `"node"`       | Node.js。`@hono/node-server` を使用します                              |
+| `"bun"`        | Bun。`Bun.serve()` を使用します                                        |
+| `"deno"`       | Deno。`Deno.serve()` を使用します                                      |
 
-Non-CF targets disable CF binding imports (`void/db`, `void/kv`, `void/auth`, `void/storage`, `void/ai`, `void/sandbox`, `void/env`). Importing any of these with a non-CF target produces a compile-time error. File-based routing, middleware, and `void/client` all work normally.
+Cloudflare 以外のターゲットでは、CF バインディングのインポート(`void/db`、`void/kv`、`void/auth`、`void/storage`、`void/ai`、`void/sandbox`、`void/env`)が無効になります。Cloudflare 以外のターゲットでこれらのいずれかをインポートすると、コンパイル時エラーになります。ファイルベースのルーティング、ミドルウェア、`void/client` は、通常どおり動作します。
 
-Void-managed WebSocket route files (`*.ws.ts`) are Cloudflare-only because they compile to Durable Objects. The `void/ws` subpath itself is not blocked on non-CF targets so client-side `connect()` code can still be bundled where a browser-like `WebSocket` runtime is available.
+Void が管理する WebSocket のルートファイル(`*.ws.ts`)は、Durable Objects にコンパイルされるため、Cloudflare 専用です。`void/ws` のサブパス自体は Cloudflare 以外のターゲットでもブロックされないため、ブラウザのような `WebSocket` ランタイムが利用できる環境では、クライアント側の `connect()` コードを引き続きバンドルできます。
 
 ```json
 { "target": "node" }
 ```
 
-### `worker`
+### `worker` {#worker}
 
-Curated Cloudflare Workers configuration. `void init` pins `compatibility_date` here. Binding arrays such as `d1_databases`, `kv_namespaces`, and `r2_buckets` go in [`cloudflare`](#cloudflare), where Void preserves custom settings and resolved IDs during deployment.
+厳選された Cloudflare Workers の設定です。`void init` は、ここに `compatibility_date` を固定します。`d1_databases`、`kv_namespaces`、`r2_buckets` などのバインディング配列は [`cloudflare`](#cloudflare) に記述します。そこでは、デプロイ中に Void がカスタム設定と解決済みの ID を保持します。
 
-| Field                 | Type       | Description                            |
-| --------------------- | ---------- | -------------------------------------- |
-| `compatibility_date`  | `string`   | Cloudflare Workers compatibility date  |
-| `compatibility_flags` | `string[]` | Cloudflare Workers compatibility flags |
-| `vars`                | `object`   | Plain-text worker variables            |
-| `limits`              | `object`   | Worker resource limit overrides        |
+| フィールド            | 型         | 説明                              |
+| --------------------- | ---------- | --------------------------------- |
+| `compatibility_date`  | `string`   | Cloudflare Workers の互換性日付   |
+| `compatibility_flags` | `string[]` | Cloudflare Workers の互換性フラグ |
+| `vars`                | `object`   | プレーンテキストの Worker 変数    |
+| `limits`              | `object`   | Worker のリソース制限の上書き     |
 
 ```json
 {
@@ -305,11 +305,11 @@ Curated Cloudflare Workers configuration. `void init` pins `compatibility_date` 
 }
 ```
 
-`worker.vars` values must be strings. Root `.env` values override them during local development only. Production builds do not load `.env`, and reject any `worker.vars` name declared as a server key in `env.ts`. Use `void secret put` for production server values.
+`worker.vars` の値は文字列である必要があります。ルートの `.env` の値は、ローカル開発中にのみ、これらを上書きします。本番ビルドは `.env` を読み込まず、`env.ts` でサーバーキーとして宣言されている `worker.vars` の名前があれば拒否します。本番のサーバー値には `void secret put` を使用してください。
 
-Managed deployments include `worker.vars` as plain-text bindings. A remote secret with the same name takes precedence. To use the configured variable instead, remove that remote secret and deploy again. Secret deletion changes the running Worker immediately, so plan this migration during a maintenance window.
+マネージドなデプロイには、`worker.vars` がプレーンテキストのバインディングとして含まれます。同じ名前のリモートシークレットがある場合は、そちらが優先されます。代わりに設定した変数を使うには、そのリモートシークレットを削除して、再度デプロイしてください。シークレットの削除は、実行中の Worker に即座に反映されるため、この移行はメンテナンス時間帯に計画してください。
 
-`worker.limits.cpu_ms` sets the CPU time limit per request, from 1 to 300000 ms. On a Void platform, deploy fails if the limit exceeds the account plan; lower it in `void.config.ts` before retrying. Rollback instead caps the old limit at the current plan ceiling. On direct deploys, [Cloudflare enforces the value](https://developers.cloudflare.com/workers/platform/limits/#cpu-time): Workers Free allows up to 10 ms and Workers Paid up to 300000 ms per request.
+`worker.limits.cpu_ms` は、リクエストごとの CPU 時間の上限を、1 から 300000 ms の範囲で設定します。Void プラットフォームでは、上限がアカウントのプランを超えるとデプロイが失敗します。再試行する前に、`void.config.ts` で値を下げてください。一方、ロールバックでは、古い上限が現在のプランの上限に制限されます。直接デプロイでは、[Cloudflare が値を適用します](https://developers.cloudflare.com/workers/platform/limits/#cpu-time)。Workers Free ではリクエストあたり最大 10 ms、Workers Paid では最大 300000 ms です。
 
 ```json
 {
@@ -321,12 +321,12 @@ Managed deployments include `worker.vars` as plain-text bindings. A remote secre
 }
 ```
 
-### `cloudflare`
+### `cloudflare` {#cloudflare}
 
-The complete Cloudflare Worker configuration for direct Cloudflare builds and deployment. Put custom bindings, `name`, `account_id`, routes, services, vars, migrations, and any other Cloudflare fields here. Void passes these fields through to the generated Cloudflare build configuration. Settings you edit here take precedence over values Void previously recorded in `void.lock.json`.
+Cloudflare への直接のビルドとデプロイに使用する、完全な Cloudflare Worker の設定です。カスタムのバインディング、`name`、`account_id`、ルート、サービス、vars、マイグレーションなど、その他の Cloudflare のフィールドはここに記述します。Void は、これらのフィールドを、生成される Cloudflare のビルド設定にそのまま渡します。ここで編集した設定は、Void が以前に `void.lock.json` に記録した値よりも優先されます。
 
 ```ts
-// Inside defineConfig({ ... })
+// defineConfig({ ... }) の内側
 cloudflare: {
   name: 'my-app',
   d1_databases: [{ binding: 'ANALYTICS', database_name: 'analytics', database_id: '...' }],
@@ -334,28 +334,28 @@ cloudflare: {
 },
 ```
 
-Void writes a generated Cloudflare config for its tooling and records provisioned resource IDs and append-only migration history in `void.lock.json`. Commit the lock when it changes. Root `wrangler.jsonc` and `wrangler.json` are migrated on `void init` or `void deploy`; Void keeps backup copies under `.void/config-migration/`.
+Void は、ツール用に生成した Cloudflare 設定を書き出し、プロビジョニングされたリソースの ID と、追記専用のマイグレーション履歴を `void.lock.json` に記録します。ロックファイルが変更された場合はコミットしてください。ルートの `wrangler.jsonc` と `wrangler.json` は、`void init` または `void deploy` 時にマイグレーションされ、Void はバックアップのコピーを `.void/config-migration/` に保持します。
 
-If you need to remove a value that Void previously generated, remove it from the `resolved` object in `void.lock.json`. Void refreshes the generated Cloudflare file on the next command. Put ongoing custom settings in `cloudflare` in `void.config.ts`.
+Void が以前に生成した値を削除したい場合は、`void.lock.json` の `resolved` オブジェクトから削除してください。Void は、次のコマンドで、生成された Cloudflare のファイルを更新します。継続的に使うカスタム設定は、`void.config.ts` の `cloudflare` に記述してください。
 
-### `deploy.cloudflare.mode`
+### `deploy.cloudflare.mode` {#deploy-cloudflare-mode}
 
-Direct Cloudflare deploys use `staged` by default: Void checks the new Worker before sending it production traffic. If Cloudflare cannot stage an existing Durable Object Worker, choose `atomic` after reviewing the pending Worker and database changes:
+Cloudflare への直接デプロイは、デフォルトで `staged` を使用します。Void は、新しい Worker に本番トラフィックを送る前に、その Worker を確認します。Cloudflare が既存の Durable Object の Worker をステージングできない場合は、保留中の Worker とデータベースの変更を確認したうえで、`atomic` を選択してください。
 
 ```ts
-// Inside defineConfig({ ... })
+// defineConfig({ ... }) の内側
 deploy: { cloudflare: { mode: 'atomic' } },
 ```
 
-This choice applies to subsequent `void deploy` runs. Atomic deployment sends traffic to the new Worker before Void checks readiness; a Durable Object class migration cannot be rolled back across its migration boundary. Use `--atomic` for a single deployment instead. `deploy` is a Void setting and is not passed to Cloudflare's Worker config.
+この選択は、以降の `void deploy` の実行に適用されます。アトミックなデプロイでは、Void が準備状況を確認する前に、新しい Worker にトラフィックが送られます。Durable Object のクラスのマイグレーションは、そのマイグレーションの境界をまたいでロールバックすることはできません。1 回のデプロイだけに適用したい場合は、代わりに `--atomic` を使用してください。`deploy` は Void の設定であり、Cloudflare の Worker 設定には渡されません。
 
-### `routing`
+### `routing` {#routing}
 
-Routing and edge configuration for headers, redirects, rewrites, and caching.
+ヘッダー、リダイレクト、リライト、キャッシュに関する、ルーティングとエッジの設定です。
 
-#### `routing.headers`
+#### `routing.headers` {#routing-headers}
 
-Custom response headers. Keys are URL patterns, values are arrays of `"Name: value"` strings. See [Custom Headers](../guide/edge/headers) for details.
+カスタムのレスポンスヘッダーです。キーは URL パターン、値は `"Name: value"` 形式の文字列の配列です。詳細は[カスタムヘッダー](../guide/edge/headers)を参照してください。
 
 ```json
 {
@@ -368,9 +368,9 @@ Custom response headers. Keys are URL patterns, values are arrays of `"Name: val
 }
 ```
 
-#### `routing.redirects`
+#### `routing.redirects` {#routing-redirects}
 
-URL redirects. Keys are source URL patterns, values are destination strings (302 default) or objects with `to` and optional `status` (`301`, `302`, `303`, `307`, `308`). See [Redirects](../guide/edge/redirects) for details.
+URL のリダイレクトです。キーは元の URL パターン、値は宛先の文字列(デフォルトは 302)、または `to` と、省略可能な `status`(`301`、`302`、`303`、`307`、`308`)を持つオブジェクトです。詳細は[リダイレクト](../guide/edge/redirects)を参照してください。
 
 ```json
 {
@@ -383,9 +383,9 @@ URL redirects. Keys are source URL patterns, values are destination strings (302
 }
 ```
 
-#### `routing.rewrites`
+#### `routing.rewrites` {#routing-rewrites}
 
-URL rewrites. Keys are source URL patterns, values are destination paths. Serves content from the destination without changing the browser URL. See [Rewrites](../guide/edge/rewrites) for details.
+URL のリライトです。キーは元の URL パターン、値は宛先のパスです。ブラウザの URL を変更せずに、宛先のコンテンツを配信します。詳細は[リライト](../guide/edge/rewrites)を参照してください。
 
 ```json
 {
@@ -398,11 +398,11 @@ URL rewrites. Keys are source URL patterns, values are destination paths. Serves
 }
 ```
 
-Destinations use the `RewriteDestination` shape — typed route patterns plus `string`, so known routes autocomplete while dynamic paths remain accepted. See [Programmatic rewrites](../guide/edge/rewrites#programmatic-rewrites-in-middleware).
+宛先には `RewriteDestination` の形を使います。これは、型付きのルートパターンに `string` を加えたもので、既知のルートはオートコンプリートされ、動的なパスも引き続き受け付けられます。[ミドルウェアでのプログラムによるリライト](../guide/edge/rewrites#programmatic-rewrites-in-middleware)を参照してください。
 
-#### `routing.fallbacks`
+#### `routing.fallbacks` {#routing-fallbacks}
 
-Fallback rewrites. Same shape as `rewrites`, but rules only fire when no static asset or route matched the request (i.e. the request would otherwise 404). Useful for SPA shells or default-locale catch-alls that shouldn't pre-empt real routes. See [Rewrites → Fallbacks](../guide/edge/rewrites#fallbacks) for details.
+フォールバックのリライトです。`rewrites` と同じ形ですが、ルールが適用されるのは、静的アセットにもルートにも一致しなかった場合(つまり、そのままでは 404 になるリクエスト)のみです。実際のルートより優先させたくない、SPA シェルやデフォルトロケールのキャッチオールに便利です。詳細は[リライト → フォールバック](../guide/edge/rewrites#fallbacks)を参照してください。
 
 ```json
 {
@@ -414,9 +414,9 @@ Fallback rewrites. Same shape as `rewrites`, but rules only fire when no static 
 }
 ```
 
-#### `routing.isr`
+#### `routing.isr` {#routing-isr}
 
-Boolean switch for Void's ISR caching. When omitted or `true`, Void infers caching from your revalidate and prerender settings. Setting it to `false` disables ISR and edge prerendering for the whole app, including per-page exports:
+Void の ISR キャッシュのブール値のスイッチです。省略した場合、または `true` の場合、Void は revalidate とプリレンダリングの設定からキャッシュを推論します。`false` に設定すると、ページごとのエクスポートも含め、アプリ全体で ISR とエッジのプリレンダリングが無効になります。
 
 ```json
 {
@@ -426,11 +426,11 @@ Boolean switch for Void's ISR caching. When omitted or `true`, Void infers cachi
 }
 ```
 
-Build-time HTML generation with `output: "static"` is unaffected. Set `isr` to `true` to enable your configured cache policies again.
+`output: "static"` によるビルド時の HTML 生成は影響を受けません。設定済みのキャッシュポリシーを再び有効にするには、`isr` を `true` に設定します。
 
-#### `routing.revalidate`
+#### `routing.revalidate` {#routing-revalidate}
 
-ISR revalidation TTL in seconds, either globally or per path. See [Revalidation](../guide/edge/revalidation.md) for details.
+ISR の再検証 TTL(秒)を、グローバルまたはパスごとに指定します。詳細は[再検証](../guide/edge/revalidation.md)を参照してください。
 
 ```json
 {
@@ -444,9 +444,9 @@ ISR revalidation TTL in seconds, either globally or per path. See [Revalidation]
 }
 ```
 
-#### `routing.revalidateQueryAllowlist`
+#### `routing.revalidateQueryAllowlist` {#routing-revalidatequeryallowlist}
 
-Query parameters to keep in ISR cache keys. Keys are source URL patterns, values are query parameter names to keep. The listed parameters are part of the cache key for every request to a matching path; all other query parameters are left out of the key. When omitted, ISR cache keys drop every incoming query parameter to avoid unbounded cache fanout.
+ISR のキャッシュキーに残すクエリパラメーターです。キーは元の URL パターン、値は残すクエリパラメーター名です。列挙したパラメーターは、一致するパスへのすべてのリクエストでキャッシュキーの一部になり、それ以外のクエリパラメーターはキーから除外されます。省略した場合、キャッシュの無制限な拡散を避けるため、ISR のキャッシュキーはすべての受信クエリパラメーターを破棄します。
 
 ```json
 {
@@ -460,9 +460,9 @@ Query parameters to keep in ISR cache keys. Keys are source URL patterns, values
 }
 ```
 
-#### `routing.prerender`
+#### `routing.prerender` {#routing-prerender}
 
-Paths to prerender as static HTML at deploy time. Each path must start with `/`. See [Edge Prerendering](../guide/edge/prerendering.md) for details.
+デプロイ時に静的 HTML としてプリレンダリングするパスです。各パスは `/` で始まる必要があります。詳細は[エッジでのプリレンダリング](../guide/edge/prerendering.md)を参照してください。
 
 ```json
 {
@@ -472,9 +472,9 @@ Paths to prerender as static HTML at deploy time. Each path must start with `/`.
 }
 ```
 
-#### `routing.notFound`
+#### `routing.notFound` {#routing-notfound}
 
-Override how the asset layer answers a request that matched no asset and no worker route. One of `"single-page-application"`, `"404-page"`, or `"none"`. If omitted, Void infers it — see [Static Assets](../guide/edge/static-assets.md#navigation-and-middleware).
+アセットにも Worker のルートにも一致しなかったリクエストに、アセットレイヤーがどのように応答するかを上書きします。`"single-page-application"`、`"404-page"`、`"none"` のいずれかです。省略した場合、Void が推論します。[静的アセット](../guide/edge/static-assets.md#navigation-and-middleware)を参照してください。
 
 ```json
 {
@@ -484,69 +484,69 @@ Override how the asset layer answers a request that matched no asset and no work
 }
 ```
 
-Use `"404-page"` for a generated static site with a `404.html`, `"single-page-application"` for a client router, or `"none"` to keep the Worker's own 404. API and middleware routing remain unchanged.
+`404.html` を持つ生成された静的サイトには `"404-page"` を、クライアントルーターには `"single-page-application"` を、Worker 自身の 404 を維持するには `"none"` を使用します。API とミドルウェアのルーティングは変わりません。
 
-SvelteKit, Nuxt, Analog, and Astro use their own error pages and ignore this setting. For direct Cloudflare deployment with TanStack Start, React Router, or vinext, set a complete asset policy in your framework's Cloudflare config. See [Static Assets](../guide/edge/static-assets.md#navigation-and-middleware).
+SvelteKit、Nuxt、Analog、Astro は独自のエラーページを使用するため、この設定は無視されます。TanStack Start、React Router、vinext で Cloudflare に直接デプロイする場合は、フレームワークの Cloudflare 設定で、完全なアセットポリシーを設定してください。[静的アセット](../guide/edge/static-assets.md#navigation-and-middleware)を参照してください。
 
-### `inference`
+### `inference` {#inference}
 
-Configuration for build-time inference, including how Void detects your app type, bindings, and build process.
+ビルド時の推論に関する設定です。Void がアプリの種類、バインディング、ビルドプロセスをどのように検出するかが含まれます。
 
-#### `inference.bindings`
+#### `inference.bindings` {#inference-bindings}
 
-Explicitly control inferred Cloudflare bindings. If omitted, bindings are [automatically inferred](./resource-inference.md) by scanning your source files for binding usage. Explicit values override the named bindings; omitted bindings are still inferred. Auth and checked-in migrations still require a database even when `db` is `false`.
+推論される Cloudflare バインディングを明示的に制御します。省略した場合、ソースファイルをスキャンしてバインディングの使用を検出することで、バインディングが[自動的に推論](./resource-inference.md)されます。明示的な値は、指定したバインディングを上書きします。省略したバインディングは、引き続き推論されます。認証とチェックイン済みのマイグレーションは、`db` が `false` であっても、引き続きデータベースを必要とします。
 
-Each binding accepts `true` (use default name), `false` (disable), or a string (custom binding name):
+各バインディングは、`true`(デフォルトの名前を使用)、`false`(無効化)、または文字列(カスタムのバインディング名)を受け付けます。
 
 ```json
 { "inference": { "bindings": { "db": true, "kv": false, "storage": "MY_BUCKET", "ai": "MY_AI" } } }
 ```
 
-| Key       | Default Binding | Type          | Custom Name              |
-| --------- | --------------- | ------------- | ------------------------ |
-| `db`      | `DB`            | `D1Database`  | `"db": "MY_DB"`          |
-| `kv`      | `KV`            | `KVNamespace` | `"kv": "MY_KV"`          |
-| `storage` | `STORAGE`       | `R2Bucket`    | `"storage": "MY_BUCKET"` |
-| `ai`      | `AI`            | `Ai`          | `"ai": "MY_AI"`          |
-| `email`   | —               | —             | Boolean only             |
+| キー      | デフォルトのバインディング | 型            | カスタム名               |
+| --------- | -------------------------- | ------------- | ------------------------ |
+| `db`      | `DB`                       | `D1Database`  | `"db": "MY_DB"`          |
+| `kv`      | `KV`                       | `KVNamespace` | `"kv": "MY_KV"`          |
+| `storage` | `STORAGE`                  | `R2Bucket`    | `"storage": "MY_BUCKET"` |
+| `ai`      | `AI`                       | `Ai`          | `"ai": "MY_AI"`          |
+| `email`   | —                          | —             | ブール値のみ             |
 
-Custom binding names work with `void/db`, `void/kv`, and `void/storage` during development and deployment. Custom AI names also work with `void/ai` on direct Cloudflare deploys; managed Workers AI uses the platform's proxy.
+カスタムのバインディング名は、開発時とデプロイ時の `void/db`、`void/kv`、`void/storage` で動作します。Cloudflare への直接デプロイでは、カスタムの AI の名前も `void/ai` で動作します。マネージドな Workers AI は、プラットフォームのプロキシを使用します。
 
-`email` is a boolean feature switch. Set it to `true` to enable [email](../guide/email.md) and the `void dev` inbox without an import from `void/email`, or `false` to disable them. On a Void platform, sending uses the platform proxy. Direct Cloudflare setup records a `SEND_EMAIL` binding in `void.lock.json`; see [`email.from`](#email).
+`email` は、ブール値の機能スイッチです。`true` に設定すると、`void/email` からのインポートなしで[メール](../guide/email.md)と `void dev` の受信箱が有効になり、`false` に設定すると無効になります。Void プラットフォームでは、送信にプラットフォームのプロキシを使用します。Cloudflare への直接のセットアップでは、`SEND_EMAIL` バインディングが `void.lock.json` に記録されます。[`email.from`](#email) を参照してください。
 
-#### `inference.build`
+#### `inference.build` {#inference-build}
 
-Override the build command. Useful for frameworks with their own CLIs (Nuxt, Astro) or static apps with custom build scripts. If omitted, the CLI uses the detected default build command for the current app type. It applies to every app type, including `"void"` (where the default is `vite build`).
+ビルドコマンドを上書きします。独自の CLI を持つフレームワーク(Nuxt、Astro)や、カスタムのビルドスクリプトを持つ静的アプリに便利です。省略した場合、CLI は現在のアプリの種類に対して検出したデフォルトのビルドコマンドを使用します。これは、`"void"`(デフォルトは `vite build`)を含むすべてのアプリの種類に適用されます。
 
 ```json
 { "inference": { "build": "nuxt build --preset cloudflare-module" } }
 ```
 
-The command is run through a shell from the project root, with the project's own `node_modules/.bin` on `PATH`, so bare binaries and `&&` chains work:
+コマンドは、プロジェクトルートからシェル経由で実行され、プロジェクト自身の `node_modules/.bin` が `PATH` に含まれるため、バイナリ名のみの指定や `&&` による連結も機能します。
 
 ```json
 { "inference": { "build": "vitepress build && vite build" } }
 ```
 
-That chain is how a static site generator and a Void backend ship together — see [Adding a backend to a static site](../guide/app-types.md#adding-a-backend-to-a-static-site).
+静的サイトジェネレーターと Void のバックエンドを一緒に提供する方法がこの連結です。[静的サイトにバックエンドを追加する](../guide/app-types.md#adding-a-backend-to-a-static-site)を参照してください。
 
-#### `inference.scanDirs`
+#### `inference.scanDirs` {#inference-scandirs}
 
-Override which directories are scanned for [binding inference](./resource-inference.md). Paths are relative to the project root. Replaces the default directories for the current mode.
+[バインディングの推論](./resource-inference.md)のためにスキャンするディレクトリを上書きします。パスはプロジェクトルートからの相対パスです。現在のモードのデフォルトのディレクトリを置き換えます。
 
 ```json
 { "inference": { "scanDirs": ["src", "lib", "workers"] } }
 ```
 
-#### `inference.appType`
+#### `inference.appType` {#inference-apptype}
 
-App type. If omitted, auto-detected on first deploy. See [Supported App Types](../guide/app-types.md).
+アプリの種類です。省略した場合、最初のデプロイ時に自動検出されます。[サポートされるアプリの種類](../guide/app-types.md)を参照してください。
 
-- `"void"`: worker plus assets, including API routes, SSR, and jobs
-- `"framework"`: a meta-framework app such as TanStack Start, React Router, SvelteKit, Nuxt, or Astro
-- `"static"`: fully rendered HTML files from VitePress, plain HTML, or external tools. Non-matching paths return `404.html` or a 404 response.
-- `"spa"`: static output with SPA fallback. Non-file paths fall back to `index.html` with a `200` status so client-side routing works out of the box.
+- `"void"`: Worker とアセット。API ルート、SSR、ジョブを含みます
+- `"framework"`: TanStack Start、React Router、SvelteKit、Nuxt、Astro などのメタフレームワークのアプリ
+- `"static"`: VitePress、プレーンな HTML、外部ツールによる、完全にレンダリングされた HTML ファイル。一致しないパスには `404.html` または 404 レスポンスが返されます。
+- `"spa"`: SPA フォールバック付きの静的出力。ファイルではないパスは、クライアントサイドルーティングがそのまま機能するよう、`200` ステータスで `index.html` にフォールバックします。
 
-#### `inference.outputDir`
+#### `inference.outputDir` {#inference-outputdir}
 
-Output directory for static deploys, relative to the project root. Only relevant when `inference.appType` is `"spa"` or `"static"`. Defaults to `"dist"`.
+静的デプロイの出力ディレクトリです。プロジェクトルートからの相対パスで指定します。`inference.appType` が `"spa"` または `"static"` の場合にのみ関係します。デフォルトは `"dist"` です。

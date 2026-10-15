@@ -2,99 +2,99 @@
 outline: deep
 ---
 
-# Deployment
+# デプロイ {#deployment}
 
-`void deploy` builds your app, provisions resources, applies migrations, and deploys it. Choose your own Cloudflare account or a Void platform run by your team.
+`void deploy` は、アプリをビルドし、リソースをプロビジョニングし、マイグレーションを適用してデプロイします。デプロイ先には、ご自身の Cloudflare アカウント、またはチームが運用する Void プラットフォームを選べます。
 
-After a successful deployment, Void prints your deployment URL in a summary box with the details reported by your deployment target.
+デプロイが成功すると、Void はデプロイ先から報告された詳細とともに、デプロイ URL をサマリーボックスに表示します。
 
-## Deploy to Cloudflare
+## Cloudflare にデプロイする {#deploy-to-cloudflare}
 
-Choose Cloudflare during `void init`, or connect later:
+`void init` の際に Cloudflare を選択するか、後から接続します。
 
 ```sh
 void connect --platform cloudflare
 void deploy --platform cloudflare
 ```
 
-Void opens your browser to sign in and asks which account to use. Later deploys use the saved target, so you can run `void deploy`.
+Void がブラウザーを開いてサインインを求め、使用するアカウントを尋ねます。以降のデプロイでは保存済みのターゲットが使われるため、`void deploy` を実行するだけで済みます。
 
-Native apps work on Workers Free within its quotas. [Sandboxes](./sandboxes.md#requirements) require Workers Paid and Containers access. See the [Cloudflare guide](../integrations/cloudflare.md) for configuration, token permissions, and features with additional requirements.
+ネイティブアプリは Workers Free のクォータ内で動作します。[サンドボックス](./sandboxes.md#requirements)には Workers Paid と Containers へのアクセスが必要です。設定、トークンの権限、追加要件のある機能については [Cloudflare ガイド](../integrations/cloudflare.md)を参照してください。
 
-If you already have a Worker and a root `wrangler.jsonc` or `wrangler.json`, `void deploy` can link it and preserve its resources. See [Deploy an existing Worker](../integrations/cloudflare.md#deploy-an-existing-worker).
+すでに Worker とルートの `wrangler.jsonc` または `wrangler.json` がある場合、`void deploy` はそれをリンクし、リソースを維持できます。[既存の Worker をデプロイする](../integrations/cloudflare.md#deploy-an-existing-worker)を参照してください。
 
-## Prepare your app
+## アプリを準備する {#prepare-your-app}
 
-### Migrations
+### マイグレーション {#migrations}
 
-Deploy applies pending SQL migrations from `db/migrations/`. If your schema has changes without a migration, deploy stops:
+デプロイでは `db/migrations/` にある未適用の SQL マイグレーションが適用されます。スキーマに変更があるのにマイグレーションがない場合、デプロイは停止します。
 
 ```sh
 void db generate
 ```
 
-Review and commit the SQL, then deploy again. Rollback does not reverse database migrations. See [Database](./database.md) for the local workflow.
+SQL を確認してコミットし、もう一度デプロイしてください。ロールバックではデータベースのマイグレーションは元に戻りません。ローカルでのワークフローについては[データベース](./database.md)を参照してください。
 
-### Environment variables
+### 環境変数 {#environment-variables}
 
-Declare values in `env.ts` and set production server secrets with `void secret put`. Deploy never uploads your local `.env`. Supply public `VITE_*` values through the build environment. See [Environment Variables](./env-vars.md).
+値は `env.ts` で宣言し、本番用のサーバーシークレットは `void secret put` で設定します。デプロイでローカルの `.env` がアップロードされることはありません。公開用の `VITE_*` の値はビルド環境から渡してください。[環境変数](./env-vars.md)を参照してください。
 
-Keep the CLI and framework adapters on matching versions, and commit `void.config.ts` and `void.lock.json` when generated.
+CLI とフレームワークアダプターのバージョンは揃えておき、`void.config.ts` と `void.lock.json` は生成されたらコミットしてください。
 
-## Deploy from GitHub {#github}
+## GitHub からデプロイする {#github}
 
-Generate a workflow for your saved target and package manager:
+保存済みのターゲットとパッケージマネージャー向けにワークフローを生成します。
 
 ```sh
 void init --github
 ```
 
-For Cloudflare, add `CLOUDFLARE_API_TOKEN` to your repository secrets. The token needs access to the account and products your app uses. PostgreSQL and MySQL apps also need `DATABASE_URL`.
+Cloudflare の場合は、リポジトリのシークレットに `CLOUDFLARE_API_TOKEN` を追加します。トークンには、アプリが使用するアカウントとプロダクトへのアクセス権が必要です。PostgreSQL と MySQL のアプリでは `DATABASE_URL` も必要です。
 
-Follow the [Cloudflare CI setup](../integrations/cloudflare.md#deploying-from-ci) for Worker preview URLs and Cloudflare Access credentials.
+Worker のプレビュー URL と Cloudflare Access の認証情報については、[Cloudflare の CI セットアップ](../integrations/cloudflare.md#deploying-from-ci)に従ってください。
 
-### Team platform CI
+### チームプラットフォームの CI {#team-platform-ci}
 
-For a core self-hosted platform, use your own workflow with a [project deploy token](./platform/installation/first-deployment.md). Set `VOID_TOKEN`, `VOID_API_URL`, and the project slug, then connect in each fresh CI environment:
+コアのセルフホストプラットフォームでは、[プロジェクトのデプロイトークン](./platform/installation/first-deployment.md)を使って独自のワークフローを用意します。`VOID_TOKEN`、`VOID_API_URL`、プロジェクトのスラッグを設定し、新しい CI 環境ごとに接続してください。
 
 ```sh
 void connect "$VOID_API_URL" --no-login
 void deploy --platform void --project "$VOID_PROJECT"
 ```
 
-Platforms with the optional GitHub Actions integration use short-lived OIDC credentials. Authorize the repository with `void github connect <project> --repo <owner/repo> --executor github_actions`, set the repository's `VOID_API_URL`, and keep `permissions: id-token: write` in the generated workflow.
+オプションの GitHub Actions インテグレーションを備えたプラットフォームでは、短期間有効な OIDC 認証情報が使われます。`void github connect <project> --repo <owner/repo> --executor github_actions` でリポジトリを認可し、リポジトリの `VOID_API_URL` を設定して、生成されたワークフローの `permissions: id-token: write` を維持してください。
 
-If your platform supports managed GitHub builds, the GitHub App can deploy on push without a workflow file. See [GitHub commands](../reference/cli/github.md#github) to install the App and connect your repository.
+プラットフォームがマネージドな GitHub ビルドをサポートしている場合は、ワークフローファイルなしで GitHub App がプッシュ時にデプロイできます。App のインストールとリポジトリの接続については、[GitHub コマンド](../reference/cli/github.md#github)を参照してください。
 
-If CI runs typechecking before deploy, run `void prepare` after installing dependencies to generate the `.void/` types.
+デプロイ前に CI で型チェックを実行する場合は、依存関係のインストール後に `void prepare` を実行して `.void/` の型を生成してください。
 
-## Deploy to a team platform
+## チームプラットフォームにデプロイする {#deploy-to-a-team-platform}
 
-Use the API URL from your administrator. In a new or unlinked app:
+管理者から提供された API URL を使います。新規またはリンクされていないアプリでは次のようにします。
 
 ```sh
 void connect platform.example.com
 void deploy --platform void --project my-app
 ```
 
-Sign in and confirm project creation when asked. To use an existing project, run `void project link`. Later deploys use the saved destination.
+求められたらサインインし、プロジェクトの作成を確認してください。既存のプロジェクトを使うには `void project link` を実行します。以降のデプロイでは保存済みのデプロイ先が使われます。
 
-Project owners can [share access](./project-collaboration.md). To install a platform for your team, start with [Install a Void Platform](./self-hosted-platform.md), which also compares the deployment features of both targets.
+プロジェクトのオーナーは[アクセスを共有](./project-collaboration.md)できます。チーム向けにプラットフォームをインストールするには、まず [Void プラットフォームをインストールする](./self-hosted-platform.md)を参照してください。そこでは両方のターゲットのデプロイ機能も比較しています。
 
-### Deploy to another Void platform
+### 別の Void プラットフォームにデプロイする {#deploy-to-another-void-platform}
 
-For a single deployment to a different platform, connect and name its project:
+別のプラットフォームに 1 回だけデプロイする場合は、接続してそのプロジェクトを指定します。
 
 ```sh
 void connect second.example.com
 VOID_API_URL=https://second.example.com void deploy --platform void --project my-app
 ```
 
-This keeps your saved destination. Each platform has its own projects, secrets, and data. See the [CLI reference](../reference/cli/deploy.md) for target selection and other flags.
+この方法では保存済みのデプロイ先は変更されません。各プラットフォームには、それぞれ独自のプロジェクト、シークレット、データがあります。ターゲットの選択方法やその他のフラグについては [CLI リファレンス](../reference/cli/deploy.md)を参照してください。
 
-## Logs and rollback
+## ログとロールバック {#logs-and-rollback}
 
-Inspect your deployment, read runtime logs, or select a previous deployment:
+デプロイの確認、ランタイムログの閲覧、以前のデプロイの選択ができます。
 
 ```sh
 void project status
@@ -102,16 +102,16 @@ void project logs
 void project rollback
 ```
 
-Cloudflare logs use a live tail; team platforms retain log history. Before rolling back, check that the earlier code works with your current database schema. See [Project commands](../reference/cli/project.md).
+Cloudflare のログはライブテールを使用し、チームプラットフォームではログ履歴が保持されます。ロールバックする前に、以前のコードが現在のデータベーススキーマで動作することを確認してください。[プロジェクトコマンド](../reference/cli/project.md)を参照してください。
 
-## Other runtimes
+## その他のランタイム {#other-runtimes}
 
-Build a standalone server for [Node.js, Bun, or Deno](../integrations/nodejs-bun-deno.md) using the `target` setting. Deploy `dist/ssr` and `dist/client` together using your own hosting. Cloudflare bindings such as D1, KV, R2, and Workers AI are unavailable on these targets.
+`target` 設定を使って、[Node.js、Bun、Deno](../integrations/nodejs-bun-deno.md) 向けのスタンドアロンサーバーをビルドできます。`dist/ssr` と `dist/client` を一緒に、ご自身のホスティングにデプロイしてください。D1、KV、R2、Workers AI などの Cloudflare バインディングは、これらのターゲットでは利用できません。
 
-## Usage and execution limit pages
+## 使用量制限ページと実行制限ページ {#usage-and-execution-limit-pages}
 
-Team platforms return a structured HTTP 429 to API and Pages action requests when an app exceeds its request or CPU allowance. Browser requests get an error page.
+チームプラットフォームは、アプリがリクエスト数または CPU の許容量を超えた場合、API および Pages アクションのリクエストに対して構造化された HTTP 429 を返します。ブラウザーのリクエストにはエラーページが返されます。
 
-To customize it, add `public/usage-limit.html` for request limits or `public/execution-limit.html` for execution limits. Use standalone HTML with inline CSS and data-URL images. Scripts, external assets, and form submissions are disabled. Missing custom pages use the built-in page.
+これをカスタマイズするには、リクエスト制限用に `public/usage-limit.html`、実行制限用に `public/execution-limit.html` を追加します。インライン CSS とデータ URL の画像を使った、単体で完結する HTML を使用してください。スクリプト、外部アセット、フォーム送信は無効化されます。カスタムページがない場合は組み込みのページが使われます。
 
-Responses are not cached. A streaming response that has already started cannot be replaced with an error page; handle stream failures in your UI.
+レスポンスはキャッシュされません。すでに開始されたストリーミングレスポンスをエラーページに置き換えることはできません。ストリームの失敗は UI 側で処理してください。

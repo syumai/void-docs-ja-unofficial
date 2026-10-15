@@ -2,9 +2,9 @@
 outline: deep
 ---
 
-# Redirects
+# リダイレクト {#redirects}
 
-Define URL redirects in [`void.config.ts`](../../reference/config) using the `routing.redirects` field. Keys are source URL patterns, values are destination strings or objects with an explicit status.
+[`void.config.ts`](../../reference/config) の `routing.redirects` フィールドで URL リダイレクトを定義します。キーは元の URL パターン、値は転送先の文字列、またはステータスを明示したオブジェクトです。
 
 ```json
 {
@@ -17,18 +17,18 @@ Define URL redirects in [`void.config.ts`](../../reference/config) using the `ro
 }
 ```
 
-## Rules
+## ルール {#rules}
 
-- **Source patterns** start with `/`. `*` matches any characters including `/`.
-- **Destinations** can be strings (default `302`) or objects with `to` and optional `status`. Supported statuses: `301`, `302`, `303`, `307`, `308`.
-- `:splat` in the destination is replaced with the portion of the path matched by `*` in the source pattern.
-- Destination query strings are merged into the `Location` header (the destination's parameters take precedence on per-key conflict). To drop the incoming query, write an explicit reset like `?`.
-- When multiple rules match, the **first match wins**. Put specific patterns before catch-all patterns.
-- Redirects are evaluated **before** the request reaches the worker, so they short-circuit static asset serving, ISR, and SSR.
+- **元のパターン**は `/` で始めます。`*` は `/` を含む任意の文字列に一致します。
+- **転送先**は文字列（既定は `302`）、または `to` と任意の `status` を持つオブジェクトで指定できます。サポートされるステータスは `301`、`302`、`303`、`307`、`308` です。
+- 転送先の `:splat` は、元のパターンの `*` に一致したパス部分に置き換えられます。
+- 転送先のクエリ文字列は `Location` ヘッダーにマージされます（キーが競合した場合は転送先のパラメーターが優先されます）。受信したクエリを破棄するには、`?` のように明示的にリセットを記述します。
+- 複数のルールに一致する場合は**最初に一致したものが優先**されます。具体的なパターンをキャッチオールのパターンより前に置いてください。
+- リダイレクトはリクエストがワーカーに到達する**前**に評価されるため、静的アセットの配信、ISR、SSR よりも先に処理されます。
 
-## Domain-level redirects
+## ドメイン単位のリダイレクト {#domain-level-redirects}
 
-Prefix a source with `https://host` to redirect only requests to that domain:
+元のパターンの先頭に `https://host` を付けると、そのドメインへのリクエストだけをリダイレクトします。
 
 ```json
 {
@@ -41,23 +41,23 @@ Prefix a source with `https://host` to redirect only requests to that domain:
 }
 ```
 
-The `_redirects` file accepts the same syntax:
+`_redirects` ファイルでも同じ構文を使用できます。
 
 ```
 https://www.example.com/*  https://example.com/:splat  301
 ```
 
-Path-only sources apply to every domain on the project. Host-prefixed sources apply only to the named domain.
+パスのみの元パターンは、プロジェクトのすべてのドメインに適用されます。ホスト付きの元パターンは、指定したドメインにのみ適用されます。
 
-The source must use `https://` and a literal hostname without wildcards or a port. Add the domain to your project with `void domain add` before deploying the rule. A domain awaiting certificate verification starts redirecting once it becomes active.
+元のパターンには `https://` と、ワイルドカードやポートを含まないリテラルのホスト名を使用する必要があります。ルールをデプロイする前に `void domain add` でドメインをプロジェクトに追加してください。証明書の検証待ちのドメインは、有効になった時点でリダイレクトを開始します。
 
-## Framework `_redirects` files
+## フレームワークの `_redirects` ファイル {#framework-redirects-files}
 
-Void reads `_redirects` files produced by supported frameworks. You can also place one in Vite's `publicDir`:
+Void は、サポートされているフレームワークが生成する `_redirects` ファイルを読み込みます。Vite の `publicDir` に自分で配置することもできます。
 
 ```text
 /old-page  /new-page     301
 /blog/*    /posts/:splat 301
 ```
 
-Rules in `void.config.ts` take precedence over file rules. Use `200` for a fallback or `200!` for a [rewrite](./rewrites#redirects-file). Redirects don't need the `!` suffix.
+`void.config.ts` のルールはファイルのルールより優先されます。フォールバックには `200`、[リライト](./rewrites#redirects-file)には `200!` を使用します。リダイレクトに `!` サフィックスは不要です。

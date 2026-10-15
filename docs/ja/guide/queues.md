@@ -2,17 +2,17 @@
 outline: deep
 ---
 
-# Queues
+# キュー {#queues}
 
-Use queues to process work asynchronously, such as sending emails or handling uploads. Define a consumer in `queues/`, then send it typed messages from your app.
+キューを使用すると、メール送信やアップロードの処理などの作業を非同期で処理できます。`queues/` にコンシューマーを定義し、アプリから型付きのメッセージを送信します。
 
-## Defining queues
+## キューを定義する {#defining-queues}
 
-Create a consumer in `queues/`. TypeScript and JavaScript files are supported (`.ts`, `.mts`, `.js`, `.mjs`). Its path determines the queue name: `queues/emails.ts` creates `emails`, and `queues/order/notifications.ts` creates `order-notifications`. Each queue must have a unique name.
+`queues/` にコンシューマーを作成します。TypeScript と JavaScript のファイル (`.ts`、`.mts`、`.js`、`.mjs`) がサポートされています。キュー名はパスによって決まります。`queues/emails.ts` は `emails` を、`queues/order/notifications.ts` は `order-notifications` を作成します。各キューには一意の名前が必要です。
 
-The resulting name must follow Cloudflare's queue naming rules: 1–63 characters, only letters, digits, and `-`, beginning and ending with a letter or digit.
+結果として得られる名前は、Cloudflare のキュー命名規則に従う必要があります。1〜63 文字で、使用できるのは英字、数字、`-` のみで、先頭と末尾は英字または数字です。
 
-Export a default handler wrapped with [`defineQueue<T>`](../reference/api/handlers.md#definequeue-t-handler). `T` defines the message body for both the consumer and calls to `send()`:
+[`defineQueue<T>`](../reference/api/handlers.md#definequeue-t-handler) でラップしたデフォルトのハンドラーをエクスポートします。`T` は、コンシューマーと `send()` の呼び出しの両方に対するメッセージ本体を定義します。
 
 ```ts
 // queues/emails.ts
@@ -26,16 +26,16 @@ interface Message {
 export default defineQueue<Message>(async (batch, env) => {
   for (const msg of batch.messages) {
     console.log(`Send to ${msg.body.to}: ${msg.body.subject}`);
-    msg.ack(); // Acknowledge successful processing
+    msg.ack(); // 処理の成功を通知する
   }
 });
 ```
 
-Files or directories starting with `_` are ignored.
+`_` で始まるファイルやディレクトリは無視されます。
 
-## Sending messages
+## メッセージを送信する {#sending-messages}
 
-Import the typed `queues` proxy from `void/queues` to send messages. Each queue is available as a property matching its name, with full type safety from the consumer's `defineQueue<T>` generic.
+メッセージを送信するには、`void/queues` から型付きの `queues` プロキシをインポートします。各キューは、その名前に一致するプロパティとして利用でき、コンシューマーの `defineQueue<T>` のジェネリクスによる完全な型安全性が得られます。
 
 ```ts
 // routes/api/orders.ts
@@ -44,8 +44,8 @@ import { queues } from 'void/queues';
 
 export const POST = defineHandler(async (c) => {
   const order = await c.req.json();
-  // Fully typed: body must match the
-  // Message interface from queues/emails.ts
+  // 完全に型付けされています。本体は queues/emails.ts の
+  // Message インターフェースに一致する必要があります
   await queues.emails.send({
     to: order.email,
     subject: 'Order confirmed',
@@ -54,35 +54,35 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-## Per-message acknowledgment
+## メッセージごとの確認応答 {#per-message-acknowledgment}
 
-Each message in the batch has `ack()` and `retry()` methods matching the [Cloudflare Queues API](https://developers.cloudflare.com/queues/configuration/consumer-concurrency/):
+バッチ内の各メッセージには、[Cloudflare Queues API](https://developers.cloudflare.com/queues/configuration/consumer-concurrency/) と同じ `ack()` と `retry()` メソッドがあります。
 
 ```ts
 export default defineQueue<Message>(async (batch, env) => {
   for (const msg of batch.messages) {
     try {
       await processMessage(msg.body);
-      msg.ack(); // Remove from queue
+      msg.ack(); // キューから削除する
     } catch {
-      msg.retry({ delaySeconds: 30 }); // Re-deliver after 30s
+      msg.retry({ delaySeconds: 30 }); // 30 秒後に再配信する
     }
   }
 });
 ```
 
-- `msg.ack()`: acknowledge the message and remove it from the queue
-- `msg.retry(options?)`: retry the message, optionally with a `{ delaySeconds }` delay
-- `batch.ackAll()`: acknowledge all messages in the batch
-- `batch.retryAll(options?)`: retry all messages in the batch
+- `msg.ack()`: メッセージを確認応答し、キューから削除します
+- `msg.retry(options?)`: メッセージを再試行します。必要に応じて `{ delaySeconds }` で遅延を指定できます
+- `batch.ackAll()`: バッチ内のすべてのメッセージを確認応答します
+- `batch.retryAll(options?)`: バッチ内のすべてのメッセージを再試行します
 
-The first call wins for each message. Calling `ack()` after `retry()`, or the reverse, does nothing. Messages with no explicit decision are acknowledged if the handler succeeds, or retried if it throws.
+各メッセージについて、最初の呼び出しが優先されます。`retry()` の後の `ack()`、またはその逆の呼び出しは何も行いません。明示的な判断がないメッセージは、ハンドラーが成功すれば確認応答され、例外をスローすれば再試行されます。
 
-The `timestamp` field on each message is a `Date` object.
+各メッセージの `timestamp` フィールドは `Date` オブジェクトです。
 
-## Consumer options
+## コンシューマーのオプション {#consumer-options}
 
-Export named constants to configure how Cloudflare delivers batches to your consumer:
+名前付きの定数をエクスポートして、Cloudflare がコンシューマーにバッチを配信する方法を設定します。
 
 ```ts
 // queues/emails.ts
@@ -94,9 +94,9 @@ interface Message {
 }
 
 export const maxBatchSize = 50;
-export const maxBatchTimeout = 10; // seconds
+export const maxBatchTimeout = 10; // 秒
 export const maxRetries = 5;
-export const retryDelay = 30; // seconds
+export const retryDelay = 30; // 秒
 
 export default defineQueue<Message>(async (batch, env) => {
   for (const msg of batch.messages) {
@@ -105,22 +105,20 @@ export default defineQueue<Message>(async (batch, env) => {
 });
 ```
 
-- `maxBatchSize`: maximum number of messages per batch (default `10`)
-- `maxBatchTimeout`: maximum seconds to wait before delivering an incomplete batch (default `5`)
-- `maxRetries`: maximum number of retries before delivery is exhausted (default `3`)
-- `retryDelay`: seconds to wait between retries (default `0`)
+- `maxBatchSize`: 1 バッチあたりの最大メッセージ数 (デフォルトは `10`)
+- `maxBatchTimeout`: 不完全なバッチを配信するまでに待機する最大秒数 (デフォルトは `5`)
+- `maxRetries`: 配信を打ち切るまでの最大再試行回数 (デフォルトは `3`)
+- `retryDelay`: 再試行の間隔の秒数 (デフォルトは `0`)
 
-Void-managed queues do not configure a dead-letter queue. Cloudflare permanently
-deletes messages that exhaust their retries without one; see
-[Cloudflare's dead-letter queue guide](https://developers.cloudflare.com/queues/configuration/dead-letter-queues/).
+Void が管理するキューには、デッドレターキューは設定されません。再試行回数を使い切ったメッセージは、デッドレターキューがない場合、Cloudflare によって完全に削除されます。[Cloudflare のデッドレターキューのガイド](https://developers.cloudflare.com/queues/configuration/dead-letter-queues/)を参照してください。
 
-Void provisions queues and connects their producers and consumers when you deploy.
+Void は、デプロイ時にキューをプロビジョニングし、そのプロデューサーとコンシューマーを接続します。
 
-## Local development
+## ローカル開発 {#local-development}
 
-In native Void apps, sending a message through a queue binding automatically invokes the consumer in Miniflare. Local delivery uses the same handler as production.
+ネイティブの Void アプリでは、キューバインディングを通じてメッセージを送信すると、Miniflare 内でコンシューマーが自動的に呼び出されます。ローカルでの配信には、本番と同じハンドラーが使用されます。
 
-You can also manually dispatch a batch by POSTing to the dev endpoint Void exposes:
+Void が公開する開発用エンドポイントに POST して、バッチを手動でディスパッチすることもできます。
 
 ```
 POST /__void/queue
@@ -128,7 +126,7 @@ Content-Type: application/json
 { "queue": "<queue-name>", "messages": [{ "id": "1", "timestamp": <unix_ms>, "body": <any>, "attempts": 1 }] }
 ```
 
-The endpoint requires a local dev trigger token. Void prints a paste-ready curl command with the current token when the dev server starts.
+このエンドポイントには、ローカルの開発用トリガートークンが必要です。Void は開発サーバーの起動時に、現在のトークンを含む、貼り付け可能な curl コマンドを表示します。
 
 ```bash
 curl -X POST http://localhost:5173/__void/queue \
@@ -137,4 +135,4 @@ curl -X POST http://localhost:5173/__void/queue \
   -d '{"queue":"my-queue","messages":[{"id":"1","timestamp":'"$(date +%s000)"',"body":{"hello":"world"},"attempts":1}]}'
 ```
 
-In supported meta-frameworks, use `/__void/queue` to test a consumer manually. It runs inside the framework adapter's development runtime with that adapter's bindings. Sending to a queue binding doesn't automatically invoke the consumer in this mode.
+サポートされているメタフレームワークでは、`/__void/queue` を使用してコンシューマーを手動でテストできます。これは、フレームワークアダプターの開発ランタイム内で、そのアダプターのバインディングとともに実行されます。このモードでは、キューバインディングへの送信によってコンシューマーが自動的に呼び出されることはありません。

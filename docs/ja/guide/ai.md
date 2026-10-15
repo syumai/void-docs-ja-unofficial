@@ -2,36 +2,28 @@
 outline: deep
 ---
 
-# AI
+# AI {#ai}
 
-Run Workers AI models and provider APIs from server code with `ai` from `void/ai`. Provider requests use Cloudflare's [AI Gateway](https://developers.cloudflare.com/ai-gateway/).
+`void/ai` の `ai` を使うと、サーバーコードから Workers AI のモデルやプロバイダー API を実行できます。プロバイダーへのリクエストには Cloudflare の [AI Gateway](https://developers.cloudflare.com/ai-gateway/) が使用されます。
 
-## Local Development
+## ローカル開発 {#local-development}
 
-For a direct Cloudflare project, connect your account and start development:
+Cloudflare への直接プロジェクトでは、アカウントを接続して開発を開始します。
 
 ```sh
 void connect --platform cloudflare
 npm run dev
 ```
 
-When the app imports `void/ai`, Void enables a remote Workers AI binding during
-development and preview. Requests use your Cloudflare account and its allowance;
-Workers AI has no local simulator. Development and preview use the same
-Cloudflare login as `void connect`; sign in with `void cloudflare login`. A
-`CLOUDFLARE_API_TOKEN` takes precedence; use one in an automated environment.
+アプリが `void/ai` をインポートしている場合、Void は開発中とプレビュー中にリモートの Workers AI バインディングを有効にします。リクエストにはあなたの Cloudflare アカウントとその利用枠が使用されます。Workers AI にはローカルシミュレーターがありません。開発とプレビューでは `void connect` と同じ Cloudflare ログインが使用されます。サインインには `void cloudflare login` を使用してください。`CLOUDFLARE_API_TOKEN` が優先されるため、自動化された環境ではこれを使用してください。
 
-If development stops with a Cloudflare authentication error, run
-`void cloudflare login` in a terminal as a user who can access the deployment
-account shown by `void cloudflare status`, or set `CLOUDFLARE_API_TOKEN`.
-`wrangler login` does not affect development.
+開発中に Cloudflare の認証エラーで停止した場合は、`void cloudflare status` に表示されるデプロイ先アカウントにアクセスできるユーザーとしてターミナルで `void cloudflare login` を実行するか、`CLOUDFLARE_API_TOKEN` を設定してください。`wrangler login` は開発には影響しません。
 
-For a team platform, use `void connect <platform-url>` and link your project.
-Development requests use that platform's account and usage limits.
+チームプラットフォームでは、`void connect <platform-url>` を使用してプロジェクトをリンクします。開発中のリクエストには、そのプラットフォームのアカウントと利用制限が適用されます。
 
-## Basic Usage
+## 基本的な使い方 {#basic-usage}
 
-Call `ai.run()` with a model name and inputs. Model names and input types are fully typed from `@cloudflare/workers-types`.
+モデル名と入力を指定して `ai.run()` を呼び出します。モデル名と入力の型は `@cloudflare/workers-types` から完全に型付けされます。
 
 ```ts
 import { defineHandler } from 'void';
@@ -47,13 +39,13 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-AI methods return promises. Await them to receive the result, or return the promise directly from a handler. See [Usage Limits](#usage-limits) for limit errors.
+AI のメソッドは Promise を返します。結果を受け取るには await するか、ハンドラーから Promise をそのまま返します。制限エラーについては[利用制限](#usage-limits)を参照してください。
 
-You can use any model available through Cloudflare's AI binding, including Workers AI models such as `@cf/meta/llama-3.3-70b-instruct-fp8-fast` and Cloudflare Gateway models such as `google/gemini-2.5-flash` or `openai/gpt-4.1-mini`. The input object must match the selected Cloudflare model's schema. Models that return binary data, such as generated images, are returned as a `Blob` from `ai.run()`.
+Cloudflare の AI バインディングで利用できる任意のモデルを使用できます。たとえば `@cf/meta/llama-3.3-70b-instruct-fp8-fast` などの Workers AI モデルや、`google/gemini-2.5-flash`、`openai/gpt-4.1-mini` などの Cloudflare Gateway モデルです。入力オブジェクトは、選択した Cloudflare モデルのスキーマに一致する必要があります。生成された画像など、バイナリデータを返すモデルは、`ai.run()` から `Blob` として返されます。
 
-## Streaming
+## ストリーミング {#streaming}
 
-Use `ai.stream()` to get a streaming response with SSE headers that you can return directly from a route handler:
+`ai.stream()` を使用すると、SSE ヘッダー付きのストリーミングレスポンスを取得でき、ルートハンドラーからそのまま返せます。
 
 ```ts
 import { defineHandler } from 'void';
@@ -68,38 +60,36 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Streaming responses end with a `void:error` SSE event if generation is interrupted after the response starts, or `void:limit` for a usage limit. `fetchStream()` from `void/client` throws `UsageLimit` for limits before or during streaming and `StreamError` for other terminal errors. Catch the error in your UI to stop its generating state, retain partial output, and offer retry. This also applies to streaming provider responses and `ai.run()` with `stream: true`.
+レスポンスの開始後に生成が中断された場合、ストリーミングレスポンスは `void:error` SSE イベントで終了します。利用制限の場合は `void:limit` で終了します。`void/client` の `fetchStream()` は、ストリーミング前またはストリーミング中の制限に対して `UsageLimit` を、その他の終端エラーに対して `StreamError` をスローします。UI でエラーをキャッチして生成中の状態を停止し、途中までの出力を保持して、再試行を提案してください。これはプロバイダーのストリーミングレスポンスや、`stream: true` を指定した `ai.run()` にも当てはまります。
 
-## Listing Models
+## モデルの一覧表示 {#listing-models}
 
-Use `ai.models()` to list available models:
+`ai.models()` を使用して、利用可能なモデルを一覧表示します。
 
 ```ts
 const models = await ai.models();
 
-// Filter by task
+// タスクで絞り込む
 const textModels = await ai.models({ task: 'Text Generation' });
 ```
 
-## Markdown Conversion
+## Markdown 変換 {#markdown-conversion}
 
-Use `ai.toMarkdown()` to convert documents to markdown:
+`ai.toMarkdown()` を使用して、ドキュメントを Markdown に変換します。
 
 ```ts
 const result = await ai.toMarkdown([{ name: 'document.pdf', blob: pdfBytes }]);
 ```
 
-## Usage Limits
+## 利用制限 {#usage-limits}
 
-Workers AI usage is measured in [neurons](https://developers.cloudflare.com/workers-ai/platform/pricing/).
-On a direct deployment, usage belongs to your Cloudflare account. Provider-native
-requests also use your provider credentials and their billing terms.
+Workers AI の使用量は[ニューロン](https://developers.cloudflare.com/workers-ai/platform/pricing/)で計測されます。直接デプロイでは、使用量はあなたの Cloudflare アカウントに計上されます。プロバイダーネイティブのリクエストでは、プロバイダーの認証情報とその課金条件も適用されます。
 
-A team platform uses its own Cloudflare account and may apply per-user limits. Ask your administrator about the available allowance.
+チームプラットフォームは独自の Cloudflare アカウントを使用し、ユーザーごとの制限を適用する場合があります。利用可能な枠については管理者に確認してください。
 
-Usage limits reject the operation's promise with `UsageLimit` from `void/limits`. It includes `resource`, `reason`, and an optional `retryAt` timestamp. In Void route handlers and Pages actions, an uncaught limit produces a structured HTTP 429 with retry information. In queues, scheduled jobs, and other server code, it remains a rejected promise.
+利用制限に達すると、操作の Promise は `void/limits` の `UsageLimit` で reject されます。これには `resource`、`reason`、および省略可能な `retryAt` タイムスタンプが含まれます。Void のルートハンドラーと Pages のアクションでは、キャッチされなかった制限エラーは、再試行情報を含む構造化された HTTP 429 になります。キュー、スケジュールジョブ、その他のサーバーコードでは、reject された Promise のままです。
 
-Handling a limit is optional. Use `instanceof UsageLimit` when you want a fallback or a message tailored to your app:
+制限の処理は任意です。フォールバックやアプリに合わせたメッセージが必要な場合は、`instanceof UsageLimit` を使用します。
 
 ```ts
 import { defineHandler } from 'void';
@@ -122,11 +112,11 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-`error.response()` creates the structured HTTP 429 and accepts an optional custom `message`. Other failures reject normally. When using `fetchStream()`, the same `instanceof UsageLimit` check gives your client access to the message and retry information.
+`error.response()` は構造化された HTTP 429 を作成し、省略可能なカスタム `message` を受け取ります。その他の失敗は通常どおり reject されます。`fetchStream()` を使用する場合も、同じ `instanceof UsageLimit` のチェックにより、クライアントでメッセージと再試行情報にアクセスできます。
 
-## Cloudflare Gateway Models
+## Cloudflare Gateway モデル {#cloudflare-gateway-models}
 
-`ai.run()` mirrors Cloudflare's `env.AI.run()` model naming and input schemas. Third-party models use Cloudflare model IDs and Cloudflare-managed credentials.
+`ai.run()` は、Cloudflare の `env.AI.run()` のモデル名と入力スキーマをそのまま反映しています。サードパーティのモデルには、Cloudflare のモデル ID と Cloudflare が管理する認証情報が使用されます。
 
 ```ts
 const result = await ai.run('google/gemini-2.5-flash', {
@@ -139,20 +129,15 @@ const result = await ai.run('google/gemini-2.5-flash', {
 });
 ```
 
-Pass AI Gateway options as the third argument: `ai.run(model, inputs, { gateway: { skipCache: true } })`. On a team platform, the platform chooses the gateway and sets its metadata and logging; options such as `skipCache` and `cacheTtl` still apply.
+AI Gateway のオプションは 3 番目の引数として渡します: `ai.run(model, inputs, { gateway: { skipCache: true } })`。チームプラットフォームでは、プラットフォームがゲートウェイを選択し、そのメタデータとログを設定します。`skipCache` や `cacheTtl` などのオプションは引き続き適用されます。
 
-For provider-native requests on a direct deployment, configure [`ai.gateway`](../integrations/cloudflare.md#ai-self-host).
+直接デプロイでのプロバイダーネイティブのリクエストについては、[`ai.gateway`](../integrations/cloudflare.md#ai-self-host) を設定してください。
 
-## Provider-Native Requests
+## プロバイダーネイティブのリクエスト {#provider-native-requests}
 
-Use `ai.provider(provider).fetch(path, init)` for a provider-native API with your
-own provider key. The request goes through the configured Cloudflare AI Gateway
-and retains the provider's native HTTP shape. On a team platform, it also passes
-through that installation's proxy. AI Gateway cache, timeout and retry headers,
-such as `cf-aig-cache-ttl` and `cf-aig-max-attempts`, still apply there; the
-platform ignores logging, metadata and cost headers.
+自分のプロバイダーキーを使ってプロバイダーネイティブの API を利用するには、`ai.provider(provider).fetch(path, init)` を使用します。リクエストは設定済みの Cloudflare AI Gateway を経由し、プロバイダー本来の HTTP 形式が維持されます。チームプラットフォームでは、そのインストールのプロキシも経由します。`cf-aig-cache-ttl` や `cf-aig-max-attempts` などの AI Gateway のキャッシュ、タイムアウト、リトライのヘッダーは引き続き適用されます。プラットフォームは、ログ、メタデータ、コストに関するヘッダーを無視します。
 
-### OpenAI
+### OpenAI {#openai}
 
 ```ts
 import { defineHandler } from 'void';
@@ -171,7 +156,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-### Google AI Studio
+### Google AI Studio {#google-ai-studio}
 
 ```ts
 const response = await ai
@@ -188,9 +173,9 @@ const response = await ai
   });
 ```
 
-### Custom Providers
+### カスタムプロバイダー {#custom-providers}
 
-For providers that are not in Void's default key map, pass the secret name and API-key header:
+Void のデフォルトのキーマップにないプロバイダーでは、シークレット名と API キーのヘッダーを渡します。
 
 ```ts
 const response = await ai
@@ -204,9 +189,9 @@ const response = await ai
   });
 ```
 
-### Image Generation
+### 画像生成 {#image-generation}
 
-Use `ai.run()` or `ai.image()` for Cloudflare-native image models:
+Cloudflare ネイティブの画像モデルには、`ai.run()` または `ai.image()` を使用します。
 
 ```ts
 export const POST = defineHandler(async (c) => {
@@ -215,7 +200,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Use `ai.provider().fetch()` for provider-native image APIs. Match the [provider's request schema](https://developers.openai.com/api/reference/resources/images/methods/generate):
+プロバイダーネイティブの画像 API には `ai.provider().fetch()` を使用します。[プロバイダーのリクエストスキーマ](https://developers.openai.com/api/reference/resources/images/methods/generate)に合わせてください。
 
 ```ts
 export const POST = defineHandler(async (c) => {
@@ -231,7 +216,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-For multipart provider APIs, pass `FormData`:
+マルチパートのプロバイダー API には `FormData` を渡します。
 
 ```ts
 export const POST = defineHandler(async (c) => {
@@ -245,26 +230,26 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-### Provider Key Convention
+### プロバイダーキーの規約 {#provider-key-convention}
 
-Provider-native requests use a project secret, such as `OPENAI_API_KEY` for OpenAI or `GOOGLE_API_KEY` for Google AI Studio.
+プロバイダーネイティブのリクエストでは、OpenAI の `OPENAI_API_KEY` や Google AI Studio の `GOOGLE_API_KEY` など、プロジェクトのシークレットが使用されます。
 
-See the [provider key reference](../reference/api/resources.md#provider-keys) for supported providers and their secret names.
+サポートされているプロバイダーとそのシークレット名については、[プロバイダーキーのリファレンス](../reference/api/resources.md#provider-keys)を参照してください。
 
-OpenAI-style providers use `Authorization: Bearer <key>`. Google AI Studio uses `x-goog-api-key`. Use `apiKeyHeader` and `apiKeyPrefix` for custom providers.
+OpenAI 形式のプロバイダーは `Authorization: Bearer <key>` を使用します。Google AI Studio は `x-goog-api-key` を使用します。カスタムプロバイダーでは `apiKeyHeader` と `apiKeyPrefix` を使用してください。
 
-For production, add your API key as a project secret:
+本番環境では、API キーをプロジェクトのシークレットとして追加します。
 
 ```bash
 void secret put OPENAI_API_KEY=sk-...
 ```
 
-For local development, add it to `.env` in your project root:
+ローカル開発では、プロジェクトルートの `.env` に追加します。
 
 ```
 OPENAI_API_KEY=sk-...
 ```
 
-### Streaming with Provider-Native APIs
+### プロバイダーネイティブ API でのストリーミング {#streaming-with-provider-native-apis}
 
-Return the provider response directly. For example, add `stream: true` to the OpenAI request body shown above.
+プロバイダーのレスポンスをそのまま返します。たとえば、上記の OpenAI のリクエストボディに `stream: true` を追加します。

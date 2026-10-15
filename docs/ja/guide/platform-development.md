@@ -2,14 +2,14 @@
 outline: deep
 ---
 
-# Developing a Void Platform
+# Void プラットフォームの開発 {#developing-a-void-platform}
 
-The framework, CLI, and platform live in one repository. You can change the platform, test it locally, and deploy a runtime built from your fork into your own Cloudflare account.
+フレームワーク、CLI、プラットフォームは 1 つのリポジトリにまとまっています。プラットフォームを変更してローカルでテストし、フォークからビルドしたランタイムを自分の Cloudflare アカウントにデプロイできます。
 
-If you want to run the released platform without changing its implementation, start with [Install a Void Platform](/guide/self-hosted-platform). Use [Platform Administration](/guide/platform-administration) for managing an installed platform.
+リリース済みのプラットフォームを実装を変更せずに実行したい場合は、[Void プラットフォームのインストール](/ja/guide/self-hosted-platform)から始めてください。インストール済みのプラットフォームの管理については、[プラットフォーム管理](/ja/guide/platform-administration)を参照してください。
 
-## Development Guides
+## 開発ガイド {#development-guides}
 
-- [Local Development](/guide/platform/development/local)
-- [Runtime and Source Builds](/guide/platform/development/runtime)
-- [Schema and CI](/guide/platform/development/schema-ci)
+- [ローカル開発](/ja/guide/platform/development/local)
+- [ランタイムとソースからのビルド](/ja/guide/platform/development/runtime)
+- [スキーマと CI](/ja/guide/platform/development/schema-ci)

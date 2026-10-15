@@ -2,43 +2,43 @@
 outline: deep
 ---
 
-# Install a Void Platform
+# Void プラットフォームのインストール {#install-a-void-platform}
 
-A Void platform lets your team deploy apps into a shared Cloudflare account. As an administrator, you install and maintain the platform. Developers connect the Void CLI to its URL, sign in through an enabled login method, and deploy their apps.
+Void プラットフォームを使うと、チームで共有の Cloudflare アカウントにアプリをデプロイできます。管理者がプラットフォームをインストールして保守します。開発者は Void CLI をそのプラットフォームの URL に接続し、有効なログイン方法でサインインして、アプリをデプロイします。
 
-If you're deploying an app for yourself, [deploy directly to Cloudflare](/integrations/cloudflare#deploy-to-your-own-cloudflare-account). You don't need to install a platform first.
+自分自身のためにアプリをデプロイする場合は、[Cloudflare に直接デプロイ](/ja/integrations/cloudflare#deploy-to-your-own-cloudflare-account)してください。先にプラットフォームをインストールする必要はありません。
 
-The core platform supports GitHub, Google, generic OIDC, and Cloudflare Access login, CLI deploys, D1, KV, R2, Queues, cron jobs, Workers AI, WebSockets, SSE, ISR, routing, logs, and rollback.
+コアのプラットフォームは、GitHub、Google、汎用 OIDC、Cloudflare Access によるログイン、CLI からのデプロイ、D1、KV、R2、Queues、cron ジョブ、Workers AI、WebSockets、SSE、ISR、ルーティング、ログ、ロールバックをサポートします。
 
-The core installation includes managed Sandboxes and an email gateway; email is enabled when you configure a shared mail domain and zone. The user dashboard, GitHub builds and webhooks, build Containers, and custom project domains aren't part of the core installation. Source-built platforms that add the optional GitHub services should follow the [isolated webhook ingress setup](/guide/platform/development/runtime#optional-github-webhook-ingress-for-access-protected-apis) when Access protects the API.
+コアのインストールには、マネージドな Sandboxes とメールゲートウェイが含まれます。メールは、共有メールドメインとゾーンを設定すると有効になります。ユーザーダッシュボード、GitHub のビルドと Webhook、ビルド用 Containers、カスタムのプロジェクトドメインは、コアのインストールには含まれません。オプションの GitHub サービスを追加するソースビルドのプラットフォームで、Access が API を保護している場合は、[分離された Webhook 受信のセットアップ](/ja/guide/platform/development/runtime#optional-github-webhook-ingress-for-access-protected-apis)に従ってください。
 
-## Deployment features
+## デプロイの機能 {#deployment-features}
 
-Both targets use the same application APIs. A core platform adds shared access and retained deployment history:
+どちらのターゲットも同じアプリケーション API を使用します。コアのプラットフォームでは、共有アクセスと保持されるデプロイ履歴が追加されます。
 
-| Feature                                          | Direct Cloudflare                | Core self-hosted platform                     |
-| ------------------------------------------------ | -------------------------------- | --------------------------------------------- |
-| Static sites, SPAs, and native Pages SSR         | Supported                        | Supported                                     |
-| Routing rules, WebSockets, queues, cron, and ISR | Supported                        | Supported                                     |
-| D1, KV, R2, and external SQL through Hyperdrive  | Supported                        | Supported                                     |
-| Workers AI and provider requests                 | Your account and gateway         | Installation gateway and proxy                |
-| Runtime logs                                     | Live Cloudflare tail             | Retained platform logs                        |
-| Application rollback                             | Worker versions                  | Retained platform deployments                 |
-| Typed Durable State and native Durable Objects   | Supported                        | Supported                                     |
-| Sandboxes                                        | Requires Workers Paid and Docker | Requires Workers Paid on the platform account |
-| Custom application domains                       | Supported                        | Unavailable in the core installation          |
-| Generated GitHub deployment workflow             | Supported                        | Use your CI with a scoped developer token     |
-| User dashboard and managed GitHub builds         | Not required                     | Not included in a standard installation       |
+| 機能                                                  | Cloudflare に直接デプロイ        | コアのセルフホストプラットフォーム                 |
+| ----------------------------------------------------- | -------------------------------- | -------------------------------------------------- |
+| 静的サイト、SPA、ネイティブの Pages SSR               | サポート                         | サポート                                           |
+| ルーティングルール、WebSockets、Queues、cron、ISR     | サポート                         | サポート                                           |
+| D1、KV、R2、Hyperdrive 経由の外部 SQL                 | サポート                         | サポート                                           |
+| Workers AI とプロバイダーへのリクエスト               | お使いのアカウントとゲートウェイ | インストールのゲートウェイとプロキシ               |
+| ランタイムログ                                        | Cloudflare のライブテール        | プラットフォームが保持するログ                     |
+| アプリケーションのロールバック                        | Worker のバージョン              | プラットフォームが保持するデプロイ                 |
+| 型付きの Durable State とネイティブの Durable Objects | サポート                         | サポート                                           |
+| Sandboxes                                             | Workers Paid と Docker が必要    | プラットフォームのアカウントで Workers Paid が必要 |
+| カスタムのアプリケーションドメイン                    | サポート                         | コアのインストールでは利用不可                     |
+| 生成される GitHub デプロイワークフロー                | サポート                         | スコープ付きの開発者トークンで自分の CI を使用     |
+| ユーザーダッシュボードとマネージドな GitHub ビルド    | 不要                             | 標準のインストールには含まれない                   |
 
-A team platform requires Workers for Platforms and the [documented infrastructure](/guide/platform/installation/domains#cloudflare-footprint). Features depend on the installation's configuration.
+チームのプラットフォームには、Workers for Platforms と[ドキュメント化されたインフラストラクチャ](/ja/guide/platform/installation/domains#cloudflare-footprint)が必要です。利用できる機能は、インストールの構成によって異なります。
 
-## Installation Guides
+## インストールガイド {#installation-guides}
 
-- [Prerequisites](/guide/platform/installation/prerequisites)
-- [Credentials](/guide/platform/installation/credentials)
-- [Install and Configure Login](/guide/platform/installation/setup)
-- [First Deployment](/guide/platform/installation/first-deployment)
-- [Domains and Resources](/guide/platform/installation/domains)
-- [Maintenance and Recovery](/guide/platform/installation/maintenance)
-- [Install from CI](/guide/platform/installation/ci)
-- [Disable and Uninstall](/guide/platform/installation/uninstall)
+- [前提条件](/ja/guide/platform/installation/prerequisites)
+- [認証情報](/ja/guide/platform/installation/credentials)
+- [インストールとログインの設定](/ja/guide/platform/installation/setup)
+- [最初のデプロイ](/ja/guide/platform/installation/first-deployment)
+- [ドメインとリソース](/ja/guide/platform/installation/domains)
+- [メンテナンスと復旧](/ja/guide/platform/installation/maintenance)
+- [CI からのインストール](/ja/guide/platform/installation/ci)
+- [無効化とアンインストール](/ja/guide/platform/installation/uninstall)

@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Authentication {#auth}
+# 認証 {#auth}
 
-Imported from `"void/auth"`. Client-side helpers imported from `"void/client"`.
+`"void/auth"` からインポートします。クライアント側のヘルパーは `"void/client"` からインポートします。
 
 ## `defineAuth(config)` {#defineauth-config}
 
-Advanced escape hatch for customizing Void's Better Auth config.
+Void の Better Auth 設定をカスタマイズするための、高度なエスケープハッチです。
 
 ```ts
 import { defineAuth } from 'void/auth';
@@ -19,7 +19,7 @@ export default defineAuth(({ defaults }) => ({
 }));
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function defineAuth(config: VoidAuthConfig): VoidAuthConfig;
@@ -27,7 +27,7 @@ function defineAuth(config: VoidAuthConfig): VoidAuthConfig;
 
 ## `getUser()` {#getuser}
 
-Returns the current authenticated user, or `null` when no user is present.
+現在の認証済みユーザーを返します。ユーザーが存在しない場合は `null` を返します。
 
 ```ts
 import { getUser } from 'void/auth';
@@ -35,7 +35,7 @@ import { getUser } from 'void/auth';
 const user = getUser();
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function getUser(): AuthUser | null;
@@ -43,7 +43,7 @@ function getUser(): AuthUser | null;
 
 ## `getSession()` {#getsession}
 
-Returns the current Better Auth request state, or `null`.
+現在の Better Auth のリクエスト状態を返します。存在しない場合は `null` を返します。
 
 ```ts
 import { getSession } from 'void/auth';
@@ -51,7 +51,7 @@ import { getSession } from 'void/auth';
 const state = getSession();
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function getSession(): AuthState | null;
@@ -59,7 +59,7 @@ function getSession(): AuthState | null;
 
 ## `requireAuth(c)` {#requireauth-c}
 
-Extracts the authenticated user from the request context. Throws a 401 `HTTPException` if no session is present.
+リクエストコンテキストから認証済みユーザーを取り出します。セッションが存在しない場合は、401 の `HTTPException` をスローします。
 
 ```ts
 import { defineHandler } from 'void';
@@ -71,7 +71,7 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function requireAuth(c: CloudContext): AuthUser;
@@ -79,7 +79,7 @@ function requireAuth(c: CloudContext): AuthUser;
 
 ## `AuthUser` {#authuser}
 
-Better Auth user shape re-exported by Void.
+Void が再エクスポートする、Better Auth のユーザーの型です。
 
 ```ts
 interface AuthUser {
@@ -95,7 +95,7 @@ interface AuthUser {
 
 ## `AuthSession` {#authsession}
 
-Better Auth session shape re-exported by Void.
+Void が再エクスポートする、Better Auth のセッションの型です。
 
 ```ts
 interface AuthSession {
@@ -112,7 +112,7 @@ interface AuthSession {
 
 ## `AuthState` {#authstate}
 
-Combined authenticated request state:
+認証済みリクエストの状態をまとめたものです。
 
 ```ts
 interface AuthState {
@@ -123,7 +123,7 @@ interface AuthState {
 
 ## `auth` {#auth-1}
 
-Imported from `"void/client"`. This is a ready-to-use Better Auth client instance preconfigured with `basePath: "/api/auth"`.
+`"void/client"` からインポートします。`basePath: "/api/auth"` があらかじめ設定された、すぐに使える Better Auth のクライアントインスタンスです。
 
 ```ts
 import { auth } from 'void/client';
@@ -132,9 +132,9 @@ await auth.signIn.email({ email, password });
 await auth.signOut();
 ```
 
-The exact client methods come from Better Auth. In pages apps, Void automatically chooses the framework-specific Better Auth client package when available.
+クライアントの具体的なメソッドは Better Auth のものです。Pages アプリでは、利用可能な場合、Void がフレームワーク固有の Better Auth クライアントパッケージを自動的に選択します。
 
-For regular SPA apps that use Void for API/file routes without Void Pages mode, import the framework-specific client explicitly:
+Void Pages モードを使わず、API / ファイルルートに Void を使用する通常の SPA アプリでは、フレームワーク固有のクライアントを明示的にインポートします。
 
 ```ts
 import { auth } from 'void/client/react';
@@ -143,11 +143,11 @@ import { auth } from 'void/client/react';
 // or: 'void/client/solid'
 ```
 
-Those subpaths keep the same `fetch`, `fetchStream`, and auth exports as `void/client`, but bind `auth` and `createAuthClient` to Better Auth's framework package.
+これらのサブパスは `void/client` と同じ `fetch`、`fetchStream`、認証関連のエクスポートを維持しつつ、`auth` と `createAuthClient` を Better Auth のフレームワークパッケージに結び付けます。
 
 ## `createAuthClient` {#createauthclient}
 
-Imported from `"void/client"`. Re-export of Better Auth's `createAuthClient` for advanced usage.
+`"void/client"` からインポートします。高度な用途のために、Better Auth の `createAuthClient` を再エクスポートしたものです。
 
 ```ts
 import { createAuthClient } from 'void/client';

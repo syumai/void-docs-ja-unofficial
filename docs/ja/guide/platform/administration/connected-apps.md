@@ -1,54 +1,54 @@
-# Connected apps
+# 連携アプリ {#connected-apps}
 
-A connected app is a separate application registered as an OAuth client on your Void installation. Users sign in on Void and decide whether to connect it. The application operator may be different from the platform administrator.
+連携アプリとは、Void のインストール環境に OAuth クライアントとして登録された、別個のアプリケーションです。ユーザーは Void にサインインし、そのアプリを連携するかどうかを決定します。アプリケーションの運営者は、プラットフォームの管理者とは別の場合があります。
 
-## Register an application
+## アプリケーションを登録する {#register-an-application}
 
-Open **Admin → Connected apps**. Enter the app name, its operator, and each exact HTTPS callback URL on a separate line. Wildcards and callback query strings are not supported. Enable individual publish approvals if the app builds and deploys projects. Enable private previews to run checkpoints before publishing. Existing clients have an **Enable private previews** button; users must connect again to consent to that permission.
+**Admin → Connected apps** を開きます。アプリ名、その運営者、そして正確な HTTPS コールバック URL を 1 行に 1 つずつ入力します。ワイルドカードとコールバックのクエリ文字列はサポートされていません。アプリがプロジェクトをビルドしてデプロイする場合は、個別の公開承認を有効にします。公開前にチェックポイントを実行するには、プライベートプレビューを有効にします。既存のクライアントには **Enable private previews** ボタンがあります。ユーザーは、その権限に同意するために、再度連携する必要があります。
 
-Save the returned client ID and secret on the app's server. Void shows the secret once. The client secret authenticates that application; it does not grant access to users' accounts. Register a new client if you need replacement credentials, then disable the old one.
+返されたクライアント ID とシークレットを、アプリのサーバーに保存してください。Void がシークレットを表示するのは 1 回だけです。クライアントシークレットはそのアプリケーションを認証するもので、ユーザーのアカウントへのアクセスを許可するものではありません。認証情報を置き換える必要がある場合は、新しいクライアントを登録してから、古いクライアントを無効にしてください。
 
-**Disable and revoke access** invalidates the client's grants, pending sign-ins, and publish approvals. Registration and disablement appear in the operator audit.
+**Disable and revoke access** は、そのクライアントのグラント、保留中のサインイン、公開承認を無効にします。登録と無効化は、オペレーターの監査ログに記録されます。
 
-Local development permits exact HTTP callbacks on localhost when the platform's development authentication bypass is explicitly enabled. Production clients require HTTPS.
+ローカル開発では、プラットフォームの開発用認証バイパスを明示的に有効にしている場合、localhost 上の正確な HTTP コールバックが許可されます。本番のクライアントには HTTPS が必要です。
 
-## Connect and disconnect
+## 連携と連携解除 {#connect-and-disconnect}
 
-The app sends users to Void's authorization page, where Void displays its registered name, operator, callback origin, and requested permission. Sign-in permits reading the user's ID and username. It does not provide an account token or project management access.
+アプリはユーザーを Void の認可ページに送ります。そこで Void は、登録された名前、運営者、コールバックのオリジン、要求された権限を表示します。サインインでは、ユーザーの ID とユーザー名の読み取りが許可されます。アカウントトークンやプロジェクト管理へのアクセスは付与されません。
 
-Users can disconnect applications at `<platform API URL>/oauth/connections`. Grants also expire after an hour and become invalid when their platform login session is revoked or their account is suspended. Applications must request a new sign-in when access expires.
+ユーザーは `<platform API URL>/oauth/connections` でアプリケーションの連携を解除できます。グラントは 1 時間後にも期限切れになり、プラットフォームのログインセッションが取り消された場合や、アカウントが停止された場合は無効になります。アクセスの期限が切れたら、アプリケーションは新たにサインインを要求する必要があります。
 
-## Private previews
+## プライベートプレビュー {#private-previews}
 
-Sign-in can request `scope=profile preview:deploy` when the administrator has enabled it. After user consent, the app can build private previews without approval for each checkpoint. Production publishing still requires individual approval.
+管理者が有効にしている場合、サインインでは `scope=profile preview:deploy` を要求できます。ユーザーの同意後、アプリはチェックポイントごとの承認なしに、プライベートプレビューをビルドできます。本番への公開には、引き続き個別の承認が必要です。
 
-Use the granted bearer token to:
+付与されたベアラートークンを使って、次の操作を行います。
 
-1. POST `{ workspace: externalWorkspaceId }` to `/oauth/previews`. The response contains a stable `project_id` and preview `url` for that client, owner and workspace.
-2. POST `{ project_id, checkpoint, artifact: prepared.artifact }` to `/oauth/preview-deployment-requests`. Use its `access_token` and `approval_id` with the same asset upload and deployment protocol as publishing.
-3. Once deployment finishes, POST to `/oauth/previews/:id/launch` and open the returned URL. Launch URLs expire after one minute and can be used once. Reload the preview's origin after opening it.
+1. `/oauth/previews` に `{ workspace: externalWorkspaceId }` を POST します。レスポンスには、そのクライアント、オーナー、ワークスペースに対して固定の `project_id` とプレビューの `url` が含まれます。
+2. `/oauth/preview-deployment-requests` に `{ project_id, checkpoint, artifact: prepared.artifact }` を POST します。返された `access_token` と `approval_id` を、公開時と同じアセットのアップロードおよびデプロイのプロトコルで使用します。
+3. デプロイが完了したら、`/oauth/previews/:id/launch` に POST し、返された URL を開きます。起動 URL は 1 分後に期限切れとなり、1 回だけ使用できます。開いた後は、プレビューのオリジンを再読み込みしてください。
 
-Each workspace has a separate preview origin and resources, with no production secrets. Previews support HTTP apps with isolated D1, KV, R2, AI and native Durable Objects. Authentication, external databases, email, schedules, queues and containers require production publishing. Viewing requires the current user grant; disconnecting or disabling the app denies subsequent requests. Preview writes must originate from that preview's own origin.
+各ワークスペースには、本番のシークレットを持たない、独立したプレビューオリジンとリソースがあります。プレビューは、分離された D1、KV、R2、AI、ネイティブの Durable Objects を使った HTTP アプリをサポートしています。認証、外部データベース、メール、スケジュール、キュー、コンテナには、本番への公開が必要です。表示には現在のユーザーのグラントが必要で、アプリの連携解除または無効化により、以降のリクエストは拒否されます。プレビューへの書き込みは、そのプレビュー自身のオリジンから行う必要があります。
 
-Account Access policies must allow requests to generated preview origins to reach Void. A policy that blocks new Workers hostnames also blocks previews. Void still requires a valid preview grant when the hostname is reachable.
+アカウントの Access ポリシーは、生成されたプレビューのオリジンから Void へのリクエストを許可する必要があります。新しい Workers のホスト名をブロックするポリシーは、プレビューもブロックします。ホスト名に到達できる場合でも、Void は有効なプレビューのグラントを必要とします。
 
-Each owner can have ten preview workspaces. Each workspace permits sixty builds per hour and shares the owner's platform resource and usage limits. Inactive previews expire after seven days and Void removes their resources. Opening the workspace through `/oauth/previews` renews that expiry. Disabling preview permission expires its previews.
+各オーナーは 10 個のプレビューワークスペースを持てます。各ワークスペースでは 1 時間あたり 60 回のビルドが可能で、オーナーのプラットフォームのリソースおよび使用量の上限を共有します。非アクティブなプレビューは 7 日後に期限切れとなり、Void はそのリソースを削除します。`/oauth/previews` からワークスペースを開くと、この期限が更新されます。プレビューの権限を無効にすると、そのプレビューは期限切れになります。
 
-## Approve a publish
+## 公開を承認する {#approve-a-publish}
 
-The app builds first, then sends the user to Void with the prepared artifact. Void displays the project name, checkpoint label, resources, manifest, and artifact digest. The user must explicitly approve on Void.
+アプリはまずビルドを行い、準備したアーティファクトとともにユーザーを Void に送ります。Void は、プロジェクト名、チェックポイントのラベル、リソース、マニフェスト、アーティファクトのダイジェストを表示します。ユーザーは Void 上で明示的に承認する必要があります。
 
-Approval permits one deployment to that user's chosen project. Void creates a missing project during approval; existing projects require ownership. The app receives a credential valid for up to fifteen minutes, restricted to that artifact's asset uploads, deployment, and receipt. Retries use the same receipt.
+承認により、そのユーザーが選択したプロジェクトへの 1 回のデプロイが許可されます。存在しないプロジェクトは、承認の際に Void が作成します。既存のプロジェクトでは、所有権が必要です。アプリは、最大 15 分間有効な認証情報を受け取ります。この認証情報は、そのアーティファクトのアセットのアップロード、デプロイ、レシートに限定されています。再試行では、同じレシートを使用します。
 
-Published code can use that project's existing secrets and resources. Review the app operator and deployment details before approving code for an existing project. Migrations and resource changes in the approved manifest take effect during deployment.
+公開されたコードは、そのプロジェクトの既存のシークレットとリソースを使用できます。既存のプロジェクトのコードを承認する前に、アプリの運営者とデプロイの詳細を確認してください。承認されたマニフェストに含まれるマイグレーションとリソースの変更は、デプロイ時に反映されます。
 
-Disabling the app or disconnecting its grant stops authorization for subsequent actions and is checked again before a queued deployment publishes. Disconnecting does not remove an app that has already been published; manage that project through Void.
+アプリを無効にするか、そのグラントを連携解除すると、以降のアクションの認可が停止し、キューに入ったデプロイの公開前にも再度確認されます。連携を解除しても、すでに公開されたアプリは削除されません。そのプロジェクトは Void で管理してください。
 
-## Build an OAuth client
+## OAuth クライアントを構築する {#build-an-oauth-client}
 
-Discover endpoints at `/.well-known/oauth-authorization-server` on the platform API origin. Use authorization code flow with `scope=profile`, a random `state`, and S256 PKCE. Authenticate token exchanges using HTTP Basic client authentication. Send access tokens as Bearer credentials to `/oauth/userinfo`; its response contains `sub`, `preferred_username`, and the consented `scope`.
+エンドポイントは、プラットフォーム API のオリジンの `/.well-known/oauth-authorization-server` で確認できます。`scope=profile`、ランダムな `state`、S256 PKCE を使った認可コードフローを使用します。トークン交換には HTTP Basic によるクライアント認証を使います。アクセストークンは Bearer 認証情報として `/oauth/userinfo` に送信します。そのレスポンスには `sub`、`preferred_username`、同意済みの `scope` が含まれます。
 
-For publishing, package the built app with [`prepareDeployArtifact`](/reference/api/deploy). POST to `/oauth/deployment-requests` using the profile token:
+公開する場合は、ビルドしたアプリを [`prepareDeployArtifact`](/ja/reference/api/deploy) でパッケージ化します。プロフィールトークンを使って、`/oauth/deployment-requests` に POST します。
 
 ```ts
 {
@@ -62,10 +62,10 @@ For publishing, package the built app with [`prepareDeployArtifact`](/reference/
 }
 ```
 
-Redirect the browser to the returned `authorization_url`. Exchange its code with the publish verifier and the same registered callback. The response includes `project_id`, `approval_id`, and a `deploy:approve` access token. This publish flow is a Void extension; requesting that scope in an ordinary sign-in does not authorize deployment.
+返された `authorization_url` にブラウザーをリダイレクトします。そのコードを、公開用の verifier と同じ登録済みコールバックで交換します。レスポンスには、`project_id`、`approval_id`、`deploy:approve` のアクセストークンが含まれます。この公開フローは Void の拡張です。通常のサインインでそのスコープを要求しても、デプロイは許可されません。
 
-Use the token to request URLs from `POST /projects/:id/deploy/upload-urls`, upload the declared assets, and send the artifact to `POST /projects/:id/deploy`. Set `x-void-deploy-idempotency-key` to `approval_id`. Deployment uses Void's managed deployment protocol and requires the platform deployment Queue. The credential cannot read secrets, mint project tokens, delete projects, or deploy different bytes.
+このトークンを使って、`POST /projects/:id/deploy/upload-urls` から URL を取得し、宣言したアセットをアップロードして、アーティファクトを `POST /projects/:id/deploy` に送信します。`x-void-deploy-idempotency-key` には `approval_id` を設定します。デプロイには Void のマネージドデプロイプロトコルが使われ、プラットフォームのデプロイ用 Queue が必要です。この認証情報では、シークレットの読み取り、プロジェクトトークンの発行、プロジェクトの削除、異なるバイト列のデプロイはできません。
 
-Revoke identity grants with `POST /oauth/revoke`, authenticated as the client. No refresh token or OpenID Connect ID token is issued.
+アイデンティティのグラントは、クライアントとして認証した `POST /oauth/revoke` で取り消します。リフレッシュトークンや OpenID Connect の ID トークンは発行されません。
 
-If the API is protected by Cloudflare Access, the application operator must also configure a service identity permitted by that Access application's policy. Server OAuth endpoints and approved deployment requests still validate their own client, grant, and project authority; browser consent requires the user's company identity.
+API が Cloudflare Access で保護されている場合、アプリケーションの運営者は、その Access アプリケーションのポリシーで許可されたサービスアイデンティティも設定する必要があります。サーバー OAuth のエンドポイントと承認済みのデプロイリクエストは、引き続き独自にクライアント、グラント、プロジェクトの権限を検証します。ブラウザーでの同意には、ユーザーの会社のアイデンティティが必要です。

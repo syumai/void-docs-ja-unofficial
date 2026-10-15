@@ -2,30 +2,30 @@
 outline: deep
 ---
 
-# Project Zero Trust
+# プロジェクトの Zero Trust {#project-zero-trust}
 
-Project Zero Trust puts Cloudflare Access in front of the hostnames of projects deployed to your platform, including custom domains. Visitors sign in with one of your identity providers before they reach a protected project. Each project can still be made public.
+プロジェクトの Zero Trust は、プラットフォームにデプロイされたプロジェクトのホスト名（カスタムドメインを含む）の前段に Cloudflare Access を配置します。訪問者は、保護されたプロジェクトにアクセスする前に、設定したいずれかの ID プロバイダーでサインインします。各プロジェクトは、引き続き公開にすることもできます。
 
-This is separate from the Access login and protection for the platform API. Projects deployed directly to Cloudflare are not affected.
+これは、プラットフォーム API に対する Access のログインや保護とは別のものです。Cloudflare に直接デプロイされたプロジェクトには影響しません。
 
-Choose app access during `void platform install`, or configure it later using this page. The installer reuses the platform policy or helps you select separate company rules, and finishes setup before opening traffic.
+アプリへのアクセス設定は `void platform install` の実行中に選択するか、このページの手順であとから設定します。インストーラーはプラットフォームのポリシーを再利用するか、会社用のルールを個別に選択できるようにし、トラフィックを開放する前にセットアップを完了します。
 
-If you choose public apps in an account with Default-Deny, Void manages scoped
-public rules instead. New projects and custom domains remain public automatically.
-Keep these rules enabled while Default-Deny is on; removing them can block traffic.
-Public-only installations need no identity providers or company policies until you
-choose to protect apps. To renew their token in Admin, leave the policy fields blank.
+Default-Deny が有効なアカウントで公開アプリを選択した場合、Void は代わりにスコープを絞った
+公開ルールを管理します。新しいプロジェクトとカスタムドメインは、自動的に公開のままになります。
+Default-Deny が有効な間は、これらのルールを有効にしたままにしてください。削除するとトラフィックがブロックされる可能性があります。
+公開のみのインストールでは、アプリを保護することにするまで、ID プロバイダーや会社のポリシーは不要です。
+そのトークンを管理画面で更新するには、ポリシーのフィールドを空欄のままにします。
 
-## Requirements
+## 要件 {#requirements}
 
-- A Cloudflare Zero Trust organization in the account that hosts the platform, with the identity providers and reusable Access policies you want to use. Select at least one Allow policy that matches people by identity. Void rejects Bypass and Service Auth policies, and rules that allow Everyone or any service token.
-- A Cloudflare API token for that account with **Access: Apps and Policies Write** and **Access: Organizations, Identity Providers, and Groups Read**. Void keeps it separate from the platform runtime token, stores it encrypted, and never shows it again.
-- Free Access applications in the account. Cloudflare's default limit is 500 per account. Count the applications you already manage outside Void, then add the ones Void needs, as described in [Access Applications Void Creates](#access-applications-void-creates).
-- Platform API, proxy, and email gateway hostnames outside the project application domain. Configuration is rejected when project protection would cover one of them. Any other hostname under the project application domain also asks for sign-in, except the `/health` path of `void-platform-health.<your domain>`, which Void keeps open for its health checks and never serves from a project. New projects cannot use that name. A project that already uses it keeps every other path, protected or public like any other project.
+- プラットフォームをホストするアカウント内の Cloudflare Zero Trust 組織。使用したい ID プロバイダーと再利用可能な Access ポリシーが設定されている必要があります。ID に基づいてユーザーを照合する Allow ポリシーを少なくとも 1 つ選択してください。Void は、Bypass および Service Auth ポリシー、そして Everyone やサービストークンを許可するルールを拒否します。
+- そのアカウントの Cloudflare API トークン。**Access: Apps and Policies Write** と **Access: Organizations, Identity Providers, and Groups Read** が必要です。Void はこれをプラットフォームのランタイムトークンとは別に保持し、暗号化して保存し、二度と表示しません。
+- アカウント内の無料の Access アプリケーションの空き。Cloudflare のデフォルトの上限はアカウントあたり 500 です。Void の外部で管理しているアプリケーションを数え、[Void が作成する Access アプリケーション](#access-applications-void-creates)で説明されている Void が必要とする数を加えてください。
+- プロジェクトのアプリケーションドメイン外にある、プラットフォームの API、プロキシ、メールゲートウェイのホスト名。プロジェクトの保護がそれらのいずれかを対象に含む場合、設定は拒否されます。プロジェクトのアプリケーションドメイン配下のそれ以外のホスト名でも、サインインが求められます。ただし `void-platform-health.<your domain>` の `/health` パスは例外で、Void がヘルスチェックのために開放したままにしており、プロジェクトからは配信されません。新しいプロジェクトはこの名前を使えません。すでにこの名前を使っているプロジェクトは、他のすべてのパスをそのまま保持し、他のプロジェクトと同様に保護または公開されます。
 
-## Enable Zero Trust
+## Zero Trust を有効にする {#enable-zero-trust}
 
-Open **Zero Trust** in the administrator UI, or use the operator CLI:
+管理者 UI で **Zero Trust** を開くか、オペレーター用 CLI を使用します。
 
 ```sh
 printf '%s' "$ACCESS_API_TOKEN" | void platform zero-trust configure \
@@ -37,24 +37,24 @@ printf '%s' "$ACCESS_API_TOKEN" | void platform zero-trust configure \
   --yes
 ```
 
-- `--existing-projects protected|public` decides what happens to the projects that already exist. It is required when you enable Zero Trust.
-- `--protect-new-projects` protects projects created from now on. Omit it to make new projects public.
-- Use `--plan` instead of `--yes` to check the change without applying it.
+- `--existing-projects protected|public` は、すでに存在するプロジェクトの扱いを決めます。Zero Trust を有効にする際には必須です。
+- `--protect-new-projects` は、これから作成されるプロジェクトを保護します。省略すると、新しいプロジェクトは公開になります。
+- `--yes` の代わりに `--plan` を使うと、変更を適用せずに確認できます。
 
-To change the identity providers, policies, token, or new-project default later, run the same command without `--existing-projects`. Existing projects keep their protection; use the project overrides below to change one project.
+ID プロバイダー、ポリシー、トークン、新規プロジェクトのデフォルトをあとから変更するには、`--existing-projects` なしで同じコマンドを実行します。既存のプロジェクトの保護設定は維持されます。個別のプロジェクトを変更するには、後述のプロジェクトごとの上書きを使用してください。
 
-## Check Status
+## ステータスを確認する {#check-status}
 
 ```sh
 void platform zero-trust status
 void platform zero-trust status --check
 ```
 
-`status` shows the saved settings, the current operation, and how many projects are protected, public, or waiting. `--check` also compares the settings with Cloudflare Access. In the administrator UI, use **Check with Cloudflare**.
+`status` は、保存されている設定、現在の操作、および保護済み、公開、または待機中のプロジェクト数を表示します。`--check` は、設定を Cloudflare Access とも比較します。管理者 UI では **Check with Cloudflare** を使用します。
 
-## Project Overrides
+## プロジェクトごとの上書き {#project-overrides}
 
-Project owners and project administrators can protect a project or make it public. Readers can see its state.
+プロジェクトのオーナーとプロジェクト管理者は、プロジェクトを保護したり公開にしたりできます。閲覧者は状態を確認できます。
 
 ```sh
 void project zero-trust status
@@ -63,142 +63,142 @@ void project zero-trust public
 void project zero-trust reconcile
 ```
 
-`status` also tells you whether protection can be changed right now. Making a project public does not change the default for new projects.
+`status` は、保護設定を今すぐ変更できるかどうかも示します。プロジェクトを公開にしても、新しいプロジェクトのデフォルトは変わりません。
 
-Installation administrators can do the same from the project page in the administrator UI or with `void platform zero-trust project-status|project-protect|project-public|project-reconcile <project-id>`.
+インストール管理者は、管理者 UI のプロジェクトページ、または `void platform zero-trust project-status|project-protect|project-public|project-reconcile <project-id>` で同じ操作を行えます。
 
-Deploys and rollbacks wait until a project's protection change is finished. If one is refused, run `void project zero-trust status` to see why; the owner or a project administrator can run `void project zero-trust reconcile` before you try again. A protected project can have up to 100 custom domains.
+デプロイとロールバックは、プロジェクトの保護設定の変更が完了するまで待機します。拒否された場合は、`void project zero-trust status` を実行して理由を確認してください。オーナーまたはプロジェクト管理者が、再試行の前に `void project zero-trust reconcile` を実行できます。保護されたプロジェクトには、最大 100 個のカスタムドメインを設定できます。
 
-## Disable Zero Trust
+## Zero Trust を無効にする {#disable-zero-trust}
 
 ```sh
 void platform zero-trust disable
 ```
 
-This removes the Access applications Void created and makes all projects public. On large installations it runs in steps; run it again, or check `void platform zero-trust status`, until Zero Trust shows as disabled with no operation running.
+これにより、Void が作成した Access アプリケーションが削除され、すべてのプロジェクトが公開になります。大規模なインストールでは段階的に実行されます。Zero Trust が無効と表示され、実行中の操作がなくなるまで、再度実行するか `void platform zero-trust status` を確認してください。
 
-Disable Zero Trust and wait for its applications to be removed before [uninstalling the platform](/guide/platform/installation/uninstall). If project deletion stopped partway, retry `void project delete` for that project.
+[プラットフォームをアンインストール](/ja/guide/platform/installation/uninstall)する前に、Zero Trust を無効にし、そのアプリケーションが削除されるまで待ってください。プロジェクトの削除が途中で止まった場合は、そのプロジェクトに対して `void project delete` を再試行してください。
 
-## How Protection Works
+## 保護の仕組み {#how-protection-works}
 
-Cloudflare Access handles sign-in and applies your policies. Void also verifies the token before serving a protected project. Public projects allow visitors without sign-in.
+サインインとポリシーの適用は Cloudflare Access が行います。Void も、保護されたプロジェクトを配信する前にトークンを検証します。公開プロジェクトは、サインインなしの訪問者を許可します。
 
-### What Visitors See
+### 訪問者に表示される内容 {#what-visitors-see}
 
-A protected project asks visitors to sign in with one of the identity providers you selected. If you selected exactly one, visitors go straight to it. Otherwise, they pick one of the selected providers. A sign-in lasts 12 hours. After that, Access asks again.
+保護されたプロジェクトでは、選択した ID プロバイダーのいずれかでサインインするよう訪問者に求めます。ちょうど 1 つを選択した場合、訪問者はそのまま直接そこへ移動します。それ以外の場合は、選択されたプロバイダーの中から 1 つを選びます。サインインは 12 時間有効です。その後、Access は再度サインインを求めます。
 
-Protection follows the project to every hostname it answers on:
+保護は、プロジェクトが応答するすべてのホスト名に適用されます。
 
-| Hostname                                  | Protected project | Public project |
-| ----------------------------------------- | ----------------- | -------------- |
-| `<slug>.<your domain>`                    | Sign-in required  | Open to anyone |
-| The project's `workers.dev` testing URL   | Sign-in required  | Open to anyone |
-| Custom domains, such as `app.example.com` | Sign-in required  | Open to anyone |
+| ホスト名                                  | 保護されたプロジェクト | 公開プロジェクト   |
+| ----------------------------------------- | ---------------------- | ------------------ |
+| `<slug>.<your domain>`                    | サインインが必要       | 誰でもアクセス可能 |
+| プロジェクトの `workers.dev` テスト用 URL | サインインが必要       | 誰でもアクセス可能 |
+| `app.example.com` などのカスタムドメイン  | サインインが必要       | 誰でもアクセス可能 |
 
-Void only covers the `workers.dev` testing URLs of this installation. Other Workers in the account are not affected. On an installation without a domain, the `workers.dev` testing URL is the only project URL, and the shared project application covers only those URLs.
+Void が対象とするのは、このインストールの `workers.dev` テスト用 URL のみです。アカウント内の他の Worker には影響しません。ドメインのないインストールでは、`workers.dev` テスト用 URL がプロジェクトの唯一の URL となり、共有プロジェクトアプリケーションはそれらの URL のみを対象とします。
 
-#### The 403 Page
+#### 403 ページ {#the-403-page}
 
-A request without a valid token receives `403 Cloudflare Access authentication required`. Page requests show an HTML error; API and asset requests receive plain text. These responses are never cached.
+有効なトークンのないリクエストには `403 Cloudflare Access authentication required` が返されます。ページへのリクエストには HTML のエラーが表示され、API やアセットへのリクエストにはプレーンテキストが返されます。これらのレスポンスはキャッシュされません。
 
-Visitors who went through the sign-in page normally never see it. They can see it:
+通常どおりサインインページを経由した訪問者がこのページを目にすることはありません。次の場合には表示されることがあります。
 
-- for a short time while the project is switching between protected and public;
-- while a Zero Trust change is still being applied to the project;
-- when a Void-managed Access application was deleted, or its hostnames were changed, in the Cloudflare dashboard. See [Editing Applications in the Dashboard](#editing-applications-in-the-dashboard).
+- プロジェクトが保護と公開の間で切り替わっている短い間。
+- Zero Trust の変更がまだプロジェクトに適用されている間。
+- Void が管理する Access アプリケーションが Cloudflare ダッシュボードで削除された、またはそのホスト名が変更された場合。[ダッシュボードでのアプリケーションの編集](#editing-applications-in-the-dashboard)を参照してください。
 
-#### Every Path Is Covered
+#### すべてのパスが対象です {#every-path-is-covered}
 
-Protection applies to the whole hostname. There are no path exceptions. `/api/*` routes, static files, hashed assets, `robots.txt`, `favicon.ico`, server-sent events, and WebSockets all require a signed-in visitor.
+保護はホスト名全体に適用されます。パスの例外はありません。`/api/*` ルート、静的ファイル、ハッシュ付きアセット、`robots.txt`、`favicon.ico`、Server-Sent Events、WebSocket のすべてで、サインイン済みの訪問者が必要です。
 
-#### Webhooks and Other Non-Browser Clients
+#### Webhook とその他のブラウザ以外のクライアント {#webhooks-and-other-non-browser-clients}
 
-Project protection requires a person’s identity. Webhooks, CI jobs, uptime checks, and unauthenticated `curl` calls receive the sign-in page or a 403.
+プロジェクトの保護には、個人の ID が必要です。Webhook、CI ジョブ、稼働監視、認証なしの `curl` 呼び出しには、サインインページまたは 403 が返されます。
 
-If a project must accept such requests:
+プロジェクトでそうしたリクエストを受け付ける必要がある場合は、次のいずれかを行います。
 
-- make the project public with `void project zero-trust public` and check callers in your own code, or
-- move the endpoints that machines call into a separate project, and make only that project public.
+- `void project zero-trust public` でプロジェクトを公開にし、呼び出し元の確認を自分のコードで行う。
+- マシンが呼び出すエンドポイントを別のプロジェクトに移し、そのプロジェクトのみを公開にする。
 
-### Access Applications Void Creates
+### Void が作成する Access アプリケーション {#access-applications-void-creates}
 
-Void creates and owns these self-hosted applications in your Zero Trust organization:
+Void は、Zero Trust 組織内に次のセルフホスト型アプリケーションを作成し、所有します。
 
-| Application                 | Covers                                                                    | Policy                                                                   | Exists                                                             |
-| --------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Shared project application  | `*.<your domain>` and this installation's `workers.dev` testing URLs      | Your selected policies and identity providers                            | Once for protected-app configurations                              |
-| Public app management check | A reserved, unused dispatch check path                                    | Deny Everyone; verifies management permissions without opening hostnames | Once, instead of the shared wildcard in public-only mode           |
-| Public exception            | One public project's `<slug>.<your domain>` and `workers.dev` testing URL | A Bypass policy for Everyone, named `Void project is public`             | One for each public project                                        |
-| Custom domain application   | All managed custom domains of one project                                 | Company policies for protected projects; Bypass for public ones          | One for each project with managed custom domains                   |
-| Health check exception      | `void-platform-health.<your domain>/health`                               | A Bypass policy for Everyone, named `Void platform health check`         | Once, while Zero Trust is enabled on an installation with a domain |
+| アプリケーション                 | 対象                                                                          | ポリシー                                                                   | 存在する数                                               |
+| -------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| 共有プロジェクトアプリケーション | `*.<your domain>` とこのインストールの `workers.dev` テスト用 URL             | 選択したポリシーと ID プロバイダー                                         | 保護アプリの構成で 1 つ                                  |
+| 公開アプリ管理チェック           | 予約された未使用のディスパッチチェック用パス                                  | Deny Everyone。ホスト名を開放せずに管理権限を検証します                    | 公開のみのモードで、共有ワイルドカードの代わりに 1 つ    |
+| 公開の例外                       | 1 つの公開プロジェクトの `<slug>.<your domain>` と `workers.dev` テスト用 URL | Everyone を対象とする Bypass ポリシー。名前は `Void project is public`     | 公開プロジェクトごとに 1 つ                              |
+| カスタムドメインアプリケーション | 1 つのプロジェクトのすべての管理対象カスタムドメイン                          | 保護されたプロジェクトには会社のポリシー、公開のプロジェクトには Bypass    | 管理対象のカスタムドメインを持つプロジェクトごとに 1 つ  |
+| ヘルスチェックの例外             | `void-platform-health.<your domain>/health`                                   | Everyone を対象とする Bypass ポリシー。名前は `Void platform health check` | ドメインのあるインストールで Zero Trust が有効な間、1 つ |
 
-Installations configured through the installer also manage public custom-domain
-rules. Their custom-domain application changes policy when a project switches
-between public and protected access.
+インストーラーで構成したインストールでは、公開のカスタムドメインのルールも管理されます。
+そのカスタムドメインアプリケーションは、プロジェクトが公開アクセスと保護されたアクセスの間で
+切り替わるとポリシーが変更されます。
 
-If the installer already configured the same health-check exception, Zero Trust
-reuses it. Disabling project Zero Trust leaves that existing exception in place
-so platform health checks continue to work.
+インストーラーがすでに同じヘルスチェックの例外を構成している場合、Zero Trust はそれを
+再利用します。プロジェクトの Zero Trust を無効にしても、その既存の例外は残るため、
+プラットフォームのヘルスチェックは引き続き動作します。
 
-The number of applications Void needs is:
+Void が必要とするアプリケーションの数は次のとおりです。
 
 ```text
 1 + health-check applications + public projects + projects with managed custom domains
 ```
 
-The first application is the shared company policy or the public-app management check. Count a health exception once, including when it is shared with the installer. For example, 40 projects with one health exception, 10 public projects, and 5 projects with managed custom domains need 1 + 1 + 10 + 5 = 17 applications. Void stops with an error when the account has more than 500 Access applications.
+最初の 1 つは、共有の会社ポリシーまたは公開アプリ管理チェックです。ヘルスの例外は、インストーラーと共有している場合も含め、1 つとして数えます。たとえば、40 のプロジェクト、ヘルスの例外 1 つ、公開プロジェクト 10 個、管理対象のカスタムドメインを持つプロジェクト 5 個の場合、1 + 1 + 10 + 5 = 17 個のアプリケーションが必要です。アカウントの Access アプリケーションが 500 を超える場合、Void はエラーで停止します。
 
-#### Recognizing Void's Applications
+#### Void のアプリケーションを見分ける {#recognizing-void-s-applications}
 
-Run `void platform zero-trust status` for the shared and health-check applications, or `void platform zero-trust project-status <project-id>` for a project's applications. These commands show their exact names and IDs.
+共有アプリケーションとヘルスチェックのアプリケーションは `void platform zero-trust status` で、プロジェクトのアプリケーションは `void platform zero-trust project-status <project-id>` で確認できます。これらのコマンドは、正確な名前と ID を表示します。
 
-### Editing Applications in the Dashboard
+### ダッシュボードでのアプリケーションの編集 {#editing-applications-in-the-dashboard}
 
-Manage Void’s applications through `void platform zero-trust configure` and the project commands. Editing or deleting them in Cloudflare can block access until you reconcile. Dashboard edits may be replaced the next time Void updates an application.
+Void のアプリケーションは、`void platform zero-trust configure` とプロジェクトのコマンドで管理してください。Cloudflare 上で編集または削除すると、reconcile するまでアクセスがブロックされる可能性があります。ダッシュボードでの編集は、次に Void がアプリケーションを更新したときに置き換えられることがあります。
 
-You can edit a selected reusable policy’s rules in Cloudflare. Changes affect every project using that policy. Keep an identity-based Allow policy without Everyone or service tokens, then check it with:
+選択した再利用可能なポリシーのルールは、Cloudflare で編集できます。変更は、そのポリシーを使用するすべてのプロジェクトに影響します。Everyone やサービストークンを含まない、ID ベースの Allow ポリシーを維持し、次のコマンドで確認してください。
 
 ```sh
 void platform zero-trust status --check
 ```
 
-- `drifted: true`: run `void platform zero-trust reconcile`.
-- `present: false`: check the token, application, identity providers, and policies, then reconcile.
+- `drifted: true`: `void platform zero-trust reconcile` を実行します。
+- `present: false`: トークン、アプリケーション、ID プロバイダー、ポリシーを確認し、reconcile を実行します。
 
-This checks the shared and health-check applications. For a public exception or custom-domain application, use the project's reconcile command.
+このチェックは、共有アプリケーションとヘルスチェックのアプリケーションを対象とします。公開の例外やカスタムドメインアプリケーションについては、プロジェクトの reconcile コマンドを使用してください。
 
-#### Repair Commands
+#### 修復コマンド {#repair-commands}
 
-| Command                                                   | Scope                                 | Who can run it                           |
-| --------------------------------------------------------- | ------------------------------------- | ---------------------------------------- |
-| `void platform zero-trust reconcile`                      | Platform and all projects             | Installation administrators              |
-| `void platform zero-trust project-reconcile <project-id>` | One project                           | Installation administrators              |
-| `void project zero-trust reconcile`                       | Linked project, or `--project <slug>` | Project owner and project administrators |
+| コマンド                                                  | 対象                                                | 実行できるユーザー                         |
+| --------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------ |
+| `void platform zero-trust reconcile`                      | プラットフォームとすべてのプロジェクト              | インストール管理者                         |
+| `void platform zero-trust project-reconcile <project-id>` | 1 つのプロジェクト                                  | インストール管理者                         |
+| `void project zero-trust reconcile`                       | リンクされたプロジェクト、または `--project <slug>` | プロジェクトのオーナーとプロジェクト管理者 |
 
-Project reconciliation requires platform status `ready`. Otherwise, reconcile the platform first.
+プロジェクトの reconcile には、プラットフォームのステータスが `ready` である必要があります。そうでない場合は、先にプラットフォームを reconcile してください。
 
-If an application was renamed, restore its recorded name before reconciling. Remove duplicate copies yourself. Deleting the shared application temporarily blocks protected projects; deleting the health-check exception can block upgrades and repair until it is restored.
+アプリケーションの名前が変更された場合は、reconcile の前に記録されている名前に戻してください。重複したコピーは自分で削除してください。共有アプリケーションを削除すると、保護されたプロジェクトが一時的にブロックされます。ヘルスチェックの例外を削除すると、復元するまでアップグレードや修復ができなくなる可能性があります。
 
-### What Happens During Changes
+### 変更中に起こること {#what-happens-during-changes}
 
-Protection changes can temporarily return a 403. If a step fails, a protected project stays protected or refuses visitors until the change finishes.
+保護設定の変更中は、一時的に 403 が返されることがあります。ステップが失敗した場合、保護されたプロジェクトは変更が完了するまで保護されたまま、または訪問者を拒否したままになります。
 
-Protecting or making a project public usually finishes before the command returns. If it is still running or reports an error, inspect `void project zero-trust status`, fix the reported cause, and run `void project zero-trust reconcile`.
+プロジェクトの保護または公開への切り替えは、通常コマンドが戻る前に完了します。まだ実行中の場合やエラーが報告された場合は、`void project zero-trust status` を確認し、報告された原因を修正して `void project zero-trust reconcile` を実行してください。
 
-Platform-wide changes run in steps. During initial setup, custom domains stay public until Void reaches their project. During disable, hostnames can become public at different times. Follow progress with `void platform zero-trust status`.
+プラットフォーム全体の変更は段階的に実行されます。初期セットアップ中は、Void がそのプロジェクトに到達するまで、カスタムドメインは公開のままです。無効化中は、ホスト名が公開になるタイミングがそれぞれ異なることがあります。進行状況は `void platform zero-trust status` で確認できます。
 
-A new custom domain becomes reachable only after its project’s protection is ready.
+新しいカスタムドメインは、そのプロジェクトの保護の準備が整ってから初めて到達可能になります。
 
-### Caching
+### キャッシュ {#caching}
 
-Requests carrying an Access token bypass [ISR](/guide/edge/revalidation#cache-bypass) and the [static asset edge cache](/guide/edge/static-assets#non-hashed-assets). Protected pages render on each request, which can increase latency and request usage. Public projects keep their shared caches.
+Access トークンを含むリクエストは、[ISR](/ja/guide/edge/revalidation#cache-bypass) と[静的アセットのエッジキャッシュ](/ja/guide/edge/static-assets#non-hashed-assets)をバイパスします。保護されたページはリクエストごとにレンダリングされるため、レイテンシとリクエスト使用量が増える可能性があります。公開プロジェクトは共有キャッシュを維持します。
 
-## Recovery
+## 復旧 {#recovery}
 
-- **Status stays `configuring` or `disabling`.** Large changes run in steps. Scheduled maintenance continues them within a few minutes, or run `void platform zero-trust reconcile`.
-- **Status shows an error.** Fix the cause shown, such as token permissions or the application limit, then run `void platform zero-trust reconcile`. Otherwise Void retries every hour.
-- **One project shows an error.** The rest of the change still finishes. Void retries the project every hour, or its owner or a project administrator can run `void project zero-trust reconcile`. Until then, a project that was already protected stays protected, and a project being newly protected is never more open than before.
-- **Adding a domain stays pending because of a project.** Void publishes the new domain only after every project is ready for it. Platform status shows an error that names the projects it could not update. Check each one with `void platform zero-trust project-status <project-id>`, fix the cause, then run `void platform zero-trust reconcile` or rerun the domain command. Void also retries every hour. Your `workers.dev` URLs keep working meanwhile.
-- **A new project could not be set up.** Creating the project still succeeds with a warning. Void retries every hour, or run `void project zero-trust reconcile`.
-- **The saved API token expired or was revoked.** Run `void platform zero-trust configure --token-stdin` with a replacement token and the same identity providers, policies, and `--protect-new-projects` choice. Omit `--existing-projects`. Void continues the unfinished change, including an unfinished disable. Finish it before changing other settings.
-- **A selected identity provider or policy was deleted.** Run `void platform zero-trust disable` to stop the unfinished setup and remove its applications. This makes projects public. Then configure Zero Trust again with the new selections.
+- **ステータスが `configuring` または `disabling` のままになる。** 大規模な変更は段階的に実行されます。定期メンテナンスが数分以内に処理を継続します。または `void platform zero-trust reconcile` を実行してください。
+- **ステータスにエラーが表示される。** トークンの権限やアプリケーションの上限など、表示された原因を修正し、`void platform zero-trust reconcile` を実行してください。そうでない場合、Void は 1 時間ごとに再試行します。
+- **1 つのプロジェクトでエラーが表示される。** 残りの変更は引き続き完了します。Void はそのプロジェクトを 1 時間ごとに再試行します。または、そのオーナーかプロジェクト管理者が `void project zero-trust reconcile` を実行できます。それまでの間、すでに保護されていたプロジェクトは保護されたままで、新たに保護される途中のプロジェクトが以前より開放的になることはありません。
+- **プロジェクトが原因でドメインの追加が保留のままになる。** Void は、すべてのプロジェクトで準備が整ってから新しいドメインを公開します。プラットフォームのステータスに、更新できなかったプロジェクトの名前を示すエラーが表示されます。各プロジェクトを `void platform zero-trust project-status <project-id>` で確認し、原因を修正してから、`void platform zero-trust reconcile` を実行するか、ドメインコマンドを再実行してください。Void は 1 時間ごとにも再試行します。その間も `workers.dev` の URL は引き続き動作します。
+- **新しいプロジェクトをセットアップできなかった。** プロジェクトの作成自体は警告付きで成功します。Void は 1 時間ごとに再試行します。または `void project zero-trust reconcile` を実行してください。
+- **保存された API トークンが期限切れ、または失効した。** 新しいトークンを使い、同じ ID プロバイダー、ポリシー、`--protect-new-projects` の選択で `void platform zero-trust configure --token-stdin` を実行してください。`--existing-projects` は省略します。Void は、未完了の無効化を含め、未完了の変更を継続します。他の設定を変更する前に完了させてください。
+- **選択した ID プロバイダーまたはポリシーが削除された。** `void platform zero-trust disable` を実行して、未完了のセットアップを停止し、そのアプリケーションを削除してください。これによりプロジェクトは公開になります。その後、新しい選択内容で Zero Trust を再度構成してください。

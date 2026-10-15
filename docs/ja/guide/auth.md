@@ -2,23 +2,23 @@
 outline: deep
 ---
 
-# Authentication
+# 認証 {#authentication}
 
-::: warning ⚠️ Void Apps Only
-Void-managed auth requires a native Void app on Cloudflare. For meta-frameworks or Node.js, Bun, and Deno, use Better Auth directly.
+::: warning ⚠️ Void アプリ限定
+Void が管理する認証には、Cloudflare 上のネイティブな Void アプリが必要です。メタフレームワークや Node.js、Bun、Deno の場合は、Better Auth を直接使用してください。
 :::
 
-Void configures [Better Auth](https://www.better-auth.com/) for your app, including its database connection, API routes, and client. Start with email and password, or add a social login provider.
+Void は、データベース接続、API ルート、クライアントを含めて [Better Auth](https://www.better-auth.com/) をアプリ向けに構成します。まずはメールアドレスとパスワードによる認証から始め、必要に応じてソーシャルログインプロバイダーを追加できます。
 
-## Quick Start
+## クイックスタート {#quick-start}
 
-### 1. Enable auth
+### 1. 認証を有効にする {#1-enable-auth}
 
-Import `auth` from `void/client` to enable email/password auth automatically. Use [configuration](#config) to add social providers.
+`void/client` から `auth` をインポートすると、メール/パスワード認証が自動的に有効になります。ソーシャルプロバイダーを追加するには、[設定](#config)を使用します。
 
-### 2. Sign up and sign in
+### 2. サインアップとサインイン {#2-sign-up-and-sign-in}
 
-Use the preconfigured auth client from `void/client`:
+`void/client` で事前に構成された認証クライアントを使用します。
 
 ```tsx
 import { auth } from 'void/client';
@@ -37,9 +37,9 @@ await auth.signIn.email({
 });
 ```
 
-### 3. Protect a server route
+### 3. サーバールートを保護する {#3-protect-a-server-route}
 
-Call `requireAuth` in a route handler or page loader that needs a signed-in user. It returns that user, or throws `401` if the request isn't authenticated:
+サインイン済みのユーザーが必要なルートハンドラーやページローダーで `requireAuth` を呼び出します。そのユーザーを返します。リクエストが認証されていない場合は `401` をスローします。
 
 ```ts
 // routes/api/profile.ts
@@ -52,7 +52,7 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-In a pages-mode loader, use `getUser` or `getSession` when you want to allow unauthenticated access:
+pages モードのローダーで未認証のアクセスを許可したい場合は、`getUser` または `getSession` を使用します。
 
 ```ts
 // pages/dashboard.server.ts
@@ -67,22 +67,22 @@ export const loader = defineHandler(() => {
 });
 ```
 
-### 4. Sign out
+### 4. サインアウトする {#4-sign-out}
 
 ```tsx
 await auth.signOut();
 ```
 
-## Config
+## 設定 {#config}
 
-Auth turns on automatically when you:
+認証は、次のいずれかを行うと自動的に有効になります。
 
-- import anything from `void/auth`
-- import `auth` from `void/client`
-- add `auth` to `void.config.ts`
-- add a root-level `auth.ts` file
+- `void/auth` から何かをインポートする
+- `void/client` から `auth` をインポートする
+- `void.config.ts` に `auth` を追加する
+- ルート直下に `auth.ts` ファイルを追加する
 
-Email/password is enabled by default. To add social providers:
+メール/パスワードはデフォルトで有効です。ソーシャルプロバイダーを追加するには、次のようにします。
 
 ```json
 {
@@ -92,55 +92,55 @@ Email/password is enabled by default. To add social providers:
 }
 ```
 
-Provider credentials come from `AUTH_<PROVIDER>_CLIENT_ID` and `AUTH_<PROVIDER>_CLIENT_SECRET`. `cognito` also needs a domain, region, and user pool ID: set `AUTH_COGNITO_DOMAIN`, `AUTH_COGNITO_REGION`, and `AUTH_COGNITO_USER_POOL_ID`, or set them in `auth.ts`.
+プロバイダーの認証情報は `AUTH_<PROVIDER>_CLIENT_ID` と `AUTH_<PROVIDER>_CLIENT_SECRET` から読み込まれます。`cognito` ではさらにドメイン、リージョン、ユーザープール ID が必要です。`AUTH_COGNITO_DOMAIN`、`AUTH_COGNITO_REGION`、`AUTH_COGNITO_USER_POOL_ID` を設定するか、`auth.ts` で設定してください。
 
-See the full provider list in the [config reference](../reference/config.md#auth).
+プロバイダーの完全な一覧は、[設定リファレンス](../reference/config.md#auth)を参照してください。
 
-For example, `github` uses:
+たとえば `github` では次を使用します。
 
 - `AUTH_GITHUB_CLIENT_ID`
 - `AUTH_GITHUB_CLIENT_SECRET`
 
-## Client Usage
+## クライアントでの使い方 {#client-usage}
 
-The `auth` client uses [Better Auth's client API](https://www.better-auth.com/docs/concepts/client) at `/api/auth`. Void selects the client for your framework automatically.
+`auth` クライアントは、`/api/auth` に対して [Better Auth のクライアント API](https://www.better-auth.com/docs/concepts/client) を使用します。Void は使用しているフレームワークに合ったクライアントを自動的に選択します。
 
-For a custom client, import `createAuthClient` from `void/client`.
+カスタムクライアントを使う場合は、`void/client` から `createAuthClient` をインポートします。
 
-## Server Usage
+## サーバーでの使い方 {#server-usage}
 
-`void/auth` provides the server-side helpers:
+`void/auth` はサーバーサイドのヘルパーを提供します。
 
 ```ts
 import { getSession, getUser, requireAuth } from 'void/auth';
 ```
 
-- `getUser()` returns the current `AuthUser | null`
-- `getSession()` returns `{ user, session } | null`
-- `requireAuth(c)` returns the authenticated user or throws `401`
+- `getUser()` は現在の `AuthUser | null` を返します
+- `getSession()` は `{ user, session } | null` を返します
+- `requireAuth(c)` は認証済みのユーザーを返すか、`401` をスローします
 
-Import `AuthUser` and `AuthSession` from `void/auth` for type annotations. See their fields in the [API reference](../reference/api/auth.md#authuser).
+型注釈には `void/auth` から `AuthUser` と `AuthSession` をインポートします。それらのフィールドについては、[API リファレンス](../reference/api/auth.md#authuser)を参照してください。
 
-## Behavior
+## 動作 {#behavior}
 
-Auth sessions use the same database as your app. Void creates `BETTER_AUTH_SECRET` on deploy if it is missing and reuses it on later deploys.
+認証セッションは、アプリと同じデータベースを使用します。Void は、`BETTER_AUTH_SECRET` がない場合はデプロイ時に作成し、以降のデプロイでも再利用します。
 
-Local development needs no secret setup. To preview a production build locally, provide `BETTER_AUTH_SECRET`.
+ローカル開発ではシークレットの設定は不要です。本番ビルドをローカルでプレビューする場合は、`BETTER_AUTH_SECRET` を指定してください。
 
-Responses to signed-in requests get `Cache-Control: no-store`, so neither the browser cache nor a shared cache keeps a user's data. A route keeps its own policy when it sets `no-store`, or `private` together with `no-cache`. To answer repeat requests with `304`, use `private, no-cache` with Hono's [`etag()`](https://hono.dev/docs/middleware/builtin/etag) middleware. If you set the `ETag` yourself, make it differ per user, so the `304` doesn't reuse another account's page. The browser cache keeps a copy of a `private, no-cache` page, so the Back button can show it again after the user signs out. Keep the default `no-store` for pages that must not stay in the browser cache.
+サインイン済みのリクエストへのレスポンスには `Cache-Control: no-store` が付与されるため、ブラウザキャッシュにも共有キャッシュにもユーザーのデータは保持されません。ルートが `no-store`、または `private` と `no-cache` の組み合わせを設定している場合は、そのルート独自のポリシーが維持されます。繰り返しのリクエストに `304` で応答するには、`private, no-cache` を Hono の [`etag()`](https://hono.dev/docs/middleware/builtin/etag) ミドルウェアと併用します。`ETag` を自分で設定する場合は、`304` が別のアカウントのページを再利用しないよう、ユーザーごとに異なる値にしてください。ブラウザキャッシュは `private, no-cache` のページのコピーを保持するため、ユーザーがサインアウトした後に「戻る」ボタンでそのページが再表示されることがあります。ブラウザキャッシュに残してはならないページでは、デフォルトの `no-store` を維持してください。
 
-`POST`, `PUT`, `PATCH` and `DELETE` requests and WebSocket connections from another origin don't use the signed-in session unless that origin is in `trustedOrigins`. If a separate frontend calls your app, add its origin there (see [Customization](#customization)). If your routes use their own cookies, check the request `Origin` yourself, for example with Hono's [`csrf()`](https://hono.dev/docs/middleware/builtin/csrf) middleware.
+別のオリジンからの `POST`、`PUT`、`PATCH`、`DELETE` リクエストおよび WebSocket 接続は、そのオリジンが `trustedOrigins` に含まれていない限り、サインイン済みのセッションを使用しません。別のフロントエンドからアプリを呼び出す場合は、そのオリジンをここに追加してください（[カスタマイズ](#customization)を参照）。ルートが独自の Cookie を使用する場合は、たとえば Hono の [`csrf()`](https://hono.dev/docs/middleware/builtin/csrf) ミドルウェアなどで、リクエストの `Origin` を自分で確認してください。
 
-Deployed apps on Cloudflare limit auth requests per client IP with Better Auth's defaults, for example 3 sign-in attempts per 10 seconds. Each Worker instance keeps its own count. Change or turn off the limits with `rateLimit` in `auth.ts`. To share one count across instances, set `rateLimit: { storage: 'database' }`, then run `void db generate` for a direct Cloudflare deploy.
+Cloudflare 上にデプロイされたアプリでは、Better Auth のデフォルト設定（たとえば 10 秒あたり 3 回のサインイン試行）で、クライアント IP ごとに認証リクエストが制限されます。カウントは Worker インスタンスごとに保持されます。制限を変更または無効にするには、`auth.ts` の `rateLimit` を使用します。インスタンス間で 1 つのカウントを共有するには、`rateLimit: { storage: 'database' }` を設定し、Cloudflare への直接デプロイの場合は `void db generate` を実行してください。
 
-### Proxies and end-to-end tests
+### プロキシとエンドツーエンドテスト {#proxies-and-end-to-end-tests}
 
-All requests from one IP share one count. Two common setups reach the limits:
+同じ IP からのすべてのリクエストは、1 つのカウントを共有します。次の 2 つのよくある構成で制限に達します。
 
-- A server calls your auth endpoints for your users, such as a backend-for-frontend, a rewrite from Vercel or nginx, or another Worker's `fetch`. All of those users share that server's IP.
-- End-to-end tests sign up or sign in many times against a deployed app.
+- バックエンド・フォー・フロントエンド、Vercel や nginx からのリライト、別の Worker の `fetch` など、サーバーがユーザーの代わりに認証エンドポイントを呼び出す場合。これらすべてのユーザーが、そのサーバーの IP を共有します。
+- エンドツーエンドテストが、デプロイ済みのアプリに対してサインアップやサインインを何度も行う場合。
 
-Don't read the client IP from `x-forwarded-for` instead: any client can send that header. Give the trusted caller a secret header, and skip the limits only for requests that carry it:
+代わりに `x-forwarded-for` からクライアント IP を読み取ることはしないでください。このヘッダーはどのクライアントでも送信できます。信頼できる呼び出し元にシークレットヘッダーを渡し、それを持つリクエストに限って制限をスキップします。
 
 ```ts
 import { defineAuth } from 'void/auth';
@@ -158,16 +158,16 @@ export default defineAuth(({ defaults, env }) => ({
 }));
 ```
 
-`'/**'` matches every auth endpoint. Returning `false` skips the limit, and returning `rule` keeps the default limit for everyone else. Declare `AUTH_TRUSTED_KEY: string().optional()` in `env.ts` and set it with `void secret put AUTH_TRUSTED_KEY` (see [Environment variables](./env-vars.md#production-server-values)).
+`'/**'` はすべての認証エンドポイントにマッチします。`false` を返すと制限をスキップし、`rule` を返すとそれ以外のすべての呼び出し元にデフォルトの制限が維持されます。`env.ts` で `AUTH_TRUSTED_KEY: string().optional()` を宣言し、`void secret put AUTH_TRUSTED_KEY` で設定してください（[環境変数](./env-vars.md#production-server-values)を参照）。
 
-Your app no longer limits requests that carry the key, so:
+キーを持つリクエストはアプリ側で制限されなくなるため、次の点に注意してください。
 
-- A proxy that sends it must limit every auth request it forwards for each of its users, including sign-up, password reset and verification emails.
-- A test runner should send it only to your app. Never put the key in code that runs in your users' browsers.
+- キーを送信するプロキシは、サインアップ、パスワードリセット、確認メールを含め、各ユーザーの代わりに転送するすべての認証リクエストを制限する必要があります。
+- テストランナーは、アプリにのみキーを送信してください。ユーザーのブラウザで実行されるコードにキーを含めないでください。
 
-## Customization
+## カスタマイズ {#customization}
 
-For advanced configuration, create `auth.ts` at the project root and export `defineAuth(...)`:
+高度な設定を行うには、プロジェクトのルートに `auth.ts` を作成し、`defineAuth(...)` をエクスポートします。
 
 ```ts
 import { defineAuth } from 'void/auth';
@@ -178,18 +178,18 @@ export default defineAuth(({ defaults }) => ({
 }));
 ```
 
-`defaults` already includes Void's conventions. Extend it explicitly instead of expecting a deep merge.
+`defaults` には Void の規約がすでに含まれています。ディープマージを期待せず、明示的に拡張してください。
 
-For the full set of available options, see the official [Better Auth options reference](https://www.better-auth.com/docs/reference/options).
+利用可能なオプションの全体については、公式の [Better Auth オプションリファレンス](https://www.better-auth.com/docs/reference/options)を参照してください。
 
-## Database and Migrations
+## データベースとマイグレーション {#database-and-migrations}
 
-Auth tables live alongside your app's tables. During local development, Void creates them automatically.
+認証用のテーブルは、アプリのテーブルと同じ場所に置かれます。ローカル開発中は、Void がそれらを自動的に作成します。
 
-Void platforms create auth tables automatically. For a direct Cloudflare deploy, include them in your checked-in migrations:
+Void プラットフォームでは、認証用のテーブルが自動的に作成されます。Cloudflare への直接デプロイでは、チェックイン済みのマイグレーションに含めてください。
 
 ```sh
 void db generate
 ```
 
-Review and commit the SQL before deploying. Void includes your auth configuration and plugin tables; you don't need to duplicate them in `db/schema.ts` or run the Better Auth CLI.
+デプロイする前に、SQL を確認してコミットしてください。Void は、認証の設定とプラグインのテーブルを含めます。それらを `db/schema.ts` に重複して記述したり、Better Auth CLI を実行したりする必要はありません。

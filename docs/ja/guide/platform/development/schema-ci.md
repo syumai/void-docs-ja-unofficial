@@ -2,42 +2,42 @@
 outline: deep
 ---
 
-# Schema and CI
+# スキーマと CI {#schema-and-ci}
 
-## Changing the Platform Schema
+## プラットフォームのスキーマを変更する {#changing-the-platform-schema}
 
-The schema lives in `platform/packages/api/src/schema.ts`. Generate a migration after changing it:
+スキーマは `platform/packages/api/src/schema.ts` にあります。変更後にマイグレーションを生成します。
 
 ```sh
 vp run --filter @voidcloud/api db:generate
 ```
 
-Review the generated SQL and migration journal before committing them. Released migrations are append-only. An upgrade applies new migrations while the previous Workers may still serve requests, so schema changes must remain compatible with that code.
+コミットする前に、生成された SQL とマイグレーションのジャーナルを確認してください。リリース済みのマイグレーションは追記のみです。アップグレードでは、以前の Worker がまだリクエストを処理している間に新しいマイグレーションが適用される可能性があるため、スキーマの変更はそのコードとの互換性を保つ必要があります。
 
-`platform/packages/api/drizzle/compatibility.json` records which earlier runtimes have been verified against the new schema. Add an edge only after testing that compatibility. The runtime build checks that the migration files and recorded schema history agree.
+`platform/packages/api/drizzle/compatibility.json` には、どの以前のランタイムが新しいスキーマに対して検証済みであるかが記録されています。その互換性をテストした後にのみ、エッジを追加してください。ランタイムのビルドでは、マイグレーションファイルと記録されたスキーマ履歴が一致していることが検査されます。
 
-## Runtime artifact contract
+## ランタイムアーティファクトの契約 {#runtime-artifact-contract}
 
-`@void/platform` contains installation manifests, resource naming, discovery contracts, Worker configuration, and deployable bundles under the `./installer` export. Platform source lives in `platform/packages/`.
+`@void/platform` には、インストールのマニフェスト、リソースの命名、ディスカバリーの契約、Worker の設定、デプロイ可能なバンドルが `./installer` エクスポートの下に含まれます。プラットフォームのソースは `platform/packages/` にあります。
 
-Runtime artifacts include migration SQL, its journal, and a rollback compatibility manifest. Drizzle authoring snapshots remain in the source tree.
+ランタイムアーティファクトには、マイグレーションの SQL、そのジャーナル、ロールバック互換性マニフェストが含まれます。Drizzle のオーサリング用スナップショットはソースツリーに残ります。
 
-## CI in a Fork
+## フォークでの CI {#ci-in-a-fork}
 
-The uncredentialed test workflows use GitHub-hosted runners in forks. They build and test the workspace without requiring Void Cloud accounts, tokens, or deployment access.
+認証情報を使わないテストワークフローは、フォークでは GitHub ホストのランナーを使用します。Void Cloud のアカウント、トークン、デプロイ権限を必要とせずに、ワークスペースをビルドしてテストします。
 
-If your fork has a released platform version, set the repository variable
-`VOID_PLATFORM_PRODUCTION_REF` to its immutable 40-character commit SHA. Platform
-pull requests then create that version's database, seed representative user,
-project, and encrypted-secret records, and apply the proposed migrations. The
-check verifies existing data and runs the previous runtime against the upgraded
-schema. Mutable branch or tag names are rejected.
+フォークにリリース済みのプラットフォームバージョンがある場合は、リポジトリ変数
+`VOID_PLATFORM_PRODUCTION_REF` にその不変の 40 文字のコミット SHA を設定してください。
+すると、プラットフォームのプルリクエストでは、そのバージョンのデータベースが作成され、
+代表的なユーザー、プロジェクト、暗号化されたシークレットのレコードがシードされ、
+提案されたマイグレーションが適用されます。このチェックでは、既存のデータを検証し、
+アップグレード後のスキーマに対して以前のランタイムを実行します。変更可能なブランチ名やタグ名は
+拒否されます。
 
-Without an explicit SHA, required compatibility checks use the latest successful
-GitHub deployment to `Prod` (or `VOID_PLATFORM_PRODUCTION_ENV`). They require
-read access to deployment history and stop if no completed deployment is found.
-Advancing the production branch does not change the selected baseline. Fork
-workflows that call platform CI must grant `deployments: read` alongside
-`contents: read`.
+明示的な SHA がない場合、必須の互換性チェックは、`Prod`（または `VOID_PLATFORM_PRODUCTION_ENV`）への
+GitHub デプロイのうち、最新の成功したものを使用します。デプロイ履歴への読み取りアクセスが必要で、
+完了したデプロイが見つからない場合は停止します。
+本番ブランチを進めても、選択されたベースラインは変わりません。プラットフォームの CI を呼び出す
+フォークのワークフローでは、`contents: read` に加えて `deployments: read` を付与する必要があります。
 
-The upstream repository also contains workflows for deploying Void Cloud and publishing the official npm packages. Forks should configure their own release workflow around the built CLI and `platform upgrade --runtime`; the [source-build CI example](/guide/platform/development/runtime#deploying-source-builds-from-ci) shows the required inputs. Keep production credentials in protected environments restricted to the appropriate release refs.
+アップストリームのリポジトリには、Void Cloud のデプロイや公式 npm パッケージの公開を行うワークフローも含まれています。フォークでは、ビルドした CLI と `platform upgrade --runtime` を軸に、独自のリリースワークフローを構成してください。[ソースビルドの CI 例](/ja/guide/platform/development/runtime#deploying-source-builds-from-ci)に、必要な入力が示されています。本番の認証情報は、適切なリリース ref に限定した保護された環境に保管してください。

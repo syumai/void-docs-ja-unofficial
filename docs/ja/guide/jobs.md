@@ -2,20 +2,20 @@
 outline: deep
 ---
 
-# Cron Jobs
+# Cron ジョブ {#cron-jobs}
 
-Put scheduled jobs in `crons/`. Each file declares a cron expression and a handler, and Void configures the schedule when you deploy.
+スケジュールされたジョブは `crons/` に置きます。各ファイルで cron 式とハンドラーを宣言すると、デプロイ時に Void がスケジュールを設定します。
 
-## Job files
+## ジョブファイル {#job-files}
 
-Create files in `crons/**/*.ts` (`.mts`, `.js`, `.mjs` also supported).
+`crons/**/*.ts` にファイルを作成します(`.mts`、`.js`、`.mjs` もサポートされています)。
 
-Each job file must export:
+各ジョブファイルは次をエクスポートする必要があります。
 
-- `export const cron = "<expression>"` (or an array of expressions)
-- a default handler (recommended: wrapped with `defineScheduled`)
+- `export const cron = "<expression>"`(または式の配列)
+- デフォルトのハンドラー(`defineScheduled` でラップすることを推奨します)
 
-Example:
+例:
 
 ```ts
 // crons/hourly-heartbeat.ts
@@ -28,9 +28,9 @@ export default defineScheduled(async (controller, env) => {
 });
 ```
 
-### Multiple schedules
+### 複数のスケジュール {#multiple-schedules}
 
-A single job file can export an array of cron expressions:
+1 つのジョブファイルで cron 式の配列をエクスポートできます。
 
 ```ts
 // crons/cleanup.ts
@@ -43,15 +43,15 @@ export default defineScheduled(async (controller, env) => {
 });
 ```
 
-## `defineScheduled`
+## `defineScheduled` {#definescheduled}
 
-Wrap a handler with [`defineScheduled()`](../reference/api/handlers.md#definescheduled-handler) to type its scheduled event, environment, and execution context.
+ハンドラーを [`defineScheduled()`](../reference/api/handlers.md#definescheduled-handler) でラップすると、スケジュールイベント、環境、実行コンテキストに型が付きます。
 
-Jobs sharing a cron expression each run once per invocation. Void waits for all matching jobs and reports any failures. Files and directories starting with `_` are ignored.
+同じ cron 式を共有するジョブは、1 回の呼び出しでそれぞれ 1 度ずつ実行されます。Void は一致するすべてのジョブの完了を待ち、失敗があれば報告します。`_` で始まるファイルとディレクトリは無視されます。
 
-## Local development
+## ローカル開発 {#local-development}
 
-Schedules don't fire automatically in local development. Test a job by sending a request to Void's development endpoint:
+ローカル開発では、スケジュールは自動的には発火しません。ジョブをテストするには、Void の開発用エンドポイントにリクエストを送信します。
 
 ```
 POST /__void/scheduled
@@ -59,9 +59,9 @@ Content-Type: application/json
 { "cron": "<expression>", "scheduledTime": <unix_ms> }
 ```
 
-Set `cron` to an expression exported by your job. A successful call returns `{ "ok": true }`.
+`cron` には、ジョブがエクスポートしている式を指定します。呼び出しが成功すると `{ "ok": true }` が返されます。
 
-The endpoint requires a local dev trigger token. Void prints a paste-ready curl command with the current token when the dev server starts.
+このエンドポイントにはローカルの開発用トリガートークンが必要です。Void は開発サーバーの起動時に、現在のトークンを含んだ、貼り付けてすぐ使える curl コマンドを表示します。
 
 ```bash
 curl -X POST http://localhost:5173/__void/scheduled \
@@ -70,10 +70,10 @@ curl -X POST http://localhost:5173/__void/scheduled \
   -d '{"cron":"0 * * * *","scheduledTime":'"$(date +%s000)"'}'
 ```
 
-The endpoint works in native Void apps and supported frameworks. Framework jobs run in the adapter's development runtime and use the bindings it provides.
+このエンドポイントは、ネイティブな Void アプリとサポートされているフレームワークで動作します。フレームワークのジョブはアダプターの開発ランタイムで実行され、そのランタイムが提供するバインディングを使用します。
 
-## Deployment behavior
+## デプロイ時の動作 {#deployment-behavior}
 
-Native scheduled events do not require a manual HTTP token. For framework deployments, HTTP requests to `/__void/scheduled` require a matching `x-void-internal` token: the managed platform supplies its proxy token, or you can explicitly configure `CRON_SECRET` for manual calls. An absent or mismatched token returns `401` without running a job.
+ネイティブのスケジュールイベントには、手動の HTTP トークンは不要です。フレームワークのデプロイでは、`/__void/scheduled` への HTTP リクエストに一致する `x-void-internal` トークンが必要です。マネージドプラットフォームはそのプロキシトークンを提供するか、手動で呼び出す場合は `CRON_SECRET` を明示的に設定できます。トークンがない場合や一致しない場合は、ジョブを実行せずに `401` を返します。
 
-On a Void platform, each project can use up to 100 different cron expressions and 1,000 schedules (each expression a job exports counts as one schedule). Jobs that share an expression count once toward the expression limit. When you deploy to your own Cloudflare account, Cloudflare's [Cron Trigger limits](https://developers.cloudflare.com/workers/platform/limits/) apply instead.
+Void プラットフォームでは、各プロジェクトで最大 100 種類の異なる cron 式と 1,000 件のスケジュールを使用できます(ジョブがエクスポートする各式が 1 件のスケジュールとして数えられます)。式を共有するジョブは、式の上限に対して 1 つとして数えられます。ご自身の Cloudflare アカウントにデプロイする場合は、代わりに Cloudflare の [Cron Trigger の制限](https://developers.cloudflare.com/workers/platform/limits/)が適用されます。

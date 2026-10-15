@@ -2,71 +2,71 @@
 outline: deep
 ---
 
-# Resource Inference
+# リソースの推論 {#resource-inference}
 
-Void automatically detects which Cloudflare resources your project uses by scanning source files at startup. In most cases, there is no manual configuration. Use a resource in code, and Void provisions the matching binding for local development.
+Void は、起動時にソースファイルをスキャンして、プロジェクトが使用している Cloudflare リソースを自動的に検出します。ほとんどの場合、手動での設定は不要です。コードでリソースを使用すると、Void がローカル開発用に対応するバインディングをプロビジョニングします。
 
-## Detected Bindings
+## 検出されるバインディング {#detected-bindings}
 
-| Binding          | Type                       | Detected by import                                                                                                                                               | Detected by env access                                                         |
-| ---------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `DB`             | `D1Database`               | `import { db } from "void/db"`                                                                                                                                   | `env.DB` or `c.env.DB`                                                         |
-| `KV`             | `KVNamespace`              | `import { kv } from "void/kv"`                                                                                                                                   | `env.KV` or `c.env.KV`                                                         |
-| `STORAGE`        | `R2Bucket`                 | `import { storage } from "void/storage"`                                                                                                                         | `env.STORAGE` or `c.env.STORAGE`                                               |
-| `AI`             | `Ai`                       | `import { ai } from "void/ai"`                                                                                                                                   | `env.AI` or `c.env.AI`                                                         |
-| `SANDBOX`        | Managed Sandbox capability | `import { getSandbox } from "void/sandbox"`                                                                                                                      | `getSandbox()`; native Cloudflare also exposes `env.SANDBOX` / `c.env.SANDBOX` |
-| Auth             | none                       | `import { ... } from "void/auth"` or `import { auth } from "void/client"` / `void/client/react` / `void/client/vue` / `void/client/svelte` / `void/client/solid` | none                                                                           |
-| `QUEUE_*`        | `Queue`                    | `import { queues } from "void/queues"`                                                                                                                           | `env.QUEUE_*`                                                                  |
-| `VOID_LIVE`      | `DurableObjectNamespace`   | `import { defineLiveStream } from "void/live"`                                                                                                                   | n/a                                                                            |
-| filename-derived | `DurableObjectNamespace`   | A default-exported `defineDurableState()` module in `durable-objects/`                                                                                           | n/a                                                                            |
+| バインディング         | 型                                 | インポートによる検出                                                                                                                                             | 環境変数アクセスによる検出                                                                         |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `DB`                   | `D1Database`                       | `import { db } from "void/db"`                                                                                                                                   | `env.DB` または `c.env.DB`                                                                         |
+| `KV`                   | `KVNamespace`                      | `import { kv } from "void/kv"`                                                                                                                                   | `env.KV` または `c.env.KV`                                                                         |
+| `STORAGE`              | `R2Bucket`                         | `import { storage } from "void/storage"`                                                                                                                         | `env.STORAGE` または `c.env.STORAGE`                                                               |
+| `AI`                   | `Ai`                               | `import { ai } from "void/ai"`                                                                                                                                   | `env.AI` または `c.env.AI`                                                                         |
+| `SANDBOX`              | マネージド Sandbox 機能            | `import { getSandbox } from "void/sandbox"`                                                                                                                      | `getSandbox()`。ネイティブ Cloudflare では `env.SANDBOX` / `c.env.SANDBOX` も公開されます          |
+| Auth                   | なし                               | `import { ... } from "void/auth"` または `import { auth } from "void/client"` / `void/client/react` / `void/client/vue` / `void/client/svelte` / `void/client/solid` | なし                                                                                               |
+| `QUEUE_*`              | `Queue`                            | `import { queues } from "void/queues"`                                                                                                                           | `env.QUEUE_*`                                                                                      |
+| `VOID_LIVE`            | `DurableObjectNamespace`           | `import { defineLiveStream } from "void/live"`                                                                                                                   | なし                                                                                               |
+| ファイル名から導出     | `DurableObjectNamespace`           | `durable-objects/` 内の、`defineDurableState()` をデフォルトエクスポートするモジュール                                                                           | なし                                                                                               |
 
-Auth detection also triggers when importing the `auth` specifier from `void/client` or a framework-specific client subpath such as `void/client/react` (but not when importing only `fetch`).
+認証の検出は、`void/client` または `void/client/react` などのフレームワーク固有のクライアントサブパスから `auth` 指定子をインポートした場合にも発生します(`fetch` のみをインポートした場合は発生しません)。
 
-Durable state is inferred from files in `durable-objects/`. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and records its migration. See [Durable State](../guide/durable-state.md).
+Durable State は、`durable-objects/` 内のファイルから推論されます。たとえば、`durable-objects/shopping-cart.ts` は `SHOPPING_CART` バインディングを作成し、`ShoppingCartDurableObject` をエクスポートし、そのマイグレーションを記録します。[Durable State](../guide/durable-state.md) を参照してください。
 
-## Scanned Directories
+## スキャンされるディレクトリ {#scanned-directories}
 
-### Standard mode
+### 標準モード {#standard-mode}
 
-Native Void apps scan these directories by default. With [`sourceDir`](./config.md#sourcedir) configured, Void scans that source tree instead:
+ネイティブの Void アプリは、既定で次のディレクトリをスキャンします。[`sourceDir`](./config.md#sourcedir) が設定されている場合、Void は代わりにそのソースツリーをスキャンします。
 
-| Directory     | Contains                                    |
-| ------------- | ------------------------------------------- |
-| `routes/`     | API route handlers                          |
-| `middleware/` | Hono middleware                             |
-| `queues/`     | Queue consumers                             |
-| `pages/`      | Page components and `.server.ts` companions |
-| `crons/`      | Scheduled job handlers                      |
-| `email/`      | Inbound email handlers                      |
-| `src/`        | Application source                          |
+| ディレクトリ  | 内容                                          |
+| ------------- | --------------------------------------------- |
+| `routes/`     | API ルートハンドラー                          |
+| `middleware/` | Hono ミドルウェア                             |
+| `queues/`     | キューのコンシューマー                        |
+| `pages/`      | ページコンポーネントと `.server.ts` コンパニオン |
+| `crons/`      | スケジュールジョブのハンドラー                |
+| `email/`      | 受信メールのハンドラー                        |
+| `src/`        | アプリケーションのソース                      |
 
-### Framework mode
+### フレームワークモード {#framework-mode}
 
-For [supported meta frameworks](../integrations/frameworks/overview.md), Void scans these directories:
+[サポートされているメタフレームワーク](../integrations/frameworks/overview.md)では、Void は次のディレクトリをスキャンします。
 
-| Directory | Contains                |
-| --------- | ----------------------- |
-| `src/`    | Application source      |
-| `app/`    | Framework app directory |
-| `routes/` | Framework routes        |
-| `server/` | Server-side code        |
-| `pages/`  | Framework pages         |
-| `crons/`  | Scheduled job handlers  |
-| `queues/` | Queue consumers         |
+| ディレクトリ | 内容                             |
+| ------------ | -------------------------------- |
+| `src/`       | アプリケーションのソース         |
+| `app/`       | フレームワークの app ディレクトリ |
+| `routes/`    | フレームワークのルート           |
+| `server/`    | サーバーサイドのコード           |
+| `pages/`     | フレームワークのページ           |
+| `crons/`     | スケジュールジョブのハンドラー   |
+| `queues/`    | キューのコンシューマー           |
 
-Framework detection uses `package.json` dependencies and dev dependencies. Add `voidPlugin()` to your framework's Vite config to enable inference during development. The integration guides show the setup for each framework.
+フレームワークの検出には、`package.json` の dependencies と devDependencies が使用されます。開発中に推論を有効にするには、フレームワークの Vite 設定に `voidPlugin()` を追加します。各フレームワークのセットアップは、統合ガイドに記載されています。
 
-### Always scanned
+### 常にスキャンされるもの {#always-scanned}
 
-Regardless of mode, these are always checked:
+モードに関係なく、次のものは常にチェックされます。
 
-- **SSR entry** such as `src/main.ssr.ts`, for SSR apps that access bindings during rendering
-- **Application source** in `src/` or your configured `sourceDir`, including resource and auth imports
-- **`durable-objects/`**, which is scanned for typed Durable Object state modules in native Void apps
+- **SSR エントリー**(`src/main.ssr.ts` など)。レンダリング中にバインディングにアクセスする SSR アプリ向けです。
+- `src/` または設定した `sourceDir` 内の**アプリケーションのソース**。リソースと認証のインポートを含みます。
+- **`durable-objects/`**。ネイティブの Void アプリで、型付き Durable Object の状態モジュールを検出するためにスキャンされます。
 
-## Custom Scan Directories
+## カスタムのスキャンディレクトリ {#custom-scan-directories}
 
-If your project organizes code in non-standard directories, you can override which directories are scanned:
+プロジェクトで標準的でないディレクトリにコードを配置している場合は、スキャンされるディレクトリを上書きできます。
 
 ```json
 {
@@ -76,12 +76,12 @@ If your project organizes code in non-standard directories, you can override whi
 }
 ```
 
-Paths are relative to the project root. When `inference.scanDirs` is set, it replaces the default directories entirely. The SSR entry and application source scan still apply.
+パスはプロジェクトのルートからの相対パスです。`inference.scanDirs` を設定すると、既定のディレクトリは完全に置き換えられます。SSR エントリーとアプリケーションのソースのスキャンは、引き続き適用されます。
 
-## Explicit Binding Overrides
+## 明示的なバインディングの上書き {#explicit-binding-overrides}
 
-Use [`inference.bindings`](./config.md#inference-bindings) to enable, disable, or rename a binding when inference does not match your setup. It overrides only the bindings you name; the rest are still inferred.
+推論がセットアップと一致しない場合は、[`inference.bindings`](./config.md#inference-bindings) を使用して、バインディングを有効化、無効化、または名前変更します。指定したバインディングだけが上書きされ、残りは引き続き推論されます。
 
-## File Types
+## ファイルタイプ {#file-types}
 
-Inference scans `.ts`, `.tsx`, `.mts`, `.js`, `.jsx`, `.mjs`, and Astro frontmatter. Put server resource imports in these files or a page's `.server.ts` companion; Vue and Svelte component files are not scanned directly.
+推論は、`.ts`、`.tsx`、`.mts`、`.js`、`.jsx`、`.mjs`、および Astro のフロントマターをスキャンします。サーバーのリソースのインポートは、これらのファイルか、ページの `.server.ts` コンパニオンに置いてください。Vue と Svelte のコンポーネントファイルは、直接はスキャンされません。

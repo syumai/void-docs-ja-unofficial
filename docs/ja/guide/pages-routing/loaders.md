@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Loaders & Props
+# ローダーと Props {#loaders-props}
 
-A loader fetches the data a page needs. Define it in a companion `.server.ts` file using the same `defineHandler` API as [server routes](../server-routing.md).
+ローダーは、ページが必要とするデータを取得します。[サーバールート](../server-routing.md)と同じ `defineHandler` API を使って、対応する `.server.ts` ファイルに定義します。
 
-## Defining a Loader
+## ローダーを定義する {#defining-a-loader}
 
-`loader` runs on GET requests and returns an object that becomes the page's props:
+`loader` は GET リクエストで実行され、ページの props となるオブジェクトを返します。
 
 ```ts
 import { users } from '@schema';
@@ -24,11 +24,11 @@ export const loader = defineHandler(async (c) => {
 });
 ```
 
-`InferProps` infers the loader’s return type, so page props stay in sync with the data it returns.
+`InferProps` はローダーの戻り値の型を推論するため、ページの props は、ローダーが返すデータと常に同期します。
 
-## Using the Data in Page Components
+## ページコンポーネントでデータを使う {#using-the-data-in-page-components}
 
-The page component receives the loader's result as props. Export the inferred type from the server file so the component stays in sync:
+ページコンポーネントは、ローダーの結果を props として受け取ります。サーバーファイルから推論された型をエクスポートしておくと、コンポーネントとの同期が保たれます。
 
 ::: code-group
 
@@ -97,9 +97,9 @@ export default function UsersPage(props: Props) {
 
 :::
 
-## Deferred Props
+## 遅延 Props {#deferred-props}
 
-Use `defer()` for slow data. The page renders immediately and receives the result when it is ready:
+時間のかかるデータには `defer()` を使います。ページはすぐにレンダリングされ、結果の準備ができた時点で受け取ります。
 
 ```ts
 import { projects } from '@schema';
@@ -111,21 +111,21 @@ import { db } from 'void/db';
 export type Props = InferProps<typeof loader>;
 
 export const loader = defineHandler(async (c) => {
-  const allProjects = await db.select().from(projects); // fast, returns immediately
+  const allProjects = await db.select().from(projects); // 高速、すぐに返される
   return {
     projects: allProjects,
     usage: defer(async () => {
-      return await fetchUsageMetrics(); // slow, streams when ready
+      return await fetchUsageMetrics(); // 低速、準備ができたらストリーミングされる
     }),
   };
 });
 ```
 
-The page can render `projects` while `usage` is still loading. In React, read `usage` with `use()` inside Suspense. Other adapters expose it as `{ loading, value, error }`.
+ページは、`usage` を読み込み中のまま、`projects` をレンダリングできます。React では、Suspense 内で `use()` を使って `usage` を読み取ります。その他のアダプターでは、`{ loading, value, error }` として公開されます。
 
-### Handling Deferred State
+### 遅延状態を扱う {#handling-deferred-state}
 
-In React, `Deferred<T>` is consumed as a promise. Put the deferred read under a `<Suspense>` boundary and call `use()` where the value is needed:
+React では、`Deferred<T>` は Promise として扱います。遅延した値の読み取りを `<Suspense>` 境界の内側に置き、値が必要な箇所で `use()` を呼び出します。
 
 ::: code-group
 
@@ -152,25 +152,20 @@ export default function Dashboard({ projects, usage }: Props) {
 
 :::
 
-Rejected deferred props throw from `use()`. Put a normal React error boundary
-around the Suspense boundary when the page should render a custom failure state.
-For explicit React prop annotations, import `Deferred` from `@void/react`; the
-adapter export is typed as `Promise<T>`.
+拒否された遅延 props は、`use()` からスローされます。ページでカスタムの失敗状態を表示したい場合は、Suspense 境界を通常の React のエラーバウンダリーで囲んでください。React の props に明示的に型注釈を付ける場合は、`@void/react` から `Deferred` をインポートします。アダプターのエクスポートは `Promise<T>` として型付けされています。
 
-In production, an unexpected error in a deferred prop reaches the page as
-`Internal Server Error`; throw an
-[`HTTPException`](../../integrations/hono.md#utilities) to show your own message.
+本番環境では、遅延 props で発生した予期しないエラーは `Internal Server Error` としてページに届きます。独自のメッセージを表示するには、[`HTTPException`](../../integrations/hono.md#utilities) をスローしてください。
 
-In Vue, Svelte, and Solid, `Deferred<T>` behaves as a [discriminated union](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions) with three states:
+Vue、Svelte、Solid では、`Deferred<T>` は 3 つの状態を持つ[判別可能なユニオン型](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)として動作します。
 
 ```ts
 type Deferred<T> =
-  | { loading: true; value: null; error: null } // pending
-  | { loading: false; value: T; error: null } // resolved
-  | { loading: false; value: null; error: Error }; // rejected
+  | { loading: true; value: null; error: null } // 保留中
+  | { loading: false; value: T; error: null } // 解決済み
+  | { loading: false; value: null; error: Error }; // 拒否済み
 ```
 
-Check `loading` first, then `error`. TypeScript narrows `value` to `T` in the resolved branch:
+最初に `loading` を、次に `error` を確認します。解決済みの分岐では、TypeScript が `value` を `T` に絞り込みます。
 
 ::: code-group
 
@@ -229,20 +224,20 @@ export default function Dashboard(props: Props) {
 
 :::
 
-### Deferred Props After Mutations
+### ミューテーション後の遅延 Props {#deferred-props-after-mutations}
 
 ::: info
-After an action, deferred props keep their last resolved values until the next page load or client-side navigation. Other loader props refresh immediately.
+アクションの後、遅延 props は、次のページ読み込みまたはクライアントサイドナビゲーションまで、最後に解決された値を保持します。それ以外のローダーの props はすぐに更新されます。
 :::
 
-### Grouped Deferred Props
+### グループ化した遅延 Props {#grouped-deferred-props}
 
-When multiple props depend on the same slow operation, use a named group to resolve them together with a single function call:
+複数の props が同じ低速な処理に依存している場合は、名前付きグループを使うと、1 回の関数呼び出しでまとめて解決できます。
 
 ```ts
 export const loader = defineHandler<Props>(async (c) => {
   const analyticsResolver = async () => {
-    const data = await fetchAnalytics(); // one slow call
+    const data = await fetchAnalytics(); // 低速な呼び出しは 1 回だけ
     return { metrics: data.metrics, chart: data.chart };
   };
 
@@ -254,4 +249,4 @@ export const loader = defineHandler<Props>(async (c) => {
 });
 ```
 
-Both `metrics` and `chart` resolve from a single invocation of the analytics resolver. The component receives them as separate `Deferred<T>` props.
+`metrics` と `chart` はどちらも、analytics リゾルバーの 1 回の呼び出しから解決されます。コンポーネントは、それらを別々の `Deferred<T>` の props として受け取ります。

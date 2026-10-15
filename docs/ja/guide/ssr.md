@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Custom SSR
+# カスタム SSR {#custom-ssr}
 
-Use custom SSR to choose your own router, data loading, HTML shell, and hydration code. If you want Void to handle these for you, use [Pages Routing](./pages-routing/overview).
+ルーター、データ読み込み、HTML シェル、ハイドレーションのコードを自分で選びたい場合は、カスタム SSR を使用します。これらを Void に任せたい場合は、[Pages Routing](./pages-routing/overview) を使用してください。
 
-## Create the app
+## アプリを作成する {#create-the-app}
 
-Start with a root component. This React example renders a page based on the request path:
+ルートコンポーネントから始めます。この React の例では、リクエストパスに応じてページをレンダリングします。
 
 ```tsx
 // src/App.tsx
@@ -17,18 +17,18 @@ export default function App({ url }: { url: string }) {
 }
 ```
 
-## Required entries
+## 必須のエントリー {#required-entries}
 
-Create both entry files:
+次の 2 つのエントリーファイルを両方作成します。
 
-- `src/main.ssr.ts` or `src/main.ssr.tsx`
-- `src/main.client.ts` or `src/main.client.tsx`
+- `src/main.ssr.ts` または `src/main.ssr.tsx`
+- `src/main.client.ts` または `src/main.client.tsx`
 
-Use one server entry and one client entry. Both are required.
+サーバーエントリーとクライアントエントリーを 1 つずつ使用します。どちらも必須です。
 
-## Render API
+## レンダー API {#render-api}
 
-Wrap your server renderer with `defineRender()` and return an HTML response. Insert `assetTags.css` and `assetTags.preloads` in `<head>`, and `assetTags.body` before `</body>`:
+サーバーレンダラーを `defineRender()` でラップし、HTML レスポンスを返します。`assetTags.css` と `assetTags.preloads` は `<head>` に、`assetTags.body` は `</body>` の前に挿入します。
 
 ```tsx
 // src/main.ssr.tsx
@@ -53,11 +53,11 @@ export default defineRender(async (c, assetTags) => {
 });
 ```
 
-You can also export a named `render(c, assetTags)` function with the same signature. See [`defineRender`](../reference/api/handlers.md#definerender-handler) for the types.
+同じシグネチャを持つ名前付きの `render(c, assetTags)` 関数をエクスポートすることもできます。型については [`defineRender`](../reference/api/handlers.md#definerender-handler) を参照してください。
 
-## Hydrate in the browser
+## ブラウザでハイドレートする {#hydrate-in-the-browser}
 
-In the client entry, hydrate the same component:
+クライアントエントリーでは、同じコンポーネントをハイドレートします。
 
 ```tsx
 // src/main.client.tsx
@@ -67,8 +67,8 @@ import App from './App';
 hydrateRoot(document.getElementById('root')!, <App url={window.location.pathname} />);
 ```
 
-## Caching
+## キャッシュ {#caching}
 
-See [Revalidation](./edge/revalidation.md) for stale-while-revalidate caching of SSR pages.
+SSR ページの stale-while-revalidate キャッシュについては、[Revalidation](./edge/revalidation.md) を参照してください。
 
-API routes and static files are served before custom rendering. Unmatched non-API requests use `render(c, assetTags)`.
+API ルートと静的ファイルは、カスタムレンダリングより先に処理されます。マッチしない API 以外のリクエストには `render(c, assetTags)` が使用されます。

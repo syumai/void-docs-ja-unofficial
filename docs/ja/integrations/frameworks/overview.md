@@ -2,51 +2,51 @@
 outline: deep
 ---
 
-# Meta-Frameworks
+# メタフレームワーク {#meta-frameworks}
 
-Keep your framework's routes and rendering, and add Void for databases, storage, jobs, and deployment. The guides in this section show how to connect each framework to Void.
+フレームワークのルーティングとレンダリングはそのまま使い、データベース、ストレージ、ジョブ、デプロイのために Void を追加できます。このセクションのガイドでは、各フレームワークを Void に接続する方法を説明します。
 
-Add `voidPlugin()` to the framework's Vite config. It detects resource usage, generates database types, manages migrations, and prepares the app for `void deploy`.
+フレームワークの Vite 設定に `voidPlugin()` を追加してください。リソースの使用状況の検出、データベース型の生成、マイグレーションの管理、`void deploy` のためのアプリの準備を行います。
 
-TanStack Start and React Router use the Cloudflare Vite plugin provided by Void. SvelteKit, Nuxt, Analog, and Astro use their own Cloudflare adapters. The setup differs, but your framework continues to handle routing and rendering.
+TanStack Start と React Router は、Void が提供する Cloudflare Vite プラグインを使用します。SvelteKit、Nuxt、Analog、Astro は、それぞれ独自の Cloudflare アダプターを使用します。セットアップは異なりますが、ルーティングとレンダリングは引き続きフレームワークが処理します。
 
 ![void relationships with meta frameworks and deployment targets](./void-relationships.svg)
 
-## Supported Frameworks
+## 対応フレームワーク {#supported-frameworks}
 
-| Framework                             | Package                 | Integration                                                                  |
-| ------------------------------------- | ----------------------- | ---------------------------------------------------------------------------- |
-| [TanStack Start](./tanstack-start.md) | `@tanstack/react-start` | Vite plugin composition. `voidPlugin()` runs alongside the framework plugin. |
-| [React Router v7](./react-router.md)  | `@react-router/dev`     | Vite plugin composition. Setup matches TanStack Start.                       |
-| [SvelteKit](./sveltekit.md)           | `@sveltejs/kit`         | Vite-based, uses its own Cloudflare adapter                                  |
-| [Nuxt](./nuxt.md)                     | `nuxt`                  | Own CLI and build toolchain                                                  |
-| [Analog](./analog.md)                 | `@analogjs/platform`    | Vite-based, uses Nitro with Cloudflare preset                                |
-| [Astro **v6+**](./astro.md)           | `astro`                 | Own CLI and Cloudflare adapter (v6 required)                                 |
+| フレームワーク                        | パッケージ              | 統合方法                                                                                 |
+| ------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| [TanStack Start](./tanstack-start.md) | `@tanstack/react-start` | Vite プラグインの合成。`voidPlugin()` はフレームワークのプラグインと並べて実行されます。 |
+| [React Router v7](./react-router.md)  | `@react-router/dev`     | Vite プラグインの合成。セットアップは TanStack Start と同じです。                        |
+| [SvelteKit](./sveltekit.md)           | `@sveltejs/kit`         | Vite ベース。独自の Cloudflare アダプターを使用                                          |
+| [Nuxt](./nuxt.md)                     | `nuxt`                  | 独自の CLI とビルドツールチェーン                                                        |
+| [Analog](./analog.md)                 | `@analogjs/platform`    | Vite ベース。Cloudflare プリセットの Nitro を使用                                        |
+| [Astro **v6+**](./astro.md)           | `astro`                 | 独自の CLI と Cloudflare アダプター（v6 が必要）                                         |
 
-Detection is automatic. The CLI reads your `package.json` dependencies.
+検出は自動です。CLI は `package.json` の依存関係を読み取ります。
 
-## Feature Support
+## 機能のサポート {#feature-support}
 
-With `voidPlugin()` added to the framework's Vite config, frameworks get most of the same backend/platform features as [Void apps](../../guide/app-types.md#void-apps):
+フレームワークの Vite 設定に `voidPlugin()` を追加すると、フレームワークでも [Void アプリ](../../guide/app-types.md#void-apps)とほぼ同じバックエンド/プラットフォーム機能を利用できます。
 
-- **Binding inference:** D1, KV, R2, AI, and queues are detected from source code.
-- **Typed database:** query types come from your Drizzle schema.
-- **Migrations:** local D1 is updated on dev startup, and migrations are validated and deployed with `void deploy`.
-- **Runtime helpers:** `void/db`, `void/kv`, `void/storage`, and `void/ai` give you typed access to Cloudflare bindings in dev and production.
-- **Auth:** Void-managed auth is not supported in framework mode yet. For now, use Better Auth's official integration for your framework.
-- **Cron jobs:** scheduled handlers via the `crons/` directory.
-- **Queue consumers:** typed producers and consumers via the `queues/` directory.
-- **Revalidation and prerendering:** configure them with [`routing.revalidate`](../../guide/edge/revalidation.md) and [`routing.prerender`](../../guide/edge/prerendering.md) in `void.config.ts`. Void apps can also set these per page in companion `.server.ts` files.
+- **バインディングの推論:** D1、KV、R2、AI、キューは、ソースコードから検出されます。
+- **型付きデータベース:** クエリの型は Drizzle スキーマから生成されます。
+- **マイグレーション:** 開発の起動時にローカルの D1 が更新され、マイグレーションは検証されて `void deploy` でデプロイされます。
+- **ランタイムヘルパー:** `void/db`、`void/kv`、`void/storage`、`void/ai` により、開発と本番で Cloudflare バインディングへ型付きでアクセスできます。
+- **認証:** Void 管理の認証は、フレームワークモードではまだサポートされていません。当面は、お使いのフレームワーク向けの Better Auth の公式インテグレーションを使用してください。
+- **Cron ジョブ:** `crons/` ディレクトリによるスケジュールハンドラー。
+- **キューコンシューマー:** `queues/` ディレクトリによる型付きのプロデューサーとコンシューマー。
+- **再検証とプリレンダリング:** `void.config.ts` の [`routing.revalidate`](../../guide/edge/revalidation.md) と [`routing.prerender`](../../guide/edge/prerendering.md) で設定します。Void アプリでは、コンパニオンの `.server.ts` ファイルでページごとに設定することもできます。
 
-For framework apps, Void revalidation caches public HTML document responses with both `void deploy` and `void deploy --platform cloudflare`. Client data requests continue to use the framework's own behavior. A response with `Set-Cookie` or `Cache-Control: private`, `no-store`, or `no-cache` is never shared.
+フレームワークアプリでは、`void deploy` と `void deploy --platform cloudflare` のどちらでも、Void の再検証は公開 HTML ドキュメントのレスポンスをキャッシュします。クライアントのデータリクエストは、引き続きフレームワーク自身の動作を使用します。`Set-Cookie` を含むレスポンスや、`Cache-Control: private`、`no-store`、`no-cache` のレスポンスが共有されることはありません。
 
-Frameworks can also access bindings directly via the framework's own mechanisms (e.g. `env` from `cloudflare:workers` in SvelteKit 3 and Analog, `platform.env` in SvelteKit 2, `event.context.cloudflare.env` in Nuxt, `Astro.locals.runtime.env` in Astro).
+フレームワーク独自の仕組みで、バインディングに直接アクセスすることもできます（例: SvelteKit 3 と Analog では `cloudflare:workers` の `env`、SvelteKit 2 では `platform.env`、Nuxt では `event.context.cloudflare.env`、Astro では `Astro.locals.runtime.env`）。
 
-## Configuration
+## 設定 {#configuration}
 
-### `void.config.ts`
+### `void.config.ts` {#void-config-ts}
 
-Most configuration is inferred automatically. Use `void.config.ts` to override defaults or fine-tune behavior:
+ほとんどの設定は自動的に推論されます。デフォルトを上書きしたり動作を細かく調整したりするには、`void.config.ts` を使用します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -64,20 +64,20 @@ export default defineConfig({
 });
 ```
 
-| Field                | Purpose                                                                                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inference.build`    | Override the default build command                                                                                                                            |
-| `inference.scanDirs` | Directories to scan for binding inference (defaults vary by framework)                                                                                        |
-| `routing.prerender`  | Paths to prerender as static HTML at deploy time                                                                                                              |
-| `routing.revalidate` | Default revalidation TTL in seconds for cached responses                                                                                                      |
-| `inference.bindings` | Override inferred bindings. You only need this if auto-detection is not doing what you want. Accepts `true` or a custom binding name such as `"db": "MY_DB"`. |
-| `routing.notFound`   | **Ignored.** SvelteKit, Nuxt, Analog, and Astro pin `not_found_handling` to `"none"` — the framework worker owns unmatched HTML. `void deploy` warns if set.  |
+| フィールド           | 目的                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `inference.build`    | デフォルトのビルドコマンドを上書きします                                                                                                                                                                     |
+| `inference.scanDirs` | バインディングの推論のためにスキャンするディレクトリ（デフォルトはフレームワークによって異なります）                                                                                                         |
+| `routing.prerender`  | デプロイ時に静的 HTML としてプリレンダリングするパス                                                                                                                                                         |
+| `routing.revalidate` | キャッシュされたレスポンスのデフォルトの再検証 TTL（秒）                                                                                                                                                     |
+| `inference.bindings` | 推論されたバインディングを上書きします。自動検出が意図どおりに動作しない場合にのみ必要です。`true`、または `"db": "MY_DB"` のようなカスタムのバインディング名を指定できます。                                |
+| `routing.notFound`   | **無視されます。** SvelteKit、Nuxt、Analog、Astro は `not_found_handling` を `"none"` に固定します。一致しない HTML はフレームワークの Worker が処理します。設定されている場合、`void deploy` は警告します。 |
 
-See [Configuration](../../reference/config.md) for the full reference.
+完全なリファレンスは[設定](../../reference/config.md)を参照してください。
 
-### Cloudflare settings
+### Cloudflare の設定 {#cloudflare-settings}
 
-Frameworks that use Cloudflare's dev runtime need their adapters pointed at Void's generated `.void-wrangler.jsonc`. Their setup guides show the adapter options. Define your Cloudflare settings in `void.config.ts`:
+Cloudflare の開発ランタイムを使用するフレームワークでは、アダプターが Void の生成する `.void-wrangler.jsonc` を指すようにする必要があります。アダプターのオプションは、各フレームワークのセットアップガイドに記載されています。Cloudflare の設定は `void.config.ts` で定義します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -91,10 +91,10 @@ export default defineConfig({
 });
 ```
 
-Existing bindings are preserved. D1, KV, and R2 use local placeholder IDs until deployment. For a project connected directly to Cloudflare, importing `void/ai` adds a remote Workers AI binding during development; [Cloudflare login](../../guide/ai.md#local-development) is required to use it. Direct deployments also include the inferred AI binding.
+既存のバインディングは維持されます。D1、KV、R2 は、デプロイまでローカルのプレースホルダー ID を使用します。Cloudflare に直接接続されたプロジェクトでは、`void/ai` をインポートすると、開発中にリモートの Workers AI バインディングが追加されます。使用するには [Cloudflare ログイン](../../guide/ai.md#local-development)が必要です。直接デプロイにも、推論された AI バインディングが含まれます。
 
-Void combines these settings with inferred bindings and records provisioned resource IDs in `void.lock.json`. Commit both files.
+Void はこれらの設定を推論されたバインディングと組み合わせ、プロビジョニングされたリソースの ID を `void.lock.json` に記録します。両方のファイルをコミットしてください。
 
-## Deployment
+## デプロイ {#deployment}
 
-Run `void deploy` to build with your framework and deploy to the selected target. See [Deployment](../../guide/deployment.md) for setup and CI.
+`void deploy` を実行すると、フレームワークでビルドし、選択したターゲットにデプロイします。セットアップと CI については、[デプロイ](../../guide/deployment.md)を参照してください。

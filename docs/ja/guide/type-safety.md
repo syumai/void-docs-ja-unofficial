@@ -2,55 +2,55 @@
 outline: deep
 ---
 
-# Type Safety
+# 型安全性 {#type-safety}
 
-Void infers types from your database schema, route handlers, and page loaders. When you change a field, TypeScript shows which queries, requests, and components need to change.
+Void は、データベーススキーマ、ルートハンドラー、ページローダーから型を推論します。フィールドを変更すると、どのクエリ、リクエスト、コンポーネントを変更する必要があるかを TypeScript が示してくれます。
 
-## The Type Pipeline
+## 型のパイプライン {#the-type-pipeline}
 
 <img src="./type-pipeline.svg" alt="Type pipeline: Drizzle schema flows to DB types, branching into route handlers (typed fetch), page loaders (component props), and page actions (useForm / action())" style="max-width: 720px; width: 100%;" />
 
-1. **Database types** come from your [Drizzle schema](./database.md#schema-definition). Column types are known at compile time.
-2. **Route handlers:** return types and validator schemas become the generated `RouteMap`, which the [typed fetch](./typed-fetch) client consumes.
-3. **Page loaders:** return types flow into page components as props via `InferProps`.
-4. **Page actions:** validator schemas flow into `useForm` and `action()` for typed data, errors, and URL autocomplete.
+1. **データベースの型**は、[Drizzle スキーマ](./database.md#schema-definition)から得られます。カラムの型はコンパイル時にわかります。
+2. **ルートハンドラー:** 戻り値の型とバリデーターのスキーマから、生成された `RouteMap` が作られ、[型付き fetch](./typed-fetch) クライアントがそれを利用します。
+3. **ページローダー:** 戻り値の型は、`InferProps` を介してページコンポーネントに props として渡されます。
+4. **ページアクション:** バリデーターのスキーマは `useForm` と `action()` に渡され、型付きのデータ、エラー、URL の自動補完が得られます。
 
-All generated types live in `.void/` and update automatically when source files or schema change.
+生成された型はすべて `.void/` に置かれ、ソースファイルやスキーマが変更されると自動的に更新されます。
 
-## Database → Handler → Client
+## データベース → ハンドラー → クライアント {#database-handler-client}
 
-Types flow from your Drizzle schema through handlers to the client without any manual annotations:
+型は、手動のアノテーションなしで、Drizzle スキーマからハンドラーを経てクライアントまで流れます。
 
 ```ts
 // routes/api/users.ts
 export const GET = defineHandler(async (c) => {
   return db.select({ name: users.name, email: users.email }).from(users);
-  //     ↑ return type inferred from schema columns
+  //     ↑ 戻り値の型はスキーマのカラムから推論される
 });
 
 export const POST = defineHandler.withValidator({
-  body: insertUserSchema, // ← derived from Drizzle schema
+  body: insertUserSchema, // ← Drizzle スキーマから導出
 })(async (c, { body }) => {
   return db.insert(users).values(body).returning();
 });
 ```
 
 ```ts
-// Client: types inferred from handlers above
+// クライアント: 型は上記のハンドラーから推論される
 const users = await fetch('/api/users');
 //    ↑ { name: string; email: string }[]
 
 await fetch('/api/users', {
   method: 'POST',
-  body: { name: 'Alice', email: 'alice@example.com' }, // ← typed from validator
+  body: { name: 'Alice', email: 'alice@example.com' }, // ← バリデーターから型付けされる
 });
 ```
 
-The Drizzle schema defines database columns, runtime validation, handler input types, and client-side type checking all at once. For endpoints that don't map to a table, use any [Standard Schema](./server-routing.md#manual-validators) library.
+Drizzle スキーマは、データベースのカラム、実行時のバリデーション、ハンドラーの入力型、クライアント側の型チェックをすべて同時に定義します。テーブルに対応しないエンドポイントでは、任意の [Standard Schema](./server-routing.md#manual-validators) ライブラリを使用できます。
 
-## Loader → Page Props
+## ローダー → ページ props {#loader-page-props}
 
-In [pages mode](./pages-routing/overview), a loader's return type flows into the page component via `InferProps`:
+[Pages モード](./pages-routing/overview)では、ローダーの戻り値の型が `InferProps` を介してページコンポーネントに渡されます。
 
 ```ts
 // pages/users/index.server.ts
@@ -69,11 +69,11 @@ defineProps<Props>(); // ← { users: { id: number; name: string; ... }[] }
 </script>
 ```
 
-No manual interface is needed. Props stay in sync with whatever the loader returns.
+手動でインターフェースを書く必要はありません。props は、ローダーが返す内容と常に同期します。
 
-## Action → useForm
+## アクション → useForm {#action-useform}
 
-When a page action uses `withValidator()`, the body schema flows through to `useForm`. That gives you typed `data`, typed `errors` keys, and URL autocomplete:
+ページアクションが `withValidator()` を使用している場合、ボディのスキーマは `useForm` に渡されます。これにより、型付きの `data`、型付きの `errors` のキー、URL の自動補完が得られます。
 
 ```ts
 // pages/users/create.server.ts
@@ -86,47 +86,47 @@ export const action = defineHandler.withValidator({
 
 ```ts
 const form = useForm('/users/create', { name: '', email: '' });
-//                    ^ autocompletes     ^ must match body schema
+//                    ^ 自動補完される     ^ ボディのスキーマに一致する必要がある
 
 form.errors.email; // ✓ string | undefined
-form.errors.foo; // ✗ TypeScript error
+form.errors.foo; // ✗ TypeScript エラー
 ```
 
-[Named actions](./pages-routing/actions-and-forms#named-actions) work the same way. The `?actionName` suffix selects the right types for that action:
+[名前付きアクション](./pages-routing/actions-and-forms#named-actions)も同じように動作します。`?actionName` サフィックスにより、そのアクションに対応する型が選択されます。
 
 ```ts
 const updateForm = useForm('/users/:id?update', { name: '' }, { params: { id } });
 const deleteForm = useForm('/users/:id?delete', { id: '' }, { params: { id } });
-// Each form's data and errors are typed from their respective validators
+// 各フォームの data と errors は、それぞれのバリデーターから型付けされる
 ```
 
-The `action()` helper gets the same type checking. See [Actions & Forms](./pages-routing/actions-and-forms) for the full API.
+`action()` ヘルパーも同じ型チェックを受けられます。完全な API については、[アクションとフォーム](./pages-routing/actions-and-forms)を参照してください。
 
-## What Gets Checked
+## チェックされる内容 {#what-gets-checked}
 
-| Layer        | What's type-checked                                                  |
-| ------------ | -------------------------------------------------------------------- |
-| Database     | Table columns, value types, insert/update shapes from Drizzle schema |
-| Handlers     | `c.env` bindings, validator input, return type                       |
-| Fetch client | Route paths, HTTP methods, `body`/`query`/`params`, response type    |
-| `useForm`    | Action URLs, `data` fields, `errors` keys, `reset()` args, `params`  |
-| `action()`   | Action URLs, `data` payload, `params`                                |
+| レイヤー           | 型チェックされる内容                                                             |
+| ------------------ | -------------------------------------------------------------------------------- |
+| データベース       | Drizzle スキーマからのテーブルカラム、値の型、insert/update の形状               |
+| ハンドラー         | `c.env` バインディング、バリデーターの入力、戻り値の型                           |
+| fetch クライアント | ルートパス、HTTP メソッド、`body`/`query`/`params`、レスポンスの型               |
+| `useForm`          | アクション URL、`data` のフィールド、`errors` のキー、`reset()` の引数、`params` |
+| `action()`         | アクション URL、`data` のペイロード、`params`                                    |
 
-## Serialization
+## シリアライズ {#serialization}
 
-The client types reflect JSON serialization through `Serialize<T>`:
+クライアントの型には、`Serialize<T>` による JSON シリアライズが反映されます。
 
-| Source type                       | Serialized type                                        |
-| --------------------------------- | ------------------------------------------------------ |
-| `string`, `number`, `boolean`     | unchanged                                              |
-| `Date`                            | `string`                                               |
-| `Response`                        | excluded (passed through at runtime)                   |
-| `bigint`, `Function`, `undefined` | excluded                                               |
-| `Array<T>` / `{ key: T }`         | recursively serialized (function-valued keys stripped) |
+| ソースの型                        | シリアライズ後の型                                      |
+| --------------------------------- | ------------------------------------------------------- |
+| `string`, `number`, `boolean`     | 変更なし                                                |
+| `Date`                            | `string`                                                |
+| `Response`                        | 除外 (実行時にはそのまま渡される)                       |
+| `bigint`, `Function`, `undefined` | 除外                                                    |
+| `Array<T>` / `{ key: T }`         | 再帰的にシリアライズ (関数の値を持つキーは取り除かれる) |
 
-## Context Variables
+## コンテキスト変数 {#context-variables}
 
-Middleware and handlers share typed data through Hono's context variables. Augment `CloudContextVariables` to define your own:
+ミドルウェアとハンドラーは、Hono のコンテキスト変数を通じて型付きのデータを共有します。独自の変数を定義するには、`CloudContextVariables` を拡張します。
 
 ```ts
 // middleware/01.auth.ts
@@ -142,11 +142,11 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-Now `c.get("requestId")` returns `string` everywhere, with no assertion needed. Multiple augmentations across files are [merged together](https://www.typescriptlang.org/docs/handbook/declaration-merging.html).
+これで `c.get("requestId")` は、型アサーションなしでどこでも `string` を返します。複数のファイルにまたがる拡張は[マージ](https://www.typescriptlang.org/docs/handbook/declaration-merging.html)されます。
 
-## Setup
+## セットアップ {#setup}
 
-Extend the generated tsconfig in your project:
+プロジェクトで、生成された tsconfig を継承します。
 
 ```json
 {
@@ -163,6 +163,6 @@ Extend the generated tsconfig in your project:
 }
 ```
 
-If you already have a TypeScript config, run `void init --tsconfig` to add Void types while preserving your settings.
+すでに TypeScript の設定がある場合は、`void init --tsconfig` を実行すると、既存の設定を維持したまま Void の型を追加できます。
 
-Run `void prepare` in CI or after a fresh clone, or let `vite dev` / `vite build` generate the `.void/` files during normal app workflows.
+CI や新たにクローンした直後には `void prepare` を実行してください。または、通常のアプリのワークフローの中で `vite dev` / `vite build` に `.void/` ファイルを生成させることもできます。

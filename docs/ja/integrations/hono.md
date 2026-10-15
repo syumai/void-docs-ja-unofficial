@@ -2,19 +2,19 @@
 outline: deep
 ---
 
-# Hono
+# Hono {#hono}
 
-Void handlers run on [Hono](https://hono.dev). Void depends on Hono internally, but if your app imports from `hono/*` directly, add `hono` to your app's dependencies first.
+Void のハンドラーは [Hono](https://hono.dev) 上で動作します。Void は内部で Hono に依存していますが、アプリが `hono/*` から直接インポートする場合は、先にアプリの依存関係に `hono` を追加してください。
 
 ```bash
 npm install hono
 ```
 
-Once `hono` is installed in your app, you can use built-in middleware, helpers, and third-party Hono packages directly.
+アプリに `hono` をインストールすれば、組み込みのミドルウェアやヘルパー、サードパーティの Hono パッケージを直接使用できます。
 
-## Built-in Middleware
+## 組み込みミドルウェア {#built-in-middleware}
 
-Use Hono's built-in middleware in your global middleware files or per-route:
+Hono の組み込みミドルウェアは、グローバルなミドルウェアファイルまたはルートごとに使用できます。
 
 ```ts
 import { cors } from 'hono/cors';
@@ -37,7 +37,7 @@ export const GET = defineHandler(
 ```
 
 ::: warning
-`cache()` stores one response per URL and returns it to every visitor. It skips requests with an `Authorization` header, but not cookies. Use it only on routes whose response is the same for everyone, never on a route that reads the signed-in user. To cache pages, use [revalidation](../guide/edge/revalidation.md), which skips requests that carry a cookie.
+`cache()` は URL ごとに 1 つのレスポンスを保存し、すべての訪問者に返します。`Authorization` ヘッダーを持つリクエストはスキップしますが、Cookie は考慮しません。全員に同じレスポンスを返すルートでのみ使用し、サインイン中のユーザーを読み取るルートでは決して使用しないでください。ページをキャッシュするには、Cookie を持つリクエストをスキップする[再検証](../guide/edge/revalidation.md)を使用してください。
 :::
 
 ```ts
@@ -51,9 +51,9 @@ export const POST = defineHandler(bearerAuth({ token: 'webhook-secret' }), async
 });
 ```
 
-## Response Helpers
+## レスポンスヘルパー {#response-helpers}
 
-Hono's context helpers are available on `c` in every handler:
+Hono のコンテキストヘルパーは、すべてのハンドラーで `c` から利用できます。
 
 ```ts
 import { stream } from 'hono/streaming';
@@ -79,9 +79,9 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-## Third-party Middleware
+## サードパーティミドルウェア {#third-party-middleware}
 
-Any `hono/*` or `@hono/*` package works. Install the package in your app, then use it directly:
+`hono/*` や `@hono/*` のパッケージはどれも使用できます。アプリにパッケージをインストールして、直接使用します。
 
 ```ts
 import { rateLimiter } from 'hono-rate-limiter';
@@ -91,15 +91,15 @@ import { defineMiddleware } from 'void';
 export default defineMiddleware(rateLimiter({ windowMs: 60_000, limit: 100 }));
 ```
 
-## Utilities
+## ユーティリティ {#utilities}
 
-Hono's standalone helpers work anywhere:
+Hono のスタンドアロンのヘルパーは、どこでも使用できます。
 
 ```ts
 import { HTTPException } from 'hono/http-exception';
 
-// Throw typed HTTP errors
+// 型付きの HTTP エラーをスローする
 throw new HTTPException(404, { message: 'User not found' });
 ```
 
-For the full list of built-in middleware, see the [Hono documentation](https://hono.dev/docs/middleware/builtin).
+組み込みミドルウェアの完全な一覧は、[Hono のドキュメント](https://hono.dev/docs/middleware/builtin)を参照してください。

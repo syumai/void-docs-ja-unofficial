@@ -2,28 +2,28 @@
 outline: deep
 ---
 
-# SvelteKit
+# SvelteKit {#sveltekit}
 
-Use Void with [SvelteKit](https://svelte.dev/docs/kit) for resource detection, typed database queries, and migrations. SvelteKit keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
+[SvelteKit](https://svelte.dev/docs/kit) で Void を使用すると、リソースの検出、型付きのデータベースクエリ、マイグレーションが利用できます。SvelteKit は独自のビルドと Cloudflare 連携を維持し、Void はその Vite 設定に組み込まれます。
 
-Void supports SvelteKit 3 and SvelteKit 2.62 or later. The setup below uses SvelteKit 3 with `@sveltejs/adapter-cloudflare` 8.
+Void は SvelteKit 3 と SvelteKit 2.62 以降をサポートします。以下のセットアップでは、SvelteKit 3 と `@sveltejs/adapter-cloudflare` 8 を使用します。
 
-## Setup
+## セットアップ {#setup}
 
-### 1. Create a new project
+### 1. 新しいプロジェクトを作成する {#1-create-a-new-project}
 
 ```bash
 npx sv create my-app
 cd my-app
 ```
 
-### 2. Install dependencies
+### 2. 依存関係をインストールする {#2-install-dependencies}
 
 ```bash
 npm install -D @sveltejs/adapter-cloudflare void
 ```
 
-### 3. Configure `vite.config.ts`
+### 3. `vite.config.ts` を設定する {#3-configure-vite-config-ts}
 
 ```ts
 import adapter from '@sveltejs/adapter-cloudflare';
@@ -43,9 +43,9 @@ export default {
 };
 ```
 
-### 4. Create `void.config.ts`
+### 4. `void.config.ts` を作成する {#4-create-void-config-ts}
 
-Point SvelteKit's adapter at Void's generated Cloudflare config as shown above. Add your Cloudflare settings to `void.config.ts`:
+上記のように、SvelteKit のアダプターが Void の生成する Cloudflare 設定を参照するようにします。Cloudflare の設定は `void.config.ts` に追加します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -59,9 +59,9 @@ export default defineConfig({
 });
 ```
 
-### 5. Configure `tsconfig.json`
+### 5. `tsconfig.json` を設定する {#5-configure-tsconfig-json}
 
-Extend SvelteKit’s generated config and Void’s generated types and database aliases:
+SvelteKit が生成する設定と、Void が生成する型およびデータベースのエイリアスを継承します。
 
 ```json
 {
@@ -73,22 +73,22 @@ Extend SvelteKit’s generated config and Void’s generated types and database 
 }
 ```
 
-Run `void prepare` after a fresh clone or before typechecking in CI so `.void/tsconfig.json` exists before SvelteKit syncs its config. Use `package.json` subpath imports for aliases such as SvelteKit 3's `#lib`.
+新しくクローンした後や CI で型チェックを行う前に `void prepare` を実行して、SvelteKit が設定を同期する前に `.void/tsconfig.json` が存在するようにします。SvelteKit 3 の `#lib` のようなエイリアスには、`package.json` のサブパスインポートを使用します。
 
-### 6. Deploy
+### 6. デプロイする {#6-deploy}
 
 ```bash
 void auth login
 void deploy
 ```
 
-## Using Void Features
+## Void の機能を使う {#using-void-features}
 
-Most [Void platform features](../../guide/app-types.md#void-apps) work with SvelteKit. Use them in server load functions, actions, and API routes:
+[Void プラットフォームの機能](../../guide/app-types.md#void-apps)の多くは SvelteKit でも動作します。サーバーの load 関数、アクション、API ルートで使用してください。
 
-Void-managed auth is not supported in framework mode yet. Use Better Auth's official SvelteKit integration directly for now.
+Void が管理する認証は、フレームワークモードではまだサポートされていません。現時点では、Better Auth の公式の SvelteKit 連携を直接使用してください。
 
-### Database
+### データベース {#database}
 
 ```ts
 import { users } from '@schema';
@@ -100,17 +100,17 @@ export async function load() {
 }
 ```
 
-### Other resources
+### その他のリソース {#other-resources}
 
-Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
+[KV](../../guide/kv.md)、[オブジェクトストレージ](../../guide/storage.md)、[AI](../../guide/ai.md) は、Void アプリと同じインポートを使って、サーバー側のコードから利用できます。[cron ジョブ](../../guide/jobs.md)は `crons/` に、[キューコンシューマー](../../guide/queues.md)は `queues/` に追加します。
 
-### Environment Variables
+### 環境変数 {#environment-variables}
 
-Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
+変数を `env.ts` で宣言し、`import { env } from "void/env"` で読み取ります。ローカルの値、本番のシークレット、公開される `VITE_*` の値については、[環境変数](../../guide/env-vars.md)を参照してください。
 
-## Accessing Bindings Directly
+## バインディングへの直接アクセス {#accessing-bindings-directly}
 
-In SvelteKit 3, use the `cloudflare:workers` module in server-side code:
+SvelteKit 3 では、サーバー側のコードで `cloudflare:workers` モジュールを使用します。
 
 ```ts
 import { env } from 'cloudflare:workers';
@@ -118,9 +118,9 @@ import { env } from 'cloudflare:workers';
 const { results } = await env.DB.prepare('SELECT * FROM users').all();
 ```
 
-## Existing SvelteKit 2 apps
+## 既存の SvelteKit 2 アプリ {#existing-sveltekit-2-apps}
 
-Use SvelteKit 2.62 or later with `@sveltejs/adapter-cloudflare` 7. The Vite configuration above also works with Kit 2; add Void's tsconfig hook to the `sveltekit()` options:
+SvelteKit 2.62 以降と `@sveltejs/adapter-cloudflare` 7 を使用します。上記の Vite 設定は Kit 2 でも動作します。`sveltekit()` のオプションに、Void の tsconfig フックを追加してください。
 
 ```ts
 import { withVoidTSConfig } from 'void/sveltekit';
@@ -136,7 +136,7 @@ sveltekit({
 });
 ```
 
-Keep the Kit 2 tsconfig setup:
+Kit 2 の tsconfig の設定を維持してください。
 
 ```json
 {
@@ -147,4 +147,4 @@ Keep the Kit 2 tsconfig setup:
 }
 ```
 
-If your app uses `svelte.config.js` or `svelte.config.ts`, keep its configuration and add `typescript.config: withVoidTSConfig()` under `kit`. Kit 2's `platform.env` remains available in hooks and load functions.
+アプリが `svelte.config.js` または `svelte.config.ts` を使用している場合は、その設定を維持したまま、`kit` の下に `typescript.config: withVoidTSConfig()` を追加します。Kit 2 の `platform.env` は、フックと load 関数で引き続き利用できます。

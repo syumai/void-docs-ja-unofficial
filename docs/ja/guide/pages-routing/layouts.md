@@ -8,12 +8,12 @@ function layoutBasicItems(ext) {
     {
       name: "pages/",
       children: [
-        { name: `layout${ext}`, description: "Root layout (nav, footer)" },
+        { name: `layout${ext}`, description: "ルートレイアウト（ナビゲーション、フッター）" },
         { name: `index${ext}` },
         {
           name: "users/",
           children: [
-            { name: `layout${ext}`, description: "Nested layout for /users/*" },
+            { name: `layout${ext}`, description: "/users/* 用のネストされたレイアウト" },
             { name: `index${ext}` },
             { name: `[id]${ext}` },
           ],
@@ -31,11 +31,11 @@ function namedLayoutItems(ext) {
         {
           name: "_layouts/",
           children: [
-            { name: `landing${ext}`, description: 'named "landing"' },
-            { name: `post${ext}`, description: 'named "post"' },
+            { name: `landing${ext}`, description: '"landing" という名前' },
+            { name: `post${ext}`, description: '"post" という名前' },
           ],
         },
-        { name: `layout${ext}`, description: "default root layout" },
+        { name: `layout${ext}`, description: "デフォルトのルートレイアウト" },
         { name: `index${ext}` },
         {
           name: "blog/",
@@ -44,7 +44,7 @@ function namedLayoutItems(ext) {
             { name: "archive.md", description: "layout: landing" },
           ],
         },
-        { name: `pricing${ext}`, description: "layout: !landing (exclusive)" },
+        { name: `pricing${ext}`, description: "layout: !landing（排他的）" },
       ],
     },
   ]
@@ -52,13 +52,13 @@ function namedLayoutItems(ext) {
 
 </script>
 
-# Layouts & Shared Data
+# レイアウトと共有データ {#layouts-shared-data}
 
-Use layouts for navigation, headers, and other UI shared by several pages. Layouts nest with your directories and keep their component state as you navigate.
+ナビゲーション、ヘッダー、その他複数のページで共有する UI には、レイアウトを使います。レイアウトはディレクトリに沿ってネストされ、ナビゲーションしてもコンポーネントの状態が保持されます。
 
-## Layouts
+## レイアウト {#layouts}
 
-Place a layout file in a `pages/` directory to wrap its pages:
+`pages/` ディレクトリにレイアウトファイルを置くと、そのディレクトリのページを包みます。
 
 <FileTree :items="layoutBasicItems" adapter-tabs default-expanded />
 
@@ -142,19 +142,19 @@ export default function Layout(props: { children: JSX.Element }) {
 
 :::
 
-When a page renders, the layout wraps it. The page component is injected as the layout's children in React, Solid, and Svelte, or as a slot in Vue:
+ページがレンダリングされると、レイアウトがそれを包みます。ページコンポーネントは、React、Solid、Svelte ではレイアウトの children として、Vue ではスロットとして注入されます。
 
-<img src="./layout-nesting.svg" alt="Layout nesting diagram: pages/layout wraps pages/users/layout wraps pages/users/[id] page component" style="max-width: 520px; width: 100%;" />
+<img src="./layout-nesting.svg" alt="レイアウトのネストを示す図: pages/layout が pages/users/layout を包み、それが pages/users/[id] のページコンポーネントを包む" style="max-width: 520px; width: 100%;" />
 
-## Named Layouts
+## 名前付きレイアウト {#named-layouts}
 
-Named layouts let individual pages opt into a different layout without changing the URL structure. Define them in `_layouts/` directories within `pages/`:
+名前付きレイアウトを使うと、URL の構造を変えずに、個々のページが別のレイアウトを選択できます。`pages/` 内の `_layouts/` ディレクトリに定義します。
 
 <FileTree :items="namedLayoutItems" adapter-tabs default-expanded />
 
-### Selecting a named layout
+### 名前付きレイアウトを選択する {#selecting-a-named-layout}
 
-Export a `layout` constant from any page:
+任意のページから `layout` 定数をエクスポートします。
 
 ::: code-group
 
@@ -194,7 +194,7 @@ export default function Page() {
 
 :::
 
-For markdown pages, use frontmatter:
+Markdown ページでは、フロントマターを使います。
 
 ```md
 ---
@@ -204,21 +204,21 @@ layout: post
 # My Blog Post
 ```
 
-### Layout modes
+### レイアウトモード {#layout-modes}
 
-| Value        | Behavior                                                                       |
-| ------------ | ------------------------------------------------------------------------------ |
-| `"landing"`  | Replace the innermost layout in the chain. Outer ancestor layouts still apply. |
-| `"!landing"` | Replace the **entire** chain. Only the named layout wraps the page.            |
-| `false`      | No layout wrapping at all. Page renders standalone.                            |
+| 値           | 動作                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| `"landing"`  | チェーンの最も内側のレイアウトを置き換えます。外側の祖先レイアウトは引き続き適用されます。 |
+| `"!landing"` | チェーン**全体**を置き換えます。名前付きレイアウトのみがページを包みます。                 |
+| `false`      | レイアウトで一切包みません。ページは単独でレンダリングされます。                           |
 
-A named layout replaces the deepest default layout: in `[root, docs/layout]`, it replaces `docs/layout`; in `[root]`, it replaces the root.
+名前付きレイアウトは、最も深いデフォルトレイアウトを置き換えます。`[root, docs/layout]` では `docs/layout` を、`[root]` ではルートを置き換えます。
 
-Void uses the closest matching `_layouts/` file in the page's directory or an ancestor. A missing named layout fails the build.
+Void は、ページのディレクトリまたはその祖先ディレクトリにある、最も近い一致する `_layouts/` のファイルを使います。名前付きレイアウトが存在しない場合、ビルドは失敗します。
 
-## Shared Data
+## 共有データ {#shared-data}
 
-Middleware can inject data available on every page via `c.set("shared", {...})`. Augment `CloudContextVariables` to type the shared data, and `useShared()` will infer the type automatically:
+ミドルウェアは、`c.set("shared", {...})` を通じて、すべてのページで利用できるデータを注入できます。`CloudContextVariables` を拡張して共有データに型を付けると、`useShared()` が自動的にその型を推論します。
 
 ```ts
 // middleware/01.auth.ts
@@ -238,4 +238,4 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-Call `useShared()` from your framework adapter, as in the layout examples above. Its return type is inferred from `CloudContextVariables`. Shared data comes from middleware; page props come from the loader. See [Context variables](../type-safety.md#context-variables).
+上記のレイアウトの例のように、フレームワークアダプターの `useShared()` を呼び出します。戻り値の型は `CloudContextVariables` から推論されます。共有データはミドルウェアから、ページの props はローダーから提供されます。[コンテキスト変数](../type-safety.md#context-variables)を参照してください。

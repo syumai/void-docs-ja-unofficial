@@ -2,86 +2,86 @@
 outline: deep
 ---
 
-# Operations
+# 運用 {#operations}
 
-## Previewing Changes
+## 変更のプレビュー {#previewing-changes}
 
-Commands that change the platform show the affected objects before asking for confirmation. To inspect a change without applying it, add `--plan`:
+プラットフォームを変更するコマンドは、確認を求める前に影響を受けるオブジェクトを表示します。変更を適用せずに確認するには、`--plan` を追加します。
 
 ```sh
 void platform user suspend <user-id> --reason "Investigating unexpected traffic" --plan
 ```
 
-The preview shows which account will be suspended and the effect on its projects. Run the command again without `--plan` to confirm interactively, or use `--yes` when the change is ready to apply:
+プレビューには、停止されるアカウントと、そのプロジェクトへの影響が表示されます。対話的に確認するには `--plan` を付けずにもう一度コマンドを実行し、変更を適用する準備ができている場合は `--yes` を使用します。
 
 ```sh
 void platform user suspend <user-id> --reason "Investigating unexpected traffic" --yes
 ```
 
-Scripts must use `--yes` to apply these changes. The `void platform auth` session commands run directly and do not use `--plan` or `--yes`; changes under `void platform config auth` do use previews and confirmation. After a change, `void platform system events` shows the administrator, affected objects, and recorded outcome.
+スクリプトでこれらの変更を適用するには `--yes` を使用する必要があります。`void platform auth` のセッションコマンドは直接実行され、`--plan` や `--yes` は使用しません。`void platform config auth` 配下の変更では、プレビューと確認が使用されます。変更後は `void platform system events` で、管理者、影響を受けたオブジェクト、記録された結果を確認できます。
 
-Changes can take longer when an account owns many resources. Requests that change the platform allow five minutes by default; use `--timeout` to set a different limit in seconds:
+アカウントが多くのリソースを所有している場合、変更に時間がかかることがあります。プラットフォームを変更するリクエストは既定で 5 分まで待機します。別の上限を秒単位で設定するには `--timeout` を使用します。
 
 ```sh
 void platform user delete <user-id> --timeout 600 --plan
 ```
 
-If a request times out or loses its connection, some work may already have finished. Check the affected objects and `system events` before retrying. Void reports partial results when it can and does not automatically repeat the change.
+リクエストがタイムアウトしたり接続が失われたりした場合でも、一部の処理はすでに完了している可能性があります。再試行する前に、影響を受けるオブジェクトと `system events` を確認してください。Void は可能な場合は部分的な結果を報告し、変更を自動的に再実行することはありません。
 
-## Following Logs
+## ログの追跡 {#following-logs}
 
-To investigate a deployment, find its ID and follow its runtime logs:
+デプロイを調査するには、その ID を調べて、ランタイムログを追跡します。
 
 ```sh
 void platform deployment list --project <project-id>
 void platform deployment logs <deployment-id> --since 10m --follow
 ```
 
-Runtime logs include application messages, exceptions, and HTTP status codes. Without `--follow`, the command reads a page of historical logs. Use `--since` to choose a duration, an ISO date, or a timestamp in milliseconds.
+ランタイムログには、アプリケーションのメッセージ、例外、HTTP ステータスコードが含まれます。`--follow` を付けない場合、コマンドは過去のログを 1 ページ分読み取ります。`--since` には、期間、ISO 形式の日付、またはミリ秒単位のタイムスタンプを指定できます。
 
-Logs can become available after a request finishes. Following checks a five-minute overlap to pick up delayed records without printing them again. Records delayed longer than that may need a later historical query.
+ログは、リクエストの完了後に利用可能になることがあります。追跡中は 5 分間のオーバーラップを確認することで、遅れて届いたレコードを重複して出力することなく取得します。それ以上遅れたレコードは、後から過去ログを問い合わせる必要がある場合があります。
 
-Build logs use the build's ID:
+ビルドログには、ビルドの ID を使用します。
 
 ```sh
 void platform build logs <build-id> --follow
 ```
 
-Following waits for the final logs before stopping, including diagnostics written after the build's status changes. For a GitHub Actions build, the command gives you the URL of its logs.
+追跡は、ビルドのステータスが変わった後に書き込まれる診断情報も含め、最終的なログを待ってから停止します。GitHub Actions のビルドでは、コマンドがそのログの URL を表示します。
 
-## Checking the Platform
+## プラットフォームの確認 {#checking-the-platform}
 
-### Health checks
+### ヘルスチェック {#health-checks}
 
-Use the overview to see recent activity, or run a health check to test the platform's services and database:
+概要で最近のアクティビティを確認するか、ヘルスチェックを実行してプラットフォームのサービスとデータベースをテストします。
 
 ```sh
 void platform system overview
 void platform system health
 ```
 
-Health checks use the services configured for the selected platform. An unhealthy result exits with a nonzero status, so the same command can be used in a script.
+ヘルスチェックは、選択したプラットフォームに設定されているサービスを使用します。異常な結果の場合は 0 以外のステータスで終了するため、同じコマンドをスクリプトでも使用できます。
 
-The dashboard’s **System Status** page refreshes health checks every 30 seconds and shows errors beside the affected service.
+ダッシュボードの **System Status** ページは、ヘルスチェックを 30 秒ごとに更新し、影響を受けたサービスの横にエラーを表示します。
 
-Use `void platform upgrade`, `repair`, `disable`, and `enable` to maintain your platform. See [platform maintenance](/guide/platform/installation/maintenance#resume-repair-recover-and-upgrade).
+プラットフォームを保守するには、`void platform upgrade`、`repair`、`disable`、`enable` を使用します。[プラットフォームのメンテナンス](/ja/guide/platform/installation/maintenance#resume-repair-recover-and-upgrade)を参照してください。
 
-During an upgrade or rollback, the admin UI shows progress at `/admin/status`. See [Follow upgrade and rollback progress](/guide/platform/installation/maintenance#follow-upgrade-and-rollback-progress).
+アップグレードやロールバックの間、管理 UI は `/admin/status` で進行状況を表示します。[アップグレードとロールバックの進行状況を追跡する](/ja/guide/platform/installation/maintenance#follow-upgrade-and-rollback-progress)を参照してください。
 
-For backups and restores, see [Prepare for disaster recovery](/guide/platform/installation/maintenance#prepare-for-disaster-recovery).
+バックアップとリストアについては、[ディザスタリカバリーの準備](/ja/guide/platform/installation/maintenance#prepare-for-disaster-recovery)を参照してください。
 
-## Using Scripts
+## スクリプトの使用 {#using-scripts}
 
-Add `--json` to read a command's result from another program:
+コマンドの結果を別のプログラムから読み取るには、`--json` を追加します。
 
 ```sh
 void platform user list --page 1 --limit 50 --json
 void platform system health --json
 ```
 
-Results go to standard output. Command errors go to standard error as JSON and exit with a nonzero status. With `--follow`, each log response is a separate JSON line.
+結果は標準出力に出力されます。コマンドのエラーは JSON として標準エラーに出力され、0 以外のステータスで終了します。`--follow` を使うと、各ログのレスポンスは個別の JSON 行になります。
 
-Operator tokens expire after one hour. For CI, mint a new operator token at the start of each job from a valid full API login session belonging to an active administrator. Choose the platform explicitly, inject the full session as `VOID_TOKEN` from your secret manager, and capture the exchange output directly into the protected job environment:
+オペレータートークンは 1 時間で期限切れになります。CI では、アクティブな管理者に属する有効なフル API ログインセッションから、ジョブの開始時に新しいオペレータートークンを発行してください。プラットフォームを明示的に選択し、シークレットマネージャーからフルセッションを `VOID_TOKEN` として注入して、交換の出力を保護されたジョブ環境に直接取り込みます。
 
 ```sh
 export VOID_API_URL=https://platform.example.com
@@ -94,6 +94,6 @@ void platform system health --json
 unset VOID_OPERATOR_TOKEN
 ```
 
-Disable shell tracing for the exchange and do not write either token to logs or plaintext files. A full API login session expires after 30 days and can be revoked sooner; renew it through the normal authenticated login flow and update the protected CI secret. A job that runs longer than one hour must repeat the exchange while its full API session is still valid. An expired operator token cannot refresh itself, and Void does not issue permanent service tokens for administrator automation.
+交換の間はシェルのトレースを無効にし、どちらのトークンもログや平文のファイルに書き込まないでください。フル API ログインセッションは 30 日で期限切れになり、それより前に失効させることもできます。通常の認証済みログインフローで更新し、保護された CI のシークレットを更新してください。1 時間を超えて実行されるジョブは、フル API セッションが有効なうちに交換を繰り返す必要があります。期限切れのオペレータートークンは自分自身を更新できません。また、Void は管理者の自動化のための永続的なサービストークンを発行しません。
 
-`auth login --token-stdin` performs the same elevation and saves the one-hour operator token in the system keychain for interactive use. See [operator authentication](../../../reference/cli/platform.md#operator-authentication) for the full command syntax.
+`auth login --token-stdin` は同じ昇格を実行し、1 時間有効なオペレータートークンを対話的な利用のためにシステムのキーチェーンに保存します。コマンドの完全な構文については、[オペレーター認証](../../../reference/cli/platform.md#operator-authentication)を参照してください。

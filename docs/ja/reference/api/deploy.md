@@ -1,14 +1,14 @@
-# Deployment artifacts
+# デプロイアーティファクト {#deployment-artifacts}
 
-Use `void/deploy` from Node.js to prepare a built Void app for a managed platform deployment without platform credentials.
+Node.js から `void/deploy` を使うと、プラットフォームの認証情報なしで、ビルド済みの Void アプリをマネージドプラットフォームへのデプロイ用に準備できます。
 
-Build the app in managed mode inside its isolated environment:
+分離された環境内で、マネージドモードでアプリをビルドします。
 
 ```sh
 VOID_DEPLOY_BUILD=1 VOID_DEPLOY_PROJECT_ID=artifact npm run build
 ```
 
-These values select a platform-compatible build. `artifact` is a build marker, not an existing project ID or a credential; the target project is selected during publish approval.
+これらの値は、プラットフォームと互換性のあるビルドを選択します。`artifact` はビルドのマーカーであり、既存のプロジェクト ID や認証情報ではありません。対象のプロジェクトは、公開の承認時に選択されます。
 
 ```ts
 import { prepareDeployArtifact } from 'void/deploy';
@@ -16,8 +16,8 @@ import { prepareDeployArtifact } from 'void/deploy';
 const { artifact, assets } = await prepareDeployArtifact('/path/to/app');
 ```
 
-`artifact` contains the deployment manifest, content-addressed asset metadata, and base64 Worker modules. `assets` maps asset URL paths to base64 bytes. Keep this result immutable while requesting [publish approval](/guide/platform/administration/connected-apps).
+`artifact` には、デプロイのマニフェスト、コンテンツアドレス指定のアセットのメタデータ、Base64 エンコードされた Worker モジュールが含まれます。`assets` は、アセットの URL パスを Base64 のバイト列にマッピングします。[公開の承認](/ja/guide/platform/administration/connected-apps)をリクエストする間は、この結果を変更しないでください。
 
-Preparation packages existing build output; it does not build, contact a platform, provision resources, or deploy. It supports Void Cloudflare Worker builds. Node targets, static output, remote data, deploy-time prerendering, Sandbox, and Live resources require the normal `void deploy` workflow instead.
+準備では既存のビルド出力をパッケージ化します。ビルド、プラットフォームへの接続、リソースのプロビジョニング、デプロイは行いません。Void の Cloudflare Worker ビルドをサポートしています。Node ターゲット、静的出力、リモートデータ、デプロイ時のプリレンダリング、Sandbox、Live リソースには、通常の `void deploy` ワークフローが必要です。
 
-Run preparation inside the same isolated environment as the app build. App configuration and build plugins execute project code; keep platform credentials on the publishing server.
+準備は、アプリのビルドと同じ分離された環境内で実行してください。アプリの設定とビルドプラグインはプロジェクトのコードを実行します。プラットフォームの認証情報は、公開を行うサーバーに保持してください。

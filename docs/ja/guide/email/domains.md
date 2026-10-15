@@ -2,39 +2,39 @@
 outline: deep
 ---
 
-# Email Domains and Setup
+# メールドメインとセットアップ {#email-domains-and-setup}
 
-Choose the setup for your deployment: register a domain on a Void platform, or configure email in your own Cloudflare account. For the platform’s shared sender, follow [Sending Email](./sending.md#setup).
+デプロイ環境に合わせたセットアップを選択してください。Void プラットフォームにドメインを登録する方法と、自分の Cloudflare アカウントでメールを設定する方法があります。プラットフォーム共有の送信元を使う場合は、[メールの送信](./sending.md#setup)に従ってください。
 
-## Your own domain on the platform {#your-own-domain-on-the-platform}
+## プラットフォーム上の独自ドメイン {#your-own-domain-on-the-platform}
 
-The shared sender uses the platform's configured mail domain. To send — and receive — at a domain you own, register its Cloudflare zone with the project:
+共有送信元は、プラットフォームに設定されたメールドメインを使用します。自分が所有するドメインで送信と受信を行うには、その Cloudflare ゾーンをプロジェクトに登録します。
 
 ```sh
 void email domain add acme.com
 ```
 
-`add` opens a Cloudflare API-token template. Restrict the token to the selected account and mail zone before creating it; Workers Scripts permission applies across that account. The CLI accepts a masked paste or a newly copied token and asks you to confirm those restrictions. The platform encrypts the credential for the zone connection, so projects sharing that zone do not need separate ingress Workers.
+`add` を実行すると、Cloudflare の API トークンテンプレートが開きます。トークンを作成する前に、選択したアカウントとメールゾーンに権限を絞ってください。Workers Scripts 権限はアカウント全体に適用されます。CLI はマスクされた貼り付け、または新しくコピーしたトークンを受け付け、これらの制限を確認するよう求めます。プラットフォームはゾーン接続用の認証情報を暗号化するため、そのゾーンを共有するプロジェクトごとに個別の受信用 Worker は必要ありません。
 
-Platform-managed custom inbound email requires the apex of a Cloudflare zone. Cloudflare’s catch-all only covers that apex, so a subdomain of the selected zone cannot receive arbitrary addresses. Choose an apex without another mail provider, or use the platform’s shared mail address. Void preserves foreign MX records and enabled catch-alls. Each custom apex belongs to one project; a project can register more than one apex.
+プラットフォームが管理するカスタム受信メールには、Cloudflare ゾーンのアペックス（ルートドメイン）が必要です。Cloudflare のキャッチオールはそのアペックスのみを対象とするため、選択したゾーンのサブドメインでは任意のアドレス宛のメールを受信できません。他のメールプロバイダーを使っていないアペックスを選ぶか、プラットフォーム共有のメールアドレスを使用してください。Void は他のプロバイダーの MX レコードと有効なキャッチオールを保持します。各カスタムアペックスは 1 つのプロジェクトに属しますが、1 つのプロジェクトが複数のアペックスを登録することもできます。
 
-If setup is interrupted, use `void email domain status <domain>` to inspect the saved operation before retrying.
+セットアップが中断された場合は、再試行する前に `void email domain status <domain>` で保存済みの操作を確認してください。
 
-`void email domain status <domain>` reports three independent results:
+`void email domain status <domain>` は、次の 3 つの独立した結果を報告します。
 
-- **Inbound**: whether mail can reach the project's handlers.
-- **Outbound**: whether sending is ready, restricted to verified destinations, pending, or blocked.
-- **Management**: whether the stored Cloudflare credential can manage the connection.
+- **Inbound**: メールがプロジェクトのハンドラーに到達できるかどうか。
+- **Outbound**: 送信の準備ができているか、検証済みの宛先に制限されているか、保留中か、ブロックされているか。
+- **Management**: 保存されている Cloudflare の認証情報で接続を管理できるかどうか。
 
-Use `void email domain sync <domain>` to finish setup and refresh readiness. The status lists any dashboard or credential steps still needed. Use `rotate-secret` to rotate the connection secret after inbound is ready, or `remove` to detach the domain. Revoke unused API tokens in Cloudflare. See [Email domain commands](../../reference/cli/email.md#void-email-domain).
+セットアップを完了して準備状況を更新するには、`void email domain sync <domain>` を使用します。ステータスには、まだ必要なダッシュボード操作や認証情報の手順が表示されます。受信の準備が整った後に接続シークレットをローテーションするには `rotate-secret` を、ドメインを切り離すには `remove` を使用します。使用していない API トークンは Cloudflare で失効させてください。[メールドメインコマンド](../../reference/cli/email.md#void-email-domain)を参照してください。
 
-Once inbound is ready, mail to any address on that domain reaches your `email/` handlers. Sending to arbitrary recipients also needs outbound readiness; a domain limited to verified destinations still requires recipient verification. Platform quotas and suspension apply to both shared and custom senders.
+受信の準備が整うと、そのドメイン上の任意のアドレス宛のメールが `email/` ハンドラーに届きます。任意の宛先への送信には送信側の準備も必要です。検証済みの宛先に制限されたドメインでは、引き続き宛先の検証が必要です。プラットフォームのクォータと停止措置は、共有送信元とカスタム送信元の両方に適用されます。
 
-On an administrator-managed platform, `add` prints the administrator command for new domains. Existing owner-managed connections remain available to their owner. Your administrator may permit shared-sender mail to specific recipient domains or any recipient; destinations on the platform's shared mail domain still require explicit verification.
+管理者が管理するプラットフォームでは、`add` は新しいドメイン向けの管理者用コマンドを表示します。所有者が管理している既存の接続は、引き続き所有者が利用できます。管理者は、共有送信元からのメールを特定の宛先ドメイン、または任意の宛先に許可する場合があります。プラットフォームの共有メールドメイン上の宛先は、引き続き明示的な検証が必要です。
 
-## Your own Cloudflare account {#your-own-cloudflare-account}
+## 自分の Cloudflare アカウント {#your-own-cloudflare-account}
 
-Set a sender on a Cloudflare zone you own:
+所有している Cloudflare ゾーンに送信元を設定します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -44,73 +44,73 @@ export default defineConfig({
 });
 ```
 
-Use a mail subdomain to keep existing mail on `acme.com` with its current provider. Void refuses to replace another provider's MX records.
+`acme.com` の既存のメールを現在のプロバイダーに残したい場合は、メール用のサブドメインを使用してください。Void は他のプロバイダーの MX レコードを置き換えることを拒否します。
 
-### Setup {#setup-1}
+### セットアップ {#setup-1}
 
-Sign in with `void cloudflare login`, or use a `CLOUDFLARE_API_TOKEN` with **Email Routing Edit** and **Email Sending Edit** in addition to deploy permissions. If your browser session lacks email permissions, log out and sign in again. Global API Keys aren't supported.
+`void cloudflare login` でサインインするか、デプロイ権限に加えて **Email Routing Edit** と **Email Sending Edit** を持つ `CLOUDFLARE_API_TOKEN` を使用します。ブラウザセッションにメール権限がない場合は、いったんログアウトして再度サインインしてください。Global API Key はサポートされていません。
 
-Run `void deploy --platform cloudflare`. Void shows the domain, routing, sending, DNS, and handler addresses it would configure. Accept to set up email and deploy. Later deploys reuse the setup. If you decline the initial setup, the app deploys without email.
+`void deploy --platform cloudflare` を実行します。Void は、設定しようとしているドメイン、ルーティング、送信、DNS、ハンドラーのアドレスを表示します。承認すると、メールのセットアップとデプロイが行われます。以降のデプロイでは、このセットアップが再利用されます。最初のセットアップを拒否した場合、アプリはメールなしでデプロイされます。
 
-Without `email.from`, Void skips automatic setup and preserves authored `cloudflare.send_email` bindings and `cloudflare.addresses`; check their readiness yourself. `--require-email` still refuses deployment when automatic setup cannot be verified.
+`email.from` がない場合、Void は自動セットアップをスキップし、自分で記述した `cloudflare.send_email` バインディングと `cloudflare.addresses` を保持します。それらの準備状況は自分で確認してください。自動セットアップを検証できない場合、`--require-email` を指定していればデプロイは引き続き拒否されます。
 
-If subdomain setup needs a dashboard step, follow the checklist under **Email → Settings → Subdomains**, then retry. After DNS changes, check readiness with:
+サブドメインのセットアップでダッシュボード上の手順が必要な場合は、**Email → Settings → Subdomains** にあるチェックリストに従ってから再試行してください。DNS を変更した後は、次のコマンドで準備状況を確認します。
 
 ```sh
 void email status --platform cloudflare
 ```
 
-### Inbound addresses {#inbound-addresses}
+### 受信アドレス {#inbound-addresses}
 
-With `email.from` on `mail.acme.com`, handlers receive:
+`email.from` が `mail.acme.com` にある場合、ハンドラーは次のアドレス宛のメールを受信します。
 
-| Handler                             | Subdomain address       | Zone apex address  |
-| ----------------------------------- | ----------------------- | ------------------ |
-| `support.ts`, `support+[ticket].ts` | `support@mail.acme.com` | `support@acme.com` |
-| `_default.ts`                       | No catch-all rule       | `*@acme.com`       |
-| `[user].ts`, `[user]+[tag].ts`      | Not supported           | `*@acme.com`       |
+| ハンドラー                          | サブドメインのアドレス   | ゾーンアペックスのアドレス |
+| ----------------------------------- | ------------------------ | -------------------------- |
+| `support.ts`, `support+[ticket].ts` | `support@mail.acme.com`  | `support@acme.com`         |
+| `_default.ts`                       | キャッチオールルールなし | `*@acme.com`               |
+| `[user].ts`, `[user]+[tag].ts`      | サポートなし             | `*@acme.com`               |
 
-Cloudflare catch-alls cover only a zone apex. On a subdomain, `_default.ts` can handle mail admitted by an explicit rule, but cannot receive arbitrary addresses.
+Cloudflare のキャッチオールはゾーンアペックスのみを対象とします。サブドメインでは、`_default.ts` は明示的なルールで許可されたメールを処理できますが、任意のアドレス宛のメールは受信できません。
 
-Setup enables the zone's plus addressing so `support+T-42@mail.acme.com` reaches `support+[ticket].ts`. This setting also applies to the apex and other subdomains.
+セットアップではゾーンのプラスアドレッシングが有効になるため、`support+T-42@mail.acme.com` は `support+[ticket].ts` に届きます。この設定はアペックスや他のサブドメインにも適用されます。
 
-`replyEmail()` defaults its sender to the address that received the message. Forwarding requires a verified Cloudflare destination.
+`replyEmail()` は、送信元をデフォルトでメッセージを受信したアドレスに設定します。転送には、検証済みの Cloudflare 宛先が必要です。
 
-### Sending {#sending}
+### 送信 {#sending}
 
-On Workers Free, `sendEmail()` can send to verified destinations listed under **Email Routing → Destination addresses** in Cloudflare.
+Workers Free では、`sendEmail()` は Cloudflare の **Email Routing → Destination addresses** に登録された検証済みの宛先に送信できます。
 
-Configure your sender domain's SPF, DKIM, and DMARC records using [Cloudflare's email authentication guidance](https://developers.cloudflare.com/email-service/concepts/email-authentication/), then check the authentication results in a received message's original headers. A successful `sendEmail()` result confirms provider acceptance; it does not confirm delivery or authentication readiness.
+[Cloudflare のメール認証に関するガイダンス](https://developers.cloudflare.com/email-service/concepts/email-authentication/)に従って送信元ドメインの SPF、DKIM、DMARC レコードを設定し、受信したメッセージの元のヘッダーで認証結果を確認してください。`sendEmail()` が成功しても、確認できるのはプロバイダーが受け付けたことだけであり、配信や認証の準備ができていることは保証されません。
 
-Sending to arbitrary recipients requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Email Sending onboarding. After upgrading, run `void email setup --platform cloudflare`. Void doesn't retry onboarding during ordinary deploys.
+任意の宛先に送信するには、[Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) と Email Sending のオンボーディングが必要です。アップグレード後に `void email setup --platform cloudflare` を実行してください。Void は通常のデプロイ中にオンボーディングを再試行しません。
 
-Existing DMARC or bounce-domain records can block onboarding; the checklist identifies conflicts to resolve. Inbound mail remains available.
+既存の DMARC または bounce ドメインのレコードがオンボーディングを妨げることがあります。チェックリストに、解消すべき競合が示されます。受信メールは引き続き利用できます。
 
-The `void email usage`, `logs`, `destinations`, `allow`, and `disallow` commands apply to Void platforms.
+`void email usage`、`logs`、`destinations`、`allow`、`disallow` コマンドは Void プラットフォームに対して使用します。
 
-### Configuration changes {#configuration-changes}
+### 設定の変更 {#configuration-changes}
 
-Commit `void.lock.json` after setup. Void derives routing addresses from your handlers and creates their rules during deployment.
+セットアップ後は `void.lock.json` をコミットしてください。Void はハンドラーからルーティングアドレスを導出し、デプロイ時にそのルールを作成します。
 
-Existing rules owned by another Worker or forwarding service are left in place. If you manage `cloudflare.addresses` yourself, follow the checklist rather than combining it with automatic email setup.
+別の Worker や転送サービスが所有している既存のルールはそのまま残されます。`cloudflare.addresses` を自分で管理している場合は、自動メールセットアップと組み合わせずに、チェックリストに従ってください。
 
-After deleting a handler, review the reported stale address and set the desired `cloudflare.addresses`. Deleting a routing rule requires confirmation in an interactive terminal.
+ハンドラーを削除した後は、報告された古いアドレスを確認し、必要な `cloudflare.addresses` を設定してください。ルーティングルールの削除には、対話型ターミナルでの確認が必要です。
 
-To remove all email setup, remove `addresses`, `send_email`, and `vars.__VOID_EMAIL_FROM` from `resolved` in `void.lock.json`, remove corresponding overrides in `void.config.ts`, and delete the routing rules in Cloudflare.
+メールのセットアップをすべて削除するには、`void.lock.json` の `resolved` から `addresses`、`send_email`、`vars.__VOID_EMAIL_FROM` を削除し、`void.config.ts` の対応するオーバーライドを削除し、Cloudflare 上のルーティングルールを削除します。
 
 ### CI {#ci}
 
-Set up email locally first:
+まずローカルでメールをセットアップします。
 
 ```sh
 void email setup --platform cloudflare
 void email status --platform cloudflare
 ```
 
-Commit `void.lock.json`, then deploy in CI with:
+`void.lock.json` をコミットし、CI では次のコマンドでデプロイします。
 
 ```sh
 void deploy --platform cloudflare --require-email
 ```
 
-CI cannot answer setup prompts. Without `--require-email`, an unconfigured app can deploy without email. If setup is saved but DNS hasn't propagated, deployment waits for a later retry. Workers Free setup for verified recipients satisfies `--require-email`.
+CI はセットアップのプロンプトに応答できません。`--require-email` がない場合、未設定のアプリはメールなしでデプロイされることがあります。セットアップは保存されているものの DNS が反映されていない場合、デプロイは後の再試行まで待機します。検証済みの宛先向けの Workers Free セットアップは、`--require-email` を満たします。

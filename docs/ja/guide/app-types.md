@@ -2,67 +2,67 @@
 outline: deep
 ---
 
-# Supported App Types
+# サポートされるアプリタイプ {#supported-app-types}
 
-Void supports three types of apps:
+Void は 3 種類のアプリをサポートしています。
 
-1. **Void apps:** Vite apps powered by Void's framework layer, including [API routes](./server-routing.md), [pages mode](./pages-routing/overview.md), [auth](./auth.md), [crons](./jobs.md), and [queues](./queues.md)
-2. **Meta frameworks:** [TanStack Start](https://tanstack.com/start/latest), [React Router](https://reactrouter.com/), [SvelteKit](https://svelte.dev/docs/kit), [Nuxt](https://nuxt.com/), and [Astro](https://astro.build/)
-3. **Static sites:** SPAs, sites built with tools like [VitePress](https://vitepress.dev/), or any directory of static files
+1. **Void アプリ:** [API ルート](./server-routing.md)、[Pages モード](./pages-routing/overview.md)、[認証](./auth.md)、[cron](./jobs.md)、[キュー](./queues.md) など、Void のフレームワーク層を利用する Vite アプリ
+2. **メタフレームワーク:** [TanStack Start](https://tanstack.com/start/latest)、[React Router](https://reactrouter.com/)、[SvelteKit](https://svelte.dev/docs/kit)、[Nuxt](https://nuxt.com/)、[Astro](https://astro.build/)
+3. **静的サイト:** SPA、[VitePress](https://vitepress.dev/) などのツールで構築したサイト、または任意の静的ファイルのディレクトリ
 
-The type is auto-detected from your project structure, or you can set it explicitly in [`void.config.ts`](../reference/config.md).
+タイプはプロジェクト構成から自動検出されます。[`void.config.ts`](../reference/config.md) で明示的に指定することもできます。
 
-## Void Apps
+## Void アプリ {#void-apps}
 
-In a Void app, Void handles server routing and deployment. Use React, Vue, Svelte, or Solid for server-rendered pages, or build a frontend with any library that works with Vite.
+Void アプリでは、サーバールーティングとデプロイを Void が担当します。サーバーレンダリングされるページには React、Vue、Svelte、Solid を使えます。また、Vite で動作する任意のライブラリでフロントエンドを構築することもできます。
 
-A Void app can be **API-only** (just `routes/`), a **SPA + API** (frontend in `src/` with API routes), or **full-stack with pages mode** (server-rendered pages in `pages/` with co-located data loading):
+Void アプリは、**API のみ**(`routes/` だけ)、**SPA + API**(`src/` にフロントエンド、API ルートを併用)、または **Pages モードのフルスタック**(`pages/` にサーバーレンダリングされるページを置き、データ読み込みを同じ場所に配置)のいずれかの構成にできます。
 
 <VoidAppFileTree annotations />
 
-Void serves API routes, page rendering, and optional [custom SSR](./ssr.md) alongside static assets. Resources such as D1, KV, and R2 are [inferred from your code](../reference/resource-inference.md) and provisioned when you deploy.
+Void は、API ルート、ページレンダリング、任意の[カスタム SSR](./ssr.md) を静的アセットとあわせて配信します。D1、KV、R2 などのリソースは[コードから推論](../reference/resource-inference.md)され、デプロイ時にプロビジョニングされます。
 
-Void apps can also use [`output: 'static'`](./ssg.md) to pre-render all pages at build time. That gives you a fully static site that can be deployed anywhere, with no Cloudflare Worker required.
+Void アプリでは [`output: 'static'`](./ssg.md) を使って、ビルド時にすべてのページをプリレンダリングすることもできます。これにより、Cloudflare Worker を必要とせず、どこにでもデプロイできる完全な静的サイトが得られます。
 
-**Deploy:** `void deploy` builds the app, provisions resources, applies migrations, and uploads it to your saved Cloudflare or Void target. See [Deployment](./deployment.md) for setup.
+**デプロイ:** `void deploy` はアプリをビルドし、リソースをプロビジョニングし、マイグレーションを適用して、保存済みの Cloudflare または Void のターゲットにアップロードします。セットアップについては[デプロイ](./deployment.md)を参照してください。
 
-## Meta Frameworks
+## メタフレームワーク {#meta-frameworks}
 
-Void supports deploying Vite-based meta-framework apps with `void deploy`. The framework owns routing and SSR. Void handles [binding inference](../reference/resource-inference.md), [typed DB queries](./database.md), migrations, and deployment.
+Void は、Vite ベースのメタフレームワークアプリを `void deploy` でデプロイできます。ルーティングと SSR はフレームワークが担当します。Void は[バインディングの推論](../reference/resource-inference.md)、[型付き DB クエリ](./database.md)、マイグレーション、デプロイを担当します。
 
-| Framework                                           | Detected from package   | Setup guide                                           |
-| --------------------------------------------------- | ----------------------- | ----------------------------------------------------- |
-| [TanStack Start](https://tanstack.com/start/latest) | `@tanstack/react-start` | [Guide](../integrations/frameworks/tanstack-start.md) |
-| [React Router v7](https://reactrouter.com/)         | `@react-router/dev`     | [Guide](../integrations/frameworks/react-router.md)   |
-| [SvelteKit](https://svelte.dev/docs/kit)            | `@sveltejs/kit`         | [Guide](../integrations/frameworks/sveltekit.md)      |
-| [Nuxt](https://nuxt.com/)                           | `nuxt`                  | [Guide](../integrations/frameworks/nuxt.md)           |
-| [Analog](https://analogjs.org/)                     | `@analogjs/platform`    | [Guide](../integrations/frameworks/analog.md)         |
-| [Astro](https://astro.build/)                       | `astro`                 | [Guide](../integrations/frameworks/astro.md)          |
+| フレームワーク                                      | 検出されるパッケージ    | セットアップガイド                                     |
+| --------------------------------------------------- | ----------------------- | ------------------------------------------------------ |
+| [TanStack Start](https://tanstack.com/start/latest) | `@tanstack/react-start` | [ガイド](../integrations/frameworks/tanstack-start.md) |
+| [React Router v7](https://reactrouter.com/)         | `@react-router/dev`     | [ガイド](../integrations/frameworks/react-router.md)   |
+| [SvelteKit](https://svelte.dev/docs/kit)            | `@sveltejs/kit`         | [ガイド](../integrations/frameworks/sveltekit.md)      |
+| [Nuxt](https://nuxt.com/)                           | `nuxt`                  | [ガイド](../integrations/frameworks/nuxt.md)           |
+| [Analog](https://analogjs.org/)                     | `@analogjs/platform`    | [ガイド](../integrations/frameworks/analog.md)         |
+| [Astro](https://astro.build/)                       | `astro`                 | [ガイド](../integrations/frameworks/astro.md)          |
 
-Add `voidPlugin()` to the framework's Vite config to get binding inference, typed DB generation, migration management, cron jobs, queues, and caching. Void-managed auth is not supported in framework mode; use Better Auth's official integration for your framework. See the [Meta Frameworks Integration](../integrations/frameworks/overview.md) for supported features and setup guides.
+フレームワークの Vite 設定に `voidPlugin()` を追加すると、バインディングの推論、型付き DB の生成、マイグレーション管理、cron ジョブ、キュー、キャッシュが利用できます。フレームワークモードでは Void が管理する認証はサポートされていません。お使いのフレームワーク向けの Better Auth 公式インテグレーションを使用してください。サポートされる機能とセットアップガイドについては、[メタフレームワークインテグレーション](../integrations/frameworks/overview.md)を参照してください。
 
-## Pre-built Static Sites
+## ビルド済みの静的サイト {#pre-built-static-sites}
 
-Any project that produces static files, whether that is an SPA, a static site, or a plain directory. Void serves the assets without requiring application code.
+SPA、静的サイト、単なるディレクトリなど、静的ファイルを生成するあらゆるプロジェクトが対象です。Void はアプリケーションコードを必要とせずにアセットを配信します。
 
-**SPAs** (client-side single-page apps) serve `index.html` with a 200 status for paths that match no file, so client-side routing works out of the box. On a Void platform, missing files under the hashed assets folder (`/assets/`) return 404 instead. Detected when `vite` is a dependency and no backend files exist.
+**SPA**(クライアントサイドのシングルページアプリ)は、どのファイルにも一致しないパスに対して `index.html` をステータス 200 で返すため、クライアントサイドルーティングがそのまま動作します。Void プラットフォームでは、ハッシュ付きアセットフォルダー(`/assets/`)配下の存在しないファイルは代わりに 404 を返します。`vite` が依存関係にあり、バックエンドファイルが存在しない場合に検出されます。
 
-**Static sites** (static site generators like VitePress, Docusaurus, or any pre-built directory) produce per-page HTML files. Detected when a known SSG is a dependency, or when using the `--dir` flag.
+**静的サイト**(VitePress、Docusaurus などの静的サイトジェネレーター、またはビルド済みの任意のディレクトリ)は、ページごとの HTML ファイルを生成します。既知の SSG が依存関係にある場合、または `--dir` フラグを使用した場合に検出されます。
 
-At the edge, the resolution order is:
+エッジでの解決順序は次のとおりです。
 
-1. Exact file path (`/styles.css` → `styles.css`)
-2. Nested index (`/about` → `about/index.html`)
-3. `404.html` with **status 404** (if the file exists)
-4. Plain 404 response
+1. 完全一致するファイルパス(`/styles.css` → `styles.css`)
+2. ネストされた index(`/about` → `about/index.html`)
+3. `404.html` を **ステータス 404** で返す(ファイルが存在する場合)
+4. 通常の 404 レスポンス
 
-**Deploy:** `void deploy` or `void deploy --dir <path>` uploads static files directly. Assets are served from the edge with automatic caching.
+**デプロイ:** `void deploy` または `void deploy --dir <path>` で静的ファイルを直接アップロードします。アセットはエッジから自動キャッシュ付きで配信されます。
 
-## Adding a backend to a static site
+## 静的サイトにバックエンドを追加する {#adding-a-backend-to-a-static-site}
 
-If you add API routes to a static site generator, tell Void whether to deploy the backend too. Auto-detection sees both the SSG dependency and backend files, and stops until you set `inference.appType`.
+静的サイトジェネレーターに API ルートを追加する場合は、バックエンドもデプロイするかどうかを Void に伝えてください。自動検出は SSG の依存関係とバックエンドファイルの両方を検出し、`inference.appType` を設定するまで処理を停止します。
 
-To deploy both, set `appType` to `"void"` and build the static site before the Void app:
+両方をデプロイするには、`appType` を `"void"` に設定し、Void アプリより先に静的サイトをビルドします。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -87,23 +87,23 @@ export default defineConfig({
 });
 ```
 
-`vitepress build` emits the site, then `vite build` copies `publicDir` into `dist/client` and emits the worker into `dist/ssr`. Keep `voidPlugin()` in the **root** `vite.config.ts` only — not in the generator's own config (e.g. `.vitepress/config.ts`).
+`vitepress build` がサイトを出力し、続いて `vite build` が `publicDir` を `dist/client` にコピーし、Worker を `dist/ssr` に出力します。`voidPlugin()` は**ルートの** `vite.config.ts` にのみ置いてください。ジェネレーター自身の設定(例: `.vitepress/config.ts`)には置かないでください。
 
-The Worker handles unmatched requests. Set [`routing.notFound`](../reference/config.md#routing-notfound) to serve the generator's `404.html` for those requests:
+一致しないリクエストは Worker が処理します。それらのリクエストにジェネレーターの `404.html` を返すには、[`routing.notFound`](../reference/config.md#routing-notfound) を設定します。
 
 ```json
 { "routing": { "notFound": "404-page" } }
 ```
 
-To deploy only the static output, set:
+静的な出力だけをデプロイするには、次のように設定します。
 
 ```json
 { "inference": { "appType": "static" } }
 ```
 
-## Explicit Configuration
+## 明示的な設定 {#explicit-configuration}
 
-To lock the app type and skip auto-detection, set `inference.appType` in [`void.config.ts`](../reference/config.md):
+アプリタイプを固定して自動検出をスキップするには、[`void.config.ts`](../reference/config.md) で `inference.appType` を設定します。
 
 ```json
 {
@@ -114,5 +114,5 @@ To lock the app type and skip auto-detection, set `inference.appType` in [`void.
 }
 ```
 
-- `inference.appType`: `"void"`, `"framework"`, `"spa"`, or `"static"`
-- `inference.outputDir`: output directory for static app types (relative to project root, defaults to `"dist"`)
+- `inference.appType`: `"void"`、`"framework"`、`"spa"`、または `"static"`
+- `inference.outputDir`: 静的アプリタイプの出力ディレクトリ(プロジェクトルートからの相対パス。デフォルトは `"dist"`)

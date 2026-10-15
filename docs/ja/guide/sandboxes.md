@@ -2,15 +2,15 @@
 outline: deep
 ---
 
-# Sandboxes
+# Sandboxes {#sandboxes}
 
-Use a Cloudflare Sandbox to run commands, work with files, and connect to servers from server code. Each Sandbox ID selects an isolated container.
+Cloudflare Sandbox を使うと、サーバーコードからコマンドの実行、ファイルの操作、サーバーへの接続ができます。Sandbox ID ごとに、分離されたコンテナが選択されます。
 
-## Requirements
+## 要件 {#requirements}
 
-Cloudflare deployments require [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Run Docker for local development and direct deployments that build an image. A team platform's runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit.
+Cloudflare へのデプロイには、[Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) と Containers へのアクセスが必要です。ローカル開発と、イメージをビルドする直接デプロイでは Docker を実行してください。チームプラットフォームのランタイムトークンには、Account / Containers: Edit と Account / Cloudchamber: Edit が必要です。
 
-## Run a command
+## コマンドを実行する {#run-a-command}
 
 ```ts
 import { defineHandler } from 'void';
@@ -26,11 +26,11 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Importing from `void/sandbox` enables the required resources. Local development, direct Cloudflare deployments, and team platforms share the same runtime API.
+`void/sandbox` からインポートすると、必要なリソースが有効になります。ローカル開発、Cloudflare への直接デプロイ、チームプラットフォームでは、同じランタイム API を共有します。
 
-## Runtime API
+## ランタイム API {#runtime-api}
 
-`getSandbox(id, options)` resolves a Sandbox without starting it. The first command, file operation, or port request starts the container. IDs contain 1–63 characters and are lowercased by default; pass `normalizeId: false` to preserve case.
+`getSandbox(id, options)` は、Sandbox を起動せずに解決します。最初のコマンド、ファイル操作、ポートへのリクエストでコンテナが起動します。ID は 1〜63 文字で、デフォルトでは小文字に変換されます。大文字小文字を保持するには `normalizeId: false` を渡します。
 
 ```ts
 import { getSandbox } from 'void/sandbox';
@@ -44,29 +44,29 @@ const result = await sandbox.run(['node', '--version'], {
 });
 ```
 
-Commands take an executable and arguments as an array. For shell syntax, explicitly run `['sh', '-c', command]`. Execution options include `cwd` (default `/workspace`), `env`, `user`, `signal`, `pty`, `stdin`, `stdout`, and `stderr`.
+コマンドは、実行ファイルと引数を配列で受け取ります。シェル構文を使うには、`['sh', '-c', command]` を明示的に実行してください。実行オプションには、`cwd`(デフォルトは `/workspace`)、`env`、`user`、`signal`、`pty`、`stdin`、`stdout`、`stderr` があります。
 
-Sandbox operations return promises. `run()` resolves with `stdout` and `stderr` as `ArrayBuffer`s and the command's exit code. Usage limits reject with [`UsageLimit`](#usage-limits); other failures reject normally.
+Sandbox の操作は Promise を返します。`run()` は、`ArrayBuffer` としての `stdout` と `stderr`、およびコマンドの終了コードで解決されます。使用量の制限に達すると [`UsageLimit`](#usage-limits) で reject されます。それ以外の失敗は通常どおり reject されます。
 
-`exec()` resolves with a process. Await `process.output()` to collect its output and exit code, or read the streams and await `process.exitCode`. Waiting for completion keeps a long command active during pauses in its output; unattended background commands can stop when the Sandbox becomes idle. A runtime limit can reject completion after a command has successfully started.
+`exec()` はプロセスで解決されます。`process.output()` を await して出力と終了コードを収集するか、ストリームを読み取って `process.exitCode` を await します。完了を待つことで、出力が途切れている間も長時間のコマンドがアクティブに保たれます。待機していないバックグラウンドのコマンドは、Sandbox がアイドル状態になると停止することがあります。コマンドが正常に開始された後でも、ランタイムの制限によって完了が reject される場合があります。
 
-Use `stdin: 'pipe'` for a writable input stream. `kill(signal?)` stops a process, and `resize(cols, rows)` resizes its terminal.
+書き込み可能な入力ストリームには `stdin: 'pipe'` を使用します。`kill(signal?)` はプロセスを停止し、`resize(cols, rows)` はそのターミナルのサイズを変更します。
 
-File operations live under `sandbox.files`: `readFile`, `writeFile`, `stat`, `lstat`, `readDirectory`, `mkdir`, `rename`, and `remove`. Await `readFile()` to receive a streaming `Response`, then use `.text()`, `.arrayBuffer()`, or `.body`. `writeFile()` accepts text, binary data, or a byte stream. Relative file paths require an explicit `cwd` option.
+ファイル操作は `sandbox.files` にあります。`readFile`、`writeFile`、`stat`、`lstat`、`readDirectory`、`mkdir`、`rename`、`remove` です。`readFile()` を await するとストリーミングの `Response` が得られるので、`.text()`、`.arrayBuffer()`、`.body` を使用します。`writeFile()` は、テキスト、バイナリデータ、バイトストリームを受け付けます。相対ファイルパスを使う場合は、`cwd` オプションを明示する必要があります。
 
-To reach a server inside the container, await `sandbox.fetch(port, new Request(url))`. `sandbox.running()` checks whether the container is running; `sandbox.destroy()` stops it.
+コンテナ内のサーバーにアクセスするには、`sandbox.fetch(port, new Request(url))` を await します。`sandbox.running()` はコンテナが実行中かどうかを確認し、`sandbox.destroy()` はコンテナを停止します。
 
-On native Cloudflare deployments, `sandbox.fetch()` also supports WebSocket upgrade requests. Return its response from your Worker handler to connect the client to the container. WebSocket upgrades are currently unavailable on managed Void deployments.
+ネイティブな Cloudflare デプロイでは、`sandbox.fetch()` は WebSocket のアップグレードリクエストにも対応します。そのレスポンスを Worker のハンドラーから返すと、クライアントがコンテナに接続されます。WebSocket のアップグレードは、現時点ではマネージドな Void デプロイでは利用できません。
 
-`getSandbox()` options include `inactivityTimeoutMs` (default ten minutes, maximum six hours), `enableInternet` (default `false`), and string `labels`. Internet access and labels take effect on the next container start. `binding` selects a custom native binding; managed platforms use the configured binding.
+`getSandbox()` のオプションには、`inactivityTimeoutMs`(デフォルトは 10 分、最大 6 時間)、`enableInternet`(デフォルトは `false`)、文字列の `labels` があります。インターネットアクセスとラベルは、次回のコンテナ起動時に反映されます。`binding` はカスタムのネイティブバインディングを選択します。マネージドなプラットフォームでは、設定済みのバインディングが使用されます。
 
-For code that runs on both deployment targets, use `getSandbox()`. Direct access through `c.env.SANDBOX` is available only on local and native Cloudflare deployments.
+両方のデプロイ先で動作させるコードには、`getSandbox()` を使用してください。`c.env.SANDBOX` による直接アクセスは、ローカルとネイティブな Cloudflare デプロイでのみ利用できます。
 
-## Usage limits
+## 使用量の制限 {#usage-limits}
 
-Sandbox limits reject with `SandboxLimitError`, which extends `UsageLimit` from `void/limits`. The error includes `resource: 'sandbox'` and a `reason` of `concurrency` or `runtime_budget`. Void route handlers and Pages actions automatically send a structured HTTP 429 when the error is left uncaught.
+Sandbox の制限は、`void/limits` の `UsageLimit` を継承した `SandboxLimitError` で reject されます。このエラーには `resource: 'sandbox'` と、`concurrency` または `runtime_budget` の `reason` が含まれます。このエラーがキャッチされなかった場合、Void のルートハンドラーと Pages の action は、構造化された HTTP 429 を自動的に返します。
 
-Use `instanceof UsageLimit` to optionally handle both AI and Sandbox limits, or `instanceof SandboxLimitError` for Sandbox-specific handling:
+AI と Sandbox の両方の制限を処理したい場合は `instanceof UsageLimit` を、Sandbox 固有の処理には `instanceof SandboxLimitError` を使用します。
 
 ```ts
 import { defineHandler } from 'void';
@@ -89,19 +89,19 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Keep user input available so it can be retried. Checking `running()`, stopping a process, and `destroy()` remain available after a usage limit.
+再試行できるように、ユーザーの入力は保持しておいてください。使用量の制限に達した後も、`running()` の確認、プロセスの停止、`destroy()` は引き続き利用できます。
 
-## State persistence
+## 状態の永続化 {#state-persistence}
 
-`getSandbox(id)` selects the same Durable Object for that ID within a deployment. Native Cloudflare deployments preserve that namespace across Worker versions. Each managed platform deployment has its own namespace; rolling back to a retained deployment reconnects to that deployment's namespace.
+`getSandbox(id)` は、デプロイ内でその ID に対して同じ Durable Object を選択します。ネイティブな Cloudflare デプロイでは、その名前空間が Worker のバージョンをまたいで保持されます。マネージドなプラットフォームでは、デプロイごとに独自の名前空間があります。保持されているデプロイにロールバックすると、そのデプロイの名前空間に再接続されます。
 
-Files, running processes, and listening servers last only as long as the container. It can stop after inactivity, crash, or restart. Save anything you need to keep in your database, KV, or R2. Deleting a project on a Void platform removes both its Durable Objects and containers.
+ファイル、実行中のプロセス、待ち受け中のサーバーは、コンテナが存在する間だけ保持されます。コンテナは、非アクティブ状態、クラッシュ、再起動によって停止することがあります。保持したいものは、データベース、KV、R2 に保存してください。Void プラットフォーム上でプロジェクトを削除すると、その Durable Objects とコンテナの両方が削除されます。
 
-## Configuration
+## 設定 {#configuration}
 
-The default environment provides Node.js 26 on Debian Trixie. Managed platform deploys use Cloudflare's managed Node.js image.
+デフォルトの環境では、Debian Trixie 上の Node.js 26 が提供されます。マネージドなプラットフォームへのデプロイでは、Cloudflare のマネージドな Node.js イメージが使用されます。
 
-Use `void.config.ts` when you need a custom image or container size:
+カスタムのイメージやコンテナサイズが必要な場合は、`void.config.ts` を使用します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -115,9 +115,9 @@ export default defineConfig({
 });
 ```
 
-See the [configuration reference](../reference/config.md#sandbox) for binding names, image settings, and container sizes.
+バインディング名、イメージの設定、コンテナのサイズについては、[設定リファレンス](../reference/config.md#sandbox)を参照してください。
 
-Custom images must include the helper matching Void's installed Sandbox SDK version. The SDK image supplies this binary, but is not a runnable environment itself:
+カスタムイメージには、Void にインストールされている Sandbox SDK のバージョンに対応するヘルパーを含める必要があります。このバイナリは SDK のイメージから取得しますが、SDK のイメージ自体は実行可能な環境ではありません。
 
 ```dockerfile
 FROM node:26.10.0-trixie-slim
@@ -126,8 +126,8 @@ WORKDIR /workspace
 CMD ["sleep", "infinity"]
 ```
 
-For a managed platform, push your custom image to that platform account's Cloudflare registry and set `platformImage` to its digest-pinned reference. If `image` is already a Cloudflare registry reference, it also becomes the default `platformImage`. External registries and mutable tags are not supported. See [Cloudflare's image management guide](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry).
+マネージドなプラットフォームでは、カスタムイメージをそのプラットフォームアカウントの Cloudflare レジストリにプッシュし、`platformImage` にダイジェストで固定した参照を設定します。`image` がすでに Cloudflare レジストリへの参照である場合は、それがデフォルトの `platformImage` にもなります。外部レジストリと可変タグはサポートされていません。[Cloudflare のイメージ管理ガイド](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry)を参照してください。
 
-## Deployment
+## デプロイ {#deployment}
 
-`void deploy --platform cloudflare` builds native images and deploys the Sandbox alongside the application. `void deploy` on a connected Void Platform applies the platform's Sandbox concurrency and runtime limits.
+`void deploy --platform cloudflare` は、ネイティブイメージをビルドし、アプリケーションと一緒に Sandbox をデプロイします。接続済みの Void Platform に対する `void deploy` では、そのプラットフォームの Sandbox の同時実行数とランタイムの制限が適用されます。

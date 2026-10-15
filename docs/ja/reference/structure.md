@@ -4,21 +4,21 @@ outline: deep
 
 <script setup>
 const items = [
-  { name: "routes/", description: "API endpoints (file-based routing)", link: "#routes" },
-  { name: "pages/", description: "Full-stack server-rendered pages", link: "#pages" },
-  { name: "middleware/", description: "Global request middleware", link: "#middleware" },
-  { name: "db/", description: "Drizzle schema and SQL migrations", link: "#db" },
-  { name: "crons/", description: "Scheduled cron jobs", link: "#crons" },
-  { name: "queues/", description: "Async queue consumers", link: "#queues" },
-  { name: "email/", description: "Inbound email handlers", link: "#email" },
-  { name: "durable-objects/", description: "Durable State modules", link: "#durable-objects" },
-  { name: "src/", description: "Shared app code", link: "#src" },
-  { name: "public/", description: "Static assets (served as-is)", link: "#public" },
-  { name: ".void/", description: "Auto-generated (gitignored)", link: "#void" },
-  { name: "vite.config.ts", description: "Vite config with voidPlugin()", link: "#config-files" },
-  { name: "void.config.ts", description: "Void project config (optional)", link: "#config-files" },
-  { name: ".env", description: "Local environment values", link: "#config-files" },
-  { name: "env.ts", description: "Environment schema", link: "#config-files" },
+  { name: "routes/", description: "API エンドポイント（ファイルベースルーティング）", link: "#routes" },
+  { name: "pages/", description: "フルスタックのサーバーレンダリングページ", link: "#pages" },
+  { name: "middleware/", description: "グローバルなリクエストミドルウェア", link: "#middleware" },
+  { name: "db/", description: "Drizzle スキーマと SQL マイグレーション", link: "#db" },
+  { name: "crons/", description: "スケジュールされた cron ジョブ", link: "#crons" },
+  { name: "queues/", description: "非同期のキューコンシューマー", link: "#queues" },
+  { name: "email/", description: "受信メールのハンドラー", link: "#email" },
+  { name: "durable-objects/", description: "Durable State モジュール", link: "#durable-objects" },
+  { name: "src/", description: "共有のアプリケーションコード", link: "#src" },
+  { name: "public/", description: "静的アセット（そのまま配信）", link: "#public" },
+  { name: ".void/", description: "自動生成（gitignore 対象）", link: "#void" },
+  { name: "vite.config.ts", description: "voidPlugin() を含む Vite の設定", link: "#config-files" },
+  { name: "void.config.ts", description: "Void プロジェクトの設定（省略可）", link: "#config-files" },
+  { name: ".env", description: "ローカルの環境値", link: "#config-files" },
+  { name: "env.ts", description: "環境スキーマ", link: "#config-files" },
   { name: "package.json" },
   { name: "tsconfig.json" },
 ];
@@ -27,8 +27,8 @@ const middlewareItems = [
   {
     name: "middleware/",
     children: [
-      { name: "01.logger.ts", description: "Runs first" },
-      { name: "02.auth.ts", description: "Runs second" },
+      { name: "01.logger.ts", description: "最初に実行" },
+      { name: "02.auth.ts", description: "2 番目に実行" },
     ],
   },
 ];
@@ -37,8 +37,8 @@ const dbItems = [
   {
     name: "db/",
     children: [
-      { name: "schema.ts", description: "Drizzle schema (source of truth)" },
-      { name: "schema/", description: "Optional: split into multiple files" },
+      { name: "schema.ts", description: "Drizzle スキーマ（信頼できる唯一の情報源）" },
+      { name: "schema/", description: "省略可: 複数のファイルに分割" },
       {
         name: "migrations/",
         children: [
@@ -52,97 +52,97 @@ const dbItems = [
 
 </script>
 
-# Project Structure
+# プロジェクト構成 {#project-structure}
 
-## Overview
+## 概要 {#overview}
 
-A Void app uses file-based conventions to define routes, pages, middleware, and more. All directories are optional, so you only need the pieces your app actually uses.
+Void アプリは、ファイルベースの規約を使用して、ルート、ページ、ミドルウェアなどを定義します。すべてのディレクトリは省略可能なので、アプリが実際に使用するものだけを用意すれば十分です。
 
 <FileTree :items="items" />
 
-## `routes/`
+## `routes/` {#routes}
 
-File-based HTTP API endpoints built on [Hono](https://hono.dev). Each file exports named HTTP method handlers.
+[Hono](https://hono.dev) 上に構築された、ファイルベースの HTTP API エンドポイントです。各ファイルは、名前付きの HTTP メソッドハンドラーをエクスポートします。
 
 <RoutesFileTree />
 
-- **Named exports**: `export const GET = defineHandler(...)`, `export const POST = ...`
-- **Dynamic segments**: `[id]` becomes `:id` route parameter
-- **Catch-all**: `[...slug]` matches the remaining path
-- **Route groups**: `(admin)/` organizes files without affecting URL paths
-- **Files starting with `_`** are ignored
-- **Environment suffix**: `debug.dev.ts` builds in development only, `metrics.prod.ts` in production only
+- **名前付きエクスポート**: `export const GET = defineHandler(...)`、`export const POST = ...`
+- **動的セグメント**: `[id]` は `:id` ルートパラメーターになります
+- **キャッチオール**: `[...slug]` は残りのパスにマッチします
+- **ルートグループ**: `(admin)/` は、URL パスに影響を与えずにファイルを整理します
+- **`_` で始まるファイル**は無視されます
+- **環境サフィックス**: `debug.dev.ts` は開発時のみ、`metrics.prod.ts` は本番時のみビルドされます
 
-See [Server Routing](/guide/server-routing) for the full guide.
+詳しいガイドは、[サーバールーティング](/ja/guide/server-routing)を参照してください。
 
-## `pages/`
+## `pages/` {#pages}
 
-Full-stack server-rendered pages with co-located data loading. Available with Vue, React, Svelte, and Solid adapters.
+データの読み込みを同じ場所に置く、フルスタックのサーバーレンダリングページです。Vue、React、Svelte、Solid のアダプターで利用できます。
 
 <PagesFileTree />
 
-- **`.server.ts` files** export `loader` for `GET` data and `action` for mutations, paired with the page component of the same name
-- **Layouts** nest automatically and persist across navigations
-- **Markdown** pages are supported with frontmatter
+- **`.server.ts` ファイル**は、`GET` のデータ用の `loader` と、ミューテーション用の `action` をエクスポートし、同じ名前のページコンポーネントと組になります
+- **レイアウト**は自動的にネストされ、ナビゲーションをまたいで維持されます
+- **Markdown** ページは、フロントマターとともにサポートされます
 
-See [Pages Routing](/guide/pages-routing/overview) for the full guide.
+詳しいガイドは、[Pages ルーティング](/ja/guide/pages-routing/overview)を参照してください。
 
-## `middleware/`
+## `middleware/` {#middleware}
 
-Global middleware that runs on every request. Numeric prefixes control execution order.
+すべてのリクエストで実行される、グローバルなミドルウェアです。数値のプレフィックスで、実行順序を制御します。
 
 <FileTree :items="middlewareItems" default-expanded />
 
-Each file default-exports a `defineMiddleware()` handler. Use middleware to set shared context (auth, logging, rate limiting) available to all routes.
+各ファイルは、`defineMiddleware()` ハンドラーをデフォルトエクスポートします。ミドルウェアを使用して、すべてのルートから利用できる共有コンテキスト（認証、ロギング、レート制限など）を設定します。
 
-## `db/`
+## `db/` {#db}
 
-[Drizzle schemas](/guide/database#schema-definition) and SQL migrations for D1, PostgreSQL, or MySQL.
+D1、PostgreSQL、MySQL 向けの、[Drizzle スキーマ](/ja/guide/database#schema-definition)と SQL マイグレーションです。
 
 <FileTree :items="dbItems" default-expanded />
 
-- `db/schema.ts`: your Drizzle table definitions and the source of truth for DB types
-- `db/schema/`: optional. Split tables into separate files and re-export them from `db/schema.ts`
-- `db/migrations/`: generated SQL migration files, applied in order on deploy
+- `db/schema.ts`: Drizzle のテーブル定義で、DB の型の信頼できる唯一の情報源です
+- `db/schema/`: 省略可能です。テーブルを別々のファイルに分割し、`db/schema.ts` から再エクスポートします
+- `db/migrations/`: 生成された SQL マイグレーションファイルで、デプロイ時に順番に適用されます
 
-Generate schema with `void gen model` or write it by hand. Generate migrations with `void db generate`.
+スキーマは `void gen model` で生成するか、手で記述します。マイグレーションは `void db generate` で生成します。
 
-## `crons/`
+## `crons/` {#crons}
 
-[Scheduled jobs](/guide/jobs). Each file exports a `cron` expression and a default `defineScheduled()` handler.
+[スケジュールされたジョブ](/ja/guide/jobs)です。各ファイルは、`cron` 式と、デフォルトエクスポートの `defineScheduled()` ハンドラーをエクスポートします。
 
-## `queues/`
+## `queues/` {#queues}
 
-[Queue consumers](/guide/queues). Each file default-exports a `defineQueue()` handler.
+[キューコンシューマー](/ja/guide/queues)です。各ファイルは、`defineQueue()` ハンドラーをデフォルトエクスポートします。
 
-## `email/`
+## `email/` {#email}
 
-[Inbound email handlers](../guide/email/receiving.md#inbound). A file's name selects the recipient; `_default.ts` handles other addresses.
+[受信メールのハンドラー](../guide/email/receiving.md#inbound)です。ファイル名が受信者を選択し、`_default.ts` はその他のアドレスを処理します。
 
-## `durable-objects/`
+## `durable-objects/` {#durable-objects}
 
-[Durable State](/guide/durable-state) modules. Each file default-exports a `defineDurableState()` definition.
+[Durable State](/ja/guide/durable-state) モジュールです。各ファイルは、`defineDurableState()` の定義をデフォルトエクスポートします。
 
-## `src/`
+## `src/` {#src}
 
-Shared application code such as components, utilities, and types. This directory has no special convention, so organize it however you like.
+コンポーネント、ユーティリティ、型などの共有アプリケーションコードです。このディレクトリには特別な規約がないため、自由に整理できます。
 
-## `public/`
+## `public/` {#public}
 
-Static assets served as-is at the root path. Files here are not processed by Vite.
+ルートパスでそのまま配信される静的アセットです。ここにあるファイルは、Vite によって処理されません。
 
-## `.void/`
+## `.void/` {#void}
 
-Generated types and local development state (gitignored). Run `void prepare` to create the types, or let `vite dev` and `vite build` update them.
+生成された型とローカル開発の状態です（gitignore 対象）。型を作成するには `void prepare` を実行するか、`vite dev` や `vite build` に更新させます。
 
-## Config Files
+## 設定ファイル {#config-files}
 
-| File             | Purpose                                                                                                                                                  |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vite.config.ts` | Vite configuration. Must include `voidPlugin()`.                                                                                                         |
-| `void.config.ts` | Optional Void config for [routing](/reference/config#routing), [inference](/reference/config#inference), and [worker settings](/reference/config#worker) |
-| `tsconfig.json`  | TypeScript config. Extend `.void/tsconfig.json` for auto-generated types; run `void init --tsconfig` when an existing config already uses `extends`.     |
-| `.env`           | Local development values only (gitignored; never deployed)                                                                                               |
-| `env.ts`         | Checked-in env names, types, defaults, and requiredness                                                                                                  |
+| ファイル         | 目的                                                                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vite.config.ts` | Vite の設定です。`voidPlugin()` を含める必要があります。                                                                                                                                 |
+| `void.config.ts` | [ルーティング](/ja/reference/config#routing)、[推論](/ja/reference/config#inference)、[Worker の設定](/ja/reference/config#worker)のための、省略可能な Void の設定です                   |
+| `tsconfig.json`  | TypeScript の設定です。自動生成された型を使用するには `.void/tsconfig.json` を継承してください。既存の設定がすでに `extends` を使用している場合は、`void init --tsconfig` を実行します。 |
+| `.env`           | ローカル開発専用の値です（gitignore 対象で、デプロイされません）                                                                                                                         |
+| `env.ts`         | チェックインされる環境変数の名前、型、デフォルト値、必須かどうか                                                                                                                         |
 
-See [Environment Variables](/guide/env-vars) for local, production-secret, and client build behavior.
+ローカル、本番環境のシークレット、クライアントビルドの動作については、[環境変数](/ja/guide/env-vars)を参照してください。

@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Plugin and Configuration {#plugin}
+# プラグインと設定 {#plugin}
 
 ## `voidPlugin(options?)` {#voidplugin-options}
 
-Named export from `"void"`. Returns an array of Vite plugins that set up file-based routing, migration support, and the Cloudflare Workers runtime. Application-level configuration is read from [`void.config.ts`](../config.md); the optional `options` object controls Vite/Cloudflare plugin behavior.
+`"void"` からの名前付きエクスポートです。ファイルベースルーティング、マイグレーションのサポート、Cloudflare Workers ランタイムをセットアップする Vite プラグインの配列を返します。アプリケーションレベルの設定は [`void.config.ts`](../config.md) から読み込まれ、省略可能な `options` オブジェクトは Vite/Cloudflare プラグインの動作を制御します。
 
 ```ts
 import { voidPlugin } from 'void';
@@ -16,16 +16,16 @@ export default defineConfig({
 });
 ```
 
-| Option             | Type                      | Description                                                                                                                                                                                                                       |
-| ------------------ | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `persistTo`        | `string`                  | Directory path for persisting local dev state (D1, KV, R2). Defaults to `.void/` in the project root.                                                                                                                             |
-| `auxiliaryWorkers` | `AuxiliaryWorkerConfig[]` | Additional workers to run inside the same Miniflare instance during dev. Passed through to `@cloudflare/vite-plugin`. Useful for running multiple workers that share bindings (e.g. a separate API worker alongside a dashboard). |
+| オプション         | 型                        | 説明                                                                                                                                                                                                                                 |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `persistTo`        | `string`                  | ローカル開発の状態 (D1、KV、R2) を永続化するディレクトリのパス。デフォルトはプロジェクトルートの `.void/` です。                                                                                                                     |
+| `auxiliaryWorkers` | `AuxiliaryWorkerConfig[]` | 開発中に同じ Miniflare インスタンス内で実行する追加の Worker。`@cloudflare/vite-plugin` にそのまま渡されます。バインディングを共有する複数の Worker (例: ダッシュボードと並行して動作する別の API Worker) を実行する場合に便利です。 |
 
-## Project configuration {#project-configuration}
+## プロジェクト設定 {#project-configuration}
 
 ### `defineConfig(config)` {#defineconfig-config}
 
-Import from `void/config` in the root `void.config.ts`. It returns the config with editor completion and TypeScript checking. Void validates the result when loading it, including values computed at runtime.
+ルートの `void.config.ts` で `void/config` からインポートします。エディターの補完と TypeScript のチェックが効いた状態で設定を返します。Void は、実行時に計算された値を含め、読み込み時に結果を検証します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -36,4 +36,4 @@ export default defineConfig({
 });
 ```
 
-See the [config reference](../config.md) for all fields.
+すべてのフィールドについては、[設定リファレンス](../config.md)を参照してください。

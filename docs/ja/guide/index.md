@@ -2,37 +2,37 @@
 outline: deep
 ---
 
-# What is Void?
+# Void とは? {#what-is-void}
 
-Void is a full-stack framework for Cloudflare Workers, powered by Vite. Build your UI with React, Vue, Svelte, or Solid, and write server code in the same project. Void connects routing, data access, and deployment while keeping types shared across your app.
+Void は、Vite を基盤とした Cloudflare Workers 向けのフルスタックフレームワークです。UI は React、Vue、Svelte、Solid のいずれかで構築し、サーバーコードも同じプロジェクト内に書けます。Void はルーティング、データアクセス、デプロイをつなぎ、アプリ全体で型を共有します。
 
-Start with the [Quickstart](./quickstart.md) to create and deploy an app. If you already use a meta framework, follow its [integration guide](../integrations/frameworks/overview.md).
+まずは[クイックスタート](./quickstart.md)で、アプリを作成してデプロイしてみてください。すでにメタフレームワークを使っている場合は、そのフレームワークの[統合ガイド](../integrations/frameworks/overview.md)に従ってください。
 
-## Server routes and pages
+## サーバールートとページ {#server-routes-and-pages}
 
-Files define routes. A handler in `routes/api/users.ts` serves `/api/users`; a component in `pages/users/index.tsx` renders `/users`.
+ルートはファイルで定義します。`routes/api/users.ts` のハンドラーは `/api/users` を処理し、`pages/users/index.tsx` のコンポーネントは `/users` を描画します。
 
-Each page can have a companion `.server.ts` file. Its **loader** reads data and returns typed props to the component. Its **actions** handle forms and other mutations, then update the page. Server code stays on the server; components render there initially and run in the browser for navigation and interaction.
+各ページには、対応する `.server.ts` ファイルを置けます。**loader** はデータを読み取り、型付きの props をコンポーネントに返します。**action** はフォームなどの更新処理を扱い、ページを更新します。サーバーコードはサーバー上にとどまります。コンポーネントは最初にサーバーで描画され、ナビゲーションやインタラクションのためにブラウザでも実行されます。
 
-Use [Pages routing](./pages-routing/overview.md) for a full-stack UI, or keep your own client-side router and call [server routes](./server-routing.md) with [typed fetch](./typed-fetch.md). You can also build an API without a frontend.
+フルスタックの UI には [Pages ルーティング](./pages-routing/overview.md)を使います。独自のクライアントサイドルーターを使い続けて、[typed fetch](./typed-fetch.md) で[サーバールート](./server-routing.md)を呼び出すこともできます。フロントエンドなしで API だけを構築することも可能です。
 
-## Resources from your code
+## コードから使えるリソース {#resources-from-your-code}
 
-Import `db` from `void/db` to query your database. Void provides a local database during development and provisions one when you deploy. Imports also enable resources such as [KV](./kv.md), [object storage](./storage.md), and [queues](./queues.md). Use configuration when you need to connect existing resources.
+`void/db` から `db` をインポートすると、データベースにクエリできます。Void は開発中にローカルデータベースを提供し、デプロイ時にデータベースをプロビジョニングします。インポートにより、[KV](./kv.md)、[オブジェクトストレージ](./storage.md)、[キュー](./queues.md)などのリソースも有効になります。既存のリソースに接続したい場合は、設定を使用します。
 
-Your Drizzle schema defines database types. Handlers infer response types, and typed fetch checks their callers. Page loaders and actions carry the same types into components and forms. Changing a field shows you which parts of the app need to change.
+Drizzle スキーマがデータベースの型を定義します。ハンドラーはレスポンスの型を推論し、typed fetch が呼び出し側をチェックします。ページの loader と action は、同じ型をコンポーネントやフォームに引き継ぎます。フィールドを変更すると、アプリ内のどこを修正すべきかがわかります。
 
-## From local development to production
+## ローカル開発から本番環境まで {#from-local-development-to-production}
 
-Vite runs your app locally with Cloudflare's runtime. `void deploy` builds it, provisions resources, applies database migrations, and publishes it. [Environment variables](./env-vars.md) use a schema, local values, and production secrets.
+Vite は Cloudflare のランタイムを使ってアプリをローカルで実行します。`void deploy` はアプリをビルドし、リソースをプロビジョニングし、データベースマイグレーションを適用して公開します。[環境変数](./env-vars.md)は、スキーマ、ローカル値、本番シークレットで管理します。
 
-Deploy to [your own Cloudflare account](./deployment.md#deploy-to-cloudflare), or connect to a [Void platform](./self-hosted-platform.md) run by your team. Both use the same application APIs. A platform adds shared access, deployment history, and administration.
+[ご自身の Cloudflare アカウント](./deployment.md#deploy-to-cloudflare)にデプロイすることも、チームが運用する [Void プラットフォーム](./self-hosted-platform.md)に接続することもできます。どちらも同じアプリケーション API を使用します。プラットフォームを使うと、共有アクセス、デプロイ履歴、管理機能が加わります。
 
-Void also deploys [existing frameworks and static sites](./app-types.md). Your framework keeps its routing and rendering; Void handles resources and deployment.
+Void は[既存のフレームワークや静的サイト](./app-types.md)もデプロイできます。ルーティングとレンダリングはフレームワークがそのまま担当し、Void はリソースとデプロイを担当します。
 
-## Next steps
+## 次のステップ {#next-steps}
 
-- [Quickstart](./quickstart.md): create your first app
-- [Pages Routing](./pages-routing/overview.md): loaders, layouts, and forms
-- [Database](./database.md): schemas, queries, and migrations
-- [Deployment](./deployment.md): Cloudflare, team platforms, and CI
+- [クイックスタート](./quickstart.md): 最初のアプリを作成する
+- [Pages ルーティング](./pages-routing/overview.md): loader、レイアウト、フォーム
+- [データベース](./database.md): スキーマ、クエリ、マイグレーション
+- [デプロイ](./deployment.md): Cloudflare、チームプラットフォーム、CI

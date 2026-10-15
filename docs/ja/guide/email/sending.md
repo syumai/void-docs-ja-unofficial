@@ -2,27 +2,27 @@
 outline: deep
 ---
 
-# Sending Email
+# メールの送信 {#sending-email}
 
-Use `sendEmail` to send transactional email. During development, Void captures messages in a local inbox.
+トランザクションメールを送信するには `sendEmail` を使用します。開発中、Void はメッセージをローカルの受信トレイにキャプチャします。
 
 ```ts
 import { sendEmail } from 'void/email';
 
 const result = await sendEmail({
-  from: 'Acme <acme+noreply@mail.example.com>', // use your project's sender address
+  from: 'Acme <acme+noreply@mail.example.com>', // プロジェクトの送信元アドレスを使用する
   to: 'user@example.com',
   subject: 'Welcome',
   text: 'Thanks for signing up!',
-  // html: '<p>Thanks for signing up!</p>', // optional — sent as multipart/alternative when paired with text
+  // html: '<p>Thanks for signing up!</p>', // 省略可能 — text と組み合わせると multipart/alternative として送信される
 });
 
 if (!result.ok) {
   if ('error' in result) {
-    // A request-level failure; OUTCOME_UNKNOWN may already have been submitted.
+    // リクエストレベルの失敗。OUTCOME_UNKNOWN の場合、すでに送信されている可能性がある。
     console.error(result.error.code, result.error.message);
   } else {
-    // Some recipients failed. `deliveries` says which.
+    // 一部の宛先が失敗した。どれかは `deliveries` でわかる。
     for (const d of result.deliveries.filter((d) => !d.ok)) {
       console.error(d.recipient, d.error.code, d.error.message);
     }
@@ -30,65 +30,65 @@ if (!result.ok) {
 }
 ```
 
-Check both failure shapes: `result.error` reports a request failure, while `result.deliveries` reports failures for individual recipients. An unverified recipient fails in `deliveries`.
+失敗の 2 つの形式をどちらも確認してください。`result.error` はリクエスト全体の失敗を、`result.deliveries` は個々の宛先の失敗を報告します。未検証の宛先は `deliveries` で失敗します。
 
-## Setup {#setup}
+## セットアップ {#setup}
 
-On a platform with email enabled, deploy without additional email configuration. Ask your administrator for its shared mail domain. Administrators [enable email during installation or upgrade](/guide/platform/installation/credentials#runtime-token-permissions).
+メールが有効なプラットフォームでは、追加のメール設定なしでデプロイできます。共有メールドメインについては管理者に確認してください。管理者は[インストールまたはアップグレード時にメールを有効にします](/ja/guide/platform/installation/credentials#runtime-token-permissions)。
 
-Each project on an email-enabled platform has:
+メールが有効なプラットフォーム上の各プロジェクトには、次のものがあります。
 
-- **Default sender:** `<your-slug>+noreply@<mail-domain>`. Older projects with slugs longer than 56 characters must pass `from` explicitly.
-- **Your account email as a recipient:** it is registered when the project is created. If Cloudflare has not verified it for the platform, follow the emailed verification link and run `void email destinations` before sending to it.
+- **デフォルトの送信元:** `<your-slug>+noreply@<mail-domain>`。スラッグが 56 文字を超える古いプロジェクトでは、`from` を明示的に渡す必要があります。
+- **宛先としてのあなたのアカウントのメールアドレス:** プロジェクトの作成時に登録されます。Cloudflare がそのプラットフォームに対して検証していない場合は、メールで届く検証リンクに従い、そのアドレスに送信する前に `void email destinations` を実行してください。
 
-The shared sender can send only to verified recipients. Verify your own address or [add another recipient](#adding-recipients) before sending.
+共有の送信元は、検証済みの宛先にのみ送信できます。送信する前に、自分のアドレスを検証するか、[別の宛先を追加](#adding-recipients)してください。
 
-Deploying to your own Cloudflare account instead (`void deploy --platform cloudflare`) requires a sender in `void.config.ts` and email setup — see [Your own Cloudflare account](./domains.md#your-own-cloudflare-account).
+代わりに自分の Cloudflare アカウントにデプロイする場合 (`void deploy --platform cloudflare`) は、`void.config.ts` に送信元を設定し、メールのセットアップが必要です。[自分の Cloudflare アカウント](./domains.md#your-own-cloudflare-account)を参照してください。
 
-## Adding recipients {#adding-recipients}
+## 宛先を追加する {#adding-recipients}
 
-Cloudflare's `send_email` binding only delivers to addresses you've registered as recipients. Add them with the CLI:
+Cloudflare の `send_email` バインディングは、宛先として登録したアドレスにのみ配信します。CLI で追加します。
 
 ```sh
 void email allow user@acme.com
 ```
 
-Cloudflare emails the recipient with a verification link. Once they click it and `void email destinations` has picked the click up, you can send to that address from your project. If the link did not arrive or has expired, run `void email allow <address>` again while the address is still pending — the CLI re-sends the link, or tells you how to get a fresh one. List the project's recipients:
+Cloudflare は宛先に検証リンクをメールで送信します。宛先がリンクをクリックし、`void email destinations` がそのクリックを検出すると、プロジェクトからそのアドレスに送信できるようになります。リンクが届かなかった場合や期限切れの場合は、アドレスが保留中の間に `void email allow <address>` をもう一度実行してください。CLI がリンクを再送するか、新しいリンクの取得方法を案内します。プロジェクトの宛先を一覧表示するには、次のようにします。
 
 ```sh
 void email destinations
 ```
 
-::: warning When this is the right fit
-The shared sender suits team alerts, project notifications, and replies to inbound mail.
+::: warning これが適しているケース
+共有の送信元は、チームへのアラート、プロジェクトの通知、受信メールへの返信に適しています。
 
-For mail to arbitrary users, [register your own domain](./domains.md#your-own-domain-on-the-platform), use [Workers Paid on your own Cloudflare account](./domains.md#your-own-cloudflare-account), or call another email provider from your handler.
+任意のユーザーへのメールには、[自分のドメインを登録する](./domains.md#your-own-domain-on-the-platform)、[自分の Cloudflare アカウントで Workers Paid を使用する](./domains.md#your-own-cloudflare-account)、またはハンドラーから別のメールプロバイダーを呼び出してください。
 :::
 
-## Options {#options}
+## オプション {#options}
 
-| Option           | Type                         | Notes                                                                                                           |
-| ---------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `from`           | `string \| { email, name? }` | Optional. Pinned to the project sender — see below.                                                             |
-| `to`             | `Address \| Address[]`       | Required. One or more recipients.                                                                               |
-| `subject`        | `string`                     | Required. UTF-8 supported (encoded as RFC 2047).                                                                |
-| `text`           | `string`                     | At least one of `text` / `html` is required.                                                                    |
-| `html`           | `string`                     | Sent as `multipart/alternative` if both are provided.                                                           |
-| `replyTo`        | `Address`                    | Optional `Reply-To` header.                                                                                     |
-| `cc`, `bcc`      | `Address \| Address[]`       | Optional. Each recipient is sent its own message envelope.                                                      |
-| `headers`        | `Record<string, string>`     | Custom headers; reserved headers (From, Date, etc.) are ignored.                                                |
-| `attachments`    | `Attachment[]`               | See [Attachments](#attachments).                                                                                |
-| `idempotencyKey` | `string`                     | Optional on the Void Platform: 1–128 printable, non-space ASCII characters. Reuse for retries of the same send. |
+| オプション       | 型                           | 備考                                                                                                                               |
+| ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `from`           | `string \| { email, name? }` | 省略可能。プロジェクトの送信元に固定されます。以下を参照してください。                                                             |
+| `to`             | `Address \| Address[]`       | 必須。1 つ以上の宛先。                                                                                                             |
+| `subject`        | `string`                     | 必須。UTF-8 をサポートします (RFC 2047 としてエンコードされます)。                                                                 |
+| `text`           | `string`                     | `text` / `html` の少なくとも一方が必須です。                                                                                       |
+| `html`           | `string`                     | 両方を指定すると `multipart/alternative` として送信されます。                                                                      |
+| `replyTo`        | `Address`                    | 省略可能な `Reply-To` ヘッダー。                                                                                                   |
+| `cc`, `bcc`      | `Address \| Address[]`       | 省略可能。各宛先には、それぞれ個別のメッセージエンベロープが送信されます。                                                         |
+| `headers`        | `Record<string, string>`     | カスタムヘッダー。予約済みのヘッダー (From、Date など) は無視されます。                                                            |
+| `attachments`    | `Attachment[]`               | [添付ファイル](#attachments)を参照してください。                                                                                   |
+| `idempotencyKey` | `string`                     | Void プラットフォームでは省略可能。スペースを除く印字可能な ASCII 文字で 1〜128 文字。同じ送信の再試行では同じキーを再利用します。 |
 
-You can send to at most 50 recipients across `to`, `cc`, and `bcc`. Use standard email addresses with ASCII local parts, and punycode for internationalized domains.
+`to`、`cc`、`bcc` を合わせて、最大 50 件の宛先に送信できます。ローカル部が ASCII の標準的なメールアドレスを使用し、国際化ドメインには punycode を使用してください。
 
-`Address` accepts either a string (`"hello@acme.dev"` or `"Name <hello@acme.dev>"`) or an object (`{ email, name? }`). Unicode display names are supported.
+`Address` には、文字列 (`"hello@acme.dev"` または `"Name <hello@acme.dev>"`) か、オブジェクト (`{ email, name? }`) を指定できます。Unicode の表示名もサポートされています。
 
-On the platform the sender is pinned to your project. `from` must be your project's own platform address — `<project-slug>@<mail-domain>` or `<project-slug>+<tag>@<mail-domain>`, optionally with a display name — or any address on a domain registered with `void email domain add` (see [Your own domain on the platform](./domains.md#your-own-domain-on-the-platform)). For example, if your platform's mail domain is `mail.example.com`, you can use `Acme <acme+noreply@mail.example.com>`. Anything else is rejected with `INVALID_FROM`. Omit `from` and Void fills in `<project-slug>+noreply@<mail-domain>` for you.
+プラットフォームでは、送信元はプロジェクトに固定されます。`from` には、プロジェクト自身のプラットフォームアドレス (`<project-slug>@<mail-domain>` または `<project-slug>+<tag>@<mail-domain>`、表示名を付けることも可能) か、`void email domain add` で登録したドメイン上の任意のアドレスを指定する必要があります ([プラットフォーム上の自分のドメイン](./domains.md#your-own-domain-on-the-platform)を参照)。たとえば、プラットフォームのメールドメインが `mail.example.com` であれば、`Acme <acme+noreply@mail.example.com>` を使用できます。それ以外は `INVALID_FROM` で拒否されます。`from` を省略すると、Void が `<project-slug>+noreply@<mail-domain>` を補完します。
 
-On your own Cloudflare account, `from` defaults to `email.from` from `void.config.ts` and must be on a domain your account can send from; Cloudflare rejects any other sender and `sendEmail` reports it as `INVALID_FROM`.
+自分の Cloudflare アカウントでは、`from` のデフォルトは `void.config.ts` の `email.from` であり、アカウントから送信可能なドメイン上のアドレスである必要があります。Cloudflare はそれ以外の送信元を拒否し、`sendEmail` はそれを `INVALID_FROM` として報告します。
 
-## Attachments {#attachments}
+## 添付ファイル {#attachments}
 
 ```ts
 await sendEmail({
@@ -105,7 +105,7 @@ await sendEmail({
 });
 ```
 
-For inline images (e.g. logos referenced from HTML), set `disposition: 'inline'` and `contentId`:
+インライン画像 (HTML から参照されるロゴなど) には、`disposition: 'inline'` と `contentId` を設定します。
 
 ```ts
 await sendEmail({
@@ -124,17 +124,17 @@ await sendEmail({
 });
 ```
 
-Void infers `contentType` from the filename if you omit it. An explicit value must be a valid media type. `contentId` names the image referenced by `cid:<id>` in HTML; use an ID such as `logo` or `logo@acme.dev`. The encoded message is limited to 5 MiB and custom headers to 16 KiB. Invalid attachment fields or oversized messages return `MIME_ERROR`.
+`contentType` を省略すると、Void はファイル名から推論します。明示的に指定する値は、有効なメディアタイプである必要があります。`contentId` は、HTML 内で `cid:<id>` によって参照される画像を指す名前です。`logo` や `logo@acme.dev` のような ID を使用してください。エンコード後のメッセージは 5 MiB、カスタムヘッダーは 16 KiB に制限されています。添付ファイルのフィールドが無効な場合やメッセージが大きすぎる場合は、`MIME_ERROR` が返されます。
 
-## Result and errors {#result-and-errors}
+## 結果とエラー {#result-and-errors}
 
-`sendEmail` returns a result instead of throwing. A successful result means the provider accepted the send; it does not confirm delivery to the recipient's mailbox.
+`sendEmail` は、例外をスローする代わりに結果を返します。成功の結果は、プロバイダーが送信を受け付けたことを意味します。宛先のメールボックスへの配信を保証するものではありません。
 
-`ok: true` includes recipient IDs. A failed result has either a request-level `error` or per-recipient `deliveries`. Platform results include an `operationId` when available.
+`ok: true` には宛先の ID が含まれます。失敗の結果には、リクエストレベルの `error` か、宛先ごとの `deliveries` のいずれかが含まれます。プラットフォームの結果には、利用可能な場合は `operationId` が含まれます。
 
-A timeout can return `OUTCOME_UNKNOWN`; the provider may still accept the message. Inspect the outcome before retrying.
+タイムアウトにより `OUTCOME_UNKNOWN` が返されることがあります。この場合でも、プロバイダーがメッセージを受け付けている可能性があります。再試行する前に結果を確認してください。
 
-Use an idempotency key for sends you may retry:
+再試行する可能性のある送信には、冪等キーを使用します。
 
 ```ts
 const result = await sendEmail({
@@ -151,55 +151,55 @@ if (result.ok) {
 }
 ```
 
-For 30 days, repeating a key with the same payload returns its recorded outcome without another provider submission. Reusing it with a different payload returns `IDEMPOTENCY_CONFLICT`. A lost response or interrupted provider request can return `OUTCOME_UNKNOWN`; check `void email logs` or repeat the same key. A new key creates a new send and can produce a duplicate. Native Cloudflare binding sends do not support platform idempotency keys.
+30 日間は、同じペイロードで同じキーを繰り返すと、プロバイダーへの再送信なしに、記録された結果が返されます。異なるペイロードでキーを再利用すると `IDEMPOTENCY_CONFLICT` が返されます。レスポンスが失われた場合やプロバイダーへのリクエストが中断された場合は、`OUTCOME_UNKNOWN` が返されることがあります。`void email logs` を確認するか、同じキーを繰り返してください。新しいキーは新しい送信を作成するため、重複が発生する可能性があります。Cloudflare のネイティブバインディングによる送信では、プラットフォームの冪等キーはサポートされません。
 
-| Code                     | Meaning                                                        |
-| ------------------------ | -------------------------------------------------------------- |
-| `BINDING_MISSING`        | No email transport is configured.                              |
-| `INVALID_FROM`           | The sender is invalid or not authorized for the project.       |
-| `INVALID_TO`             | The recipient list is invalid or exceeds 50 recipients.        |
-| `UNVERIFIED_DESTINATION` | The recipient needs verification under the active policy.      |
-| `MIME_ERROR`             | The message is invalid or exceeds a size limit.                |
-| `QUOTA_EXCEEDED`         | A platform or provider quota has been reached.                 |
-| `IDEMPOTENCY_CONFLICT`   | The key was already used for another payload.                  |
-| `OUTCOME_UNKNOWN`        | The send may have reached the provider; do not blindly resend. |
-| `UPSTREAM_ERROR`         | The provider or platform refused the request.                  |
+| コード                   | 意味                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `BINDING_MISSING`        | メールのトランスポートが設定されていません。                                 |
+| `INVALID_FROM`           | 送信元が無効であるか、プロジェクトに対して許可されていません。               |
+| `INVALID_TO`             | 宛先リストが無効であるか、50 件を超えています。                              |
+| `UNVERIFIED_DESTINATION` | 有効なポリシーのもとでは、宛先の検証が必要です。                             |
+| `MIME_ERROR`             | メッセージが無効であるか、サイズ制限を超えています。                         |
+| `QUOTA_EXCEEDED`         | プラットフォームまたはプロバイダーのクォータに達しました。                   |
+| `IDEMPOTENCY_CONFLICT`   | このキーはすでに別のペイロードに使用されています。                           |
+| `OUTCOME_UNKNOWN`        | 送信がプロバイダーに到達した可能性があります。無条件に再送しないでください。 |
+| `UPSTREAM_ERROR`         | プロバイダーまたはプラットフォームがリクエストを拒否しました。               |
 
-The default platform allowance is 200 recipient attempts per UTC month and 10 per rolling minute. Failed or uncertain attempts can count toward these limits. Check `void email usage` for your current allowance.
+プラットフォームのデフォルトの許容量は、UTC の月あたり 200 件の宛先への送信試行と、直近 1 分あたり 10 件です。失敗した試行や結果が不確かな試行も、これらの制限に含まれる場合があります。現在の許容量は `void email usage` で確認してください。
 
-`void email usage` shows monthly recipient attempts, inbound receipts, and the remaining allowance. `void email logs --limit 50` shows up to 100 recent metadata entries retained for 30 days: operation, recipient, direction, state, provider reference, and error code. It does not store subjects, bodies, or attachments. Receiving a message and sending a reply are separate events.
+`void email usage` は、月ごとの宛先への送信試行、受信レシート、残りの許容量を表示します。`void email logs --limit 50` は、30 日間保持される最大 100 件の最近のメタデータエントリ (操作、宛先、方向、状態、プロバイダーの参照、エラーコード) を表示します。件名、本文、添付ファイルは保存されません。メッセージの受信と返信の送信は、別々のイベントです。
 
-## Local development {#local-development}
+## ローカル開発 {#local-development}
 
-During `void dev`, sends are captured to an in-memory inbox instead of going to Cloudflare. The dev server prints the inbox URL when it starts:
+`void dev` の間、送信は Cloudflare に送られる代わりに、メモリ上の受信トレイにキャプチャされます。開発サーバーは、起動時に受信トレイの URL を表示します。
 
 ```
 [void] Email inbox: http://localhost:5173/__void/inbox?token=<printed-token>
 ```
 
-Open a message to preview its HTML, inspect attachments, or download it as an `.eml` file.
+メッセージを開くと、HTML のプレビュー、添付ファイルの確認、`.eml` ファイルとしてのダウンロードができます。
 
-Every inbox route requires a local access token. Void includes it in the printed inbox URL and browser links. For command-line requests, send it in the `x-void-dev-trigger` header as shown below; requests without it return `401`. The token is stored in `.void/dev-trigger-token`. Treat inbox URLs as credentials, especially when exposing your dev server to a network.
+すべての受信トレイのルートには、ローカルのアクセストークンが必要です。Void は、表示される受信トレイの URL とブラウザのリンクにそれを含めます。コマンドラインからのリクエストでは、以下のように `x-void-dev-trigger` ヘッダーで送信してください。トークンのないリクエストは `401` を返します。トークンは `.void/dev-trigger-token` に保存されます。特に開発サーバーをネットワークに公開する場合は、受信トレイの URL を認証情報として扱ってください。
 
 ```bash
-# download a message as .eml
+# メッセージを .eml としてダウンロードする
 curl http://localhost:5173/__void/inbox/<id>/raw \
   -H "x-void-dev-trigger: <printed-token>" -o message.eml
 
-# clear the inbox
+# 受信トレイをクリアする
 curl -X DELETE http://localhost:5173/__void/inbox \
   -H "x-void-dev-trigger: <printed-token>"
 ```
 
-The inbox keeps the most recent 100 messages through HMR and clears on a full server restart.
+受信トレイは、HMR をまたいで直近 100 件のメッセージを保持し、サーバーを完全に再起動するとクリアされます。
 
-The dev inbox works in native Void apps, TanStack Start, and React Router. It is unavailable in SvelteKit, Nuxt, Analog, and Astro; sends from those apps return `BINDING_MISSING`. Use `createEmailTestHarness` from `void/email/testing` to capture sends in tests. If a configured inbox cannot be reached, `sendEmail` returns `UPSTREAM_ERROR` without sending.
+開発用の受信トレイは、ネイティブの Void アプリ、TanStack Start、React Router で動作します。SvelteKit、Nuxt、Analog、Astro では利用できず、これらのアプリからの送信は `BINDING_MISSING` を返します。テストで送信をキャプチャするには、`void/email/testing` の `createEmailTestHarness` を使用してください。設定された受信トレイに到達できない場合、`sendEmail` は送信せずに `UPSTREAM_ERROR` を返します。
 
-`sendInDev` is deprecated. During `void dev` it skips the inbox and returns `BINDING_MISSING`, so it never delivers. Remove it, and deploy the app to test real delivery.
+`sendInDev` は非推奨です。`void dev` の間は受信トレイをスキップして `BINDING_MISSING` を返すため、配信されることはありません。削除し、実際の配信をテストするにはアプリをデプロイしてください。
 
-## Testing {#testing}
+## テスト {#testing}
 
-Use the test harness to assert on outgoing messages without mocking the binding:
+テストハーネスを使用すると、バインディングをモックせずに、送信メッセージをアサートできます。
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -211,7 +211,7 @@ describe('signup flow', () => {
     const inbox = createEmailTestHarness();
 
     await sendEmail({
-      from: 'acme+noreply@mail.example.com', // use your project sender
+      from: 'acme+noreply@mail.example.com', // プロジェクトの送信元を使用する
       to: 'user@example.com',
       subject: 'Welcome',
       text: 'Hi!',
@@ -224,6 +224,6 @@ describe('signup flow', () => {
 });
 ```
 
-The harness intercepts every `sendEmail` call until `dispose()` is called. `clear()` empties the captured list without releasing the sink.
+ハーネスは、`dispose()` が呼ばれるまで、すべての `sendEmail` の呼び出しを横取りします。`clear()` は、シンクを解放せずに、キャプチャ済みのリストを空にします。
 
-To handle incoming messages, see [Receiving Email](./receiving.md).
+受信メッセージの処理については、[メールの受信](./receiving.md)を参照してください。

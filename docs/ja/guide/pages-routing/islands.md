@@ -11,9 +11,9 @@ function islandItems(ext) {
         {
           name: "blog/",
           children: [
-            { name: `index.island${ext}`, description: "← island page" },
+            { name: `index.island${ext}`, description: "← アイランドページ" },
             { name: "index.server.ts" },
-            { name: `_Counter${ext}`, description: "regular component, used as island" },
+            { name: `_Counter${ext}`, description: "通常のコンポーネント。アイランドとして使用" },
             { name: `_PostForm${ext}` },
           ],
         },
@@ -27,13 +27,13 @@ function mixedItems(ext) {
     {
       name: "pages/",
       children: [
-        { name: `index${ext}`, description: "regular page (full hydration, Void Router)" },
-        { name: `about${ext}`, description: "regular page" },
+        { name: `index${ext}`, description: "通常のページ(完全なハイドレーション、Void Router)" },
+        { name: `about${ext}`, description: "通常のページ" },
         {
           name: "blog/",
           children: [
-            { name: `index.island${ext}`, description: "island page (partial hydration, static HTML)" },
-            { name: `[slug].island${ext}`, description: "island page" },
+            { name: `index.island${ext}`, description: "アイランドページ(部分的なハイドレーション、静的 HTML)" },
+            { name: `[slug].island${ext}`, description: "アイランドページ" },
           ],
         },
       ],
@@ -43,33 +43,33 @@ function mixedItems(ext) {
 
 </script>
 
-# Islands
+# アイランド {#islands}
 
-Islands let you add interactive components to an otherwise static page. The server renders the page as HTML, and only the components marked as islands send JavaScript to the browser. This approach is inspired by [Astro](https://docs.astro.build/en/concepts/islands/).
+アイランドを使うと、本来は静的なページにインタラクティブなコンポーネントを追加できます。サーバーはページを HTML としてレンダリングし、アイランドとしてマークされたコンポーネントだけがブラウザーに JavaScript を送信します。このアプローチは [Astro](https://docs.astro.build/en/concepts/islands/) に着想を得ています。
 
-For example, a blog post can keep its article content static while loading JavaScript for a comment form or audio player.
+たとえば、ブログ記事では本文を静的なままにして、コメントフォームやオーディオプレーヤーのためだけに JavaScript を読み込むことができます。
 
-::: tip Prerequisites
-Islands mode builds on top of [Pages Routing](./overview). You need a working Pages setup (framework adapter installed, `pages/` directory, Vite config) before using islands.
+::: tip 前提条件
+アイランドモードは [Pages ルーティング](./overview)の上に構築されています。アイランドを使う前に、動作する Pages のセットアップ(フレームワークアダプターのインストール、`pages/` ディレクトリ、Vite の設定)が必要です。
 :::
 
-## When to Use Islands
+## アイランドを使う場面 {#when-to-use-islands}
 
-Use islands for blogs, marketing pages, or documentation with a few interactive components. For dashboards and apps with shared client state, use regular [Pages Routing](./overview).
+ブログ、マーケティングページ、少数のインタラクティブなコンポーネントを含むドキュメントにはアイランドを使用します。ダッシュボードや、クライアント状態を共有するアプリには、通常の [Pages ルーティング](./overview)を使用してください。
 
-## Creating an Island Page
+## アイランドページを作成する {#creating-an-island-page}
 
-Name your page file with the `.island` suffix:
+ページファイルに `.island` サフィックスを付けて名前を付けます。
 
 <FileTree :items="islandItems" adapter-tabs default-expanded />
 
-Island pages render as HTML and hydrate only the components you mark as islands. Navigation uses full page loads.
+アイランドページは HTML としてレンダリングされ、アイランドとしてマークしたコンポーネントだけがハイドレートされます。ナビゲーションにはフルページロードが使われます。
 
-Pages without a loader or dynamic parameters are automatically [prerendered](/guide/edge/prerendering). Opt out with `export const prerender = false` in the companion `.server.ts` file.
+ローダーや動的パラメーターを持たないページは、自動的に[プリレンダリング](/ja/guide/edge/prerendering)されます。これを無効にするには、対応する `.server.ts` ファイルで `export const prerender = false` を指定します。
 
-## Marking Components as Islands
+## コンポーネントをアイランドとしてマークする {#marking-components-as-islands}
 
-Use [import attributes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with) to mark which components should be interactive on the client:
+[import attributes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with) を使って、クライアントでインタラクティブにするコンポーネントをマークします。
 
 ::: code-group
 
@@ -154,10 +154,10 @@ export default function BlogIndex(props) {
 
 :::
 
-Components imported _without_ the `island` attribute are rendered as static HTML only. No JavaScript is sent to the browser for them.
+`island` 属性を付けずにインポートされたコンポーネントは、静的な HTML としてのみレンダリングされます。それらのコンポーネントのために JavaScript がブラウザーに送信されることはありません。
 
-::: warning TypeScript configuration
-Import attributes require `"module": "ESNext"` in your `tsconfig.json`:
+::: warning TypeScript の設定
+import attributes を使うには、`tsconfig.json` で `"module": "ESNext"` が必要です。
 
 ```json
 {
@@ -169,16 +169,16 @@ Import attributes require `"module": "ESNext"` in your `tsconfig.json`:
 
 :::
 
-## Hydration Strategies
+## ハイドレーション戦略 {#hydration-strategies}
 
-The `island` attribute value controls _when_ the component hydrates:
+`island` 属性の値によって、コンポーネントが_いつ_ハイドレートされるかが決まります。
 
-| Strategy          | Hydrates when...            | Use case                                   |
-| ----------------- | --------------------------- | ------------------------------------------ |
-| `"load"`          | Page loads                  | Critical interactive UI (forms, nav menus) |
-| `"visible"`       | Element enters the viewport | Below-the-fold content                     |
-| `"idle"`          | Browser is idle             | Non-critical enhancements                  |
-| `"media:(query)"` | CSS media query matches     | Responsive components (e.g., mobile-only)  |
+| 戦略              | ハイドレートされるタイミング     | 用途                                              |
+| ----------------- | -------------------------------- | ------------------------------------------------- |
+| `"load"`          | ページの読み込み時               | 重要なインタラクティブ UI(フォーム、ナビメニュー) |
+| `"visible"`       | 要素がビューポートに入ったとき   | スクロールしないと見えないコンテンツ              |
+| `"idle"`          | ブラウザーがアイドル状態のとき   | 重要度の低い機能拡張                              |
+| `"media:(query)"` | CSS メディアクエリに一致したとき | レスポンシブなコンポーネント(例: モバイル専用)    |
 
 ```tsx
 import Comments from './_Comments' with { island: 'visible' };
@@ -186,9 +186,9 @@ import CookieBanner from './_CookieBanner' with { island: 'idle' };
 import MobileMenu from './_MobileMenu' with { island: 'media:(max-width: 768px)' };
 ```
 
-## Server Handlers
+## サーバーハンドラー {#server-handlers}
 
-Island pages use the same `loader` and `action` pattern as regular pages. The `.server.ts` companion file works identically:
+アイランドページでは、通常のページと同じ `loader` と `action` のパターンを使用します。対応する `.server.ts` ファイルも同じように動作します。
 
 ```ts
 // pages/blog/index.server.ts
@@ -205,11 +205,11 @@ export const action = defineHandler(async (c) => {
 });
 ```
 
-After a successful action, an island page reloads or redirects through `window.location`. Regular Pages routes use the Void Router to fetch fresh props instead.
+アクションが成功すると、アイランドページは `window.location` を通じてリロードまたはリダイレクトします。通常の Pages ルートでは、代わりに Void Router を使って最新の props を取得します。
 
-## Forms
+## フォーム {#forms}
 
-Island pages cannot use `useForm` because it depends on the Void Router. Use `useIslandForm` instead. It has the same form state, but its submit helpers take the action URL and use `fetch()` directly:
+アイランドページでは、`useForm` が Void Router に依存しているため使用できません。代わりに `useIslandForm` を使用してください。フォームの状態は同じですが、送信ヘルパーはアクションの URL を受け取り、`fetch()` を直接使用します。
 
 ::: code-group
 
@@ -344,32 +344,32 @@ export default function PostForm() {
 
 :::
 
-`useIslandForm` provides the same form state as [`useForm`](./actions-and-forms#useform). Pass the action URL to `post`, `put`, `patch`, or `delete` to submit.
+`useIslandForm` は、[`useForm`](./actions-and-forms#useform) と同じフォームの状態を提供します。送信するには、アクションの URL を `post`、`put`、`patch`、`delete` のいずれかに渡します。
 
-Successful submissions reload the page; redirects navigate to their destination. A `422` response populates `errors` from `{ errors: { field: "message" } }`. Submit helpers return `Promise<void>`.
+送信に成功するとページがリロードされ、リダイレクトの場合はリダイレクト先へ移動します。`422` レスポンスでは、`{ errors: { field: "message" } }` から `errors` が設定されます。送信ヘルパーは `Promise<void>` を返します。
 
-## Navigation
+## ナビゲーション {#navigation}
 
-Island pages do not have a Void Router. Use regular `<a>` tags for navigation:
+アイランドページには Void Router がありません。ナビゲーションには通常の `<a>` タグを使用してください。
 
 ```tsx
-// ✅ Use regular links in island pages
+// ✅ アイランドページでは通常のリンクを使用する
 <a href="/blog/my-post">Read more</a>
 
-// ❌ Don't use <Link>; there is no Void Router to handle it
+// ❌ <Link> は使わない。処理する Void Router が存在しないため
 <Link href="/blog/my-post">Read more</Link>
 ```
 
-When navigating _from_ a regular page to an island page (e.g., via `<Link>`), the router detects that the target is an island page and falls back to a full-page navigation automatically.
+通常のページからアイランドページへ(たとえば `<Link>` で)ナビゲートする場合、ルーターは移動先がアイランドページであることを検出し、自動的にフルページナビゲーションにフォールバックします。
 
-## Layouts
+## レイアウト {#layouts}
 
-Island pages support [layouts](./layouts) the same way as regular pages. The layout wraps the page during server rendering. Layout components in island pages are **static only**, so they are not hydrated on the client.
+アイランドページは、通常のページと同様に[レイアウト](./layouts)をサポートします。レイアウトはサーバーレンダリング中にページをラップします。アイランドページ内のレイアウトコンポーネントは**静的のみ**であり、クライアントではハイドレートされません。
 
-## Mixing Island and Regular Pages
+## アイランドページと通常のページを混在させる {#mixing-island-and-regular-pages}
 
-Island pages and regular pages can coexist in the same app:
+アイランドページと通常のページは、同じアプリ内に共存できます。
 
 <FileTree :items="mixedItems" adapter-tabs default-expanded />
 
-The Void Router handles navigation between regular pages. Navigating to or from an island page triggers a full-page load.
+通常のページ間のナビゲーションは Void Router が処理します。アイランドページへの移動、またはアイランドページからの移動では、フルページロードが発生します。

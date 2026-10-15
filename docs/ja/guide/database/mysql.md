@@ -4,11 +4,11 @@ outline: deep
 
 # MySQL
 
-Connect your MySQL database through [Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/), then define tables and query them with Drizzle. Void configures the connection and applies your migrations when you deploy.
+[Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/) を通じて MySQL データベースに接続し、Drizzle でテーブルを定義してクエリを実行します。Void は接続を設定し、デプロイ時にマイグレーションを適用します。
 
-## Configure
+## 設定 {#configure}
 
-Set the dialect in `void.config.ts`:
+`void.config.ts` でダイアレクトを設定します。
 
 ```json
 {
@@ -16,15 +16,15 @@ Set the dialect in `void.config.ts`:
 }
 ```
 
-Add a direct connection for local development:
+ローカル開発用に直接接続を追加します。
 
 ```dotenv
 DATABASE_URL=mysql://user:password@host:3306/app
 ```
 
-Void reads `.env` for the dev server and `void db` commands. In production, the Worker connects through the inferred `HYPERDRIVE` binding.
+Void は開発サーバーと `void db` コマンドのために `.env` を読み込みます。本番環境では、Worker は推論された `HYPERDRIVE` バインディングを通じて接続します。
 
-## Define a schema
+## スキーマを定義する {#define-a-schema}
 
 ```ts
 // db/schema.ts
@@ -37,11 +37,11 @@ export const messages = mysqlTable('messages', {
 });
 ```
 
-`void gen model` generates MySQL builders automatically when the project uses the MySQL dialect.
+プロジェクトが MySQL ダイアレクトを使用している場合、`void gen model` は MySQL 用のビルダーを自動的に生成します。
 
-## Migrations
+## マイグレーション {#migrations}
 
-Use the normal workflow:
+通常のワークフローを使用します。
 
 ```sh
 void db generate
@@ -49,23 +49,23 @@ void db migrate
 void deploy
 ```
 
-For direct Cloudflare deploys, export the production `DATABASE_URL` in the shell running `void deploy --platform cloudflare`. Void uses it to provision Hyperdrive and apply pending checked-in migrations before uploading the Worker; it is not written to the Worker config.
+Cloudflare への直接デプロイでは、`void deploy --platform cloudflare` を実行するシェルで本番用の `DATABASE_URL` をエクスポートしてください。Void はこれを使って Hyperdrive をプロビジョニングし、Worker をアップロードする前にチェックイン済みの未適用マイグレーションを適用します。この値は Worker の設定には書き込まれません。
 
-Only one migration run changes a database at a time, whether it comes from `void db migrate`, `void db reset`, the reset that `void db seed` does before it loads data, `void deploy --platform cloudflare`, or a `void deploy` of any project that uses the database. Better Auth's table changes run inside the same run. Another run waits for it, up to about 20 seconds for a command that connects with `DATABASE_URL` and about 2 minutes for a `void deploy` to the Void platform, then stops with an error that asks you to try again.
+データベースを変更するマイグレーションの実行は、同時に 1 つだけです。これは `void db migrate`、`void db reset`、`void db seed` がデータを読み込む前に行うリセット、`void deploy --platform cloudflare`、およびそのデータベースを使用するあらゆるプロジェクトの `void deploy` のいずれから実行された場合でも同様です。Better Auth のテーブル変更も同じ実行の中で行われます。他の実行はその完了を待機します。`DATABASE_URL` で接続するコマンドでは最大約 20 秒、Void プラットフォームへの `void deploy` では最大約 2 分待機し、その後、再試行を促すエラーで停止します。
 
-### Failed migrations {#failed-migrations}
+### 失敗したマイグレーション {#failed-migrations}
 
-Each migration file runs in a transaction, so a failed file that only changes data leaves the database unchanged. On a sharded Vitess keyspace, such as a sharded PlanetScale database, a commit that fails on one shard does not undo the shards that already committed. MySQL commits schema changes such as `CREATE TABLE` and `ALTER TABLE` immediately, so when a file with schema changes fails partway through, its earlier statements stay applied. The error names the file that failed.
+各マイグレーションファイルはトランザクション内で実行されるため、データのみを変更するファイルが失敗した場合、データベースは変更されません。シャード化された PlanetScale データベースなど、シャード化された Vitess キースペースでは、あるシャードでコミットが失敗しても、すでにコミットされた他のシャードは元に戻りません。MySQL は `CREATE TABLE` や `ALTER TABLE` などのスキーマ変更を即座にコミットするため、スキーマ変更を含むファイルが途中で失敗すると、それ以前のステートメントは適用されたままになります。エラーには失敗したファイル名が示されます。
 
-To recover, undo the applied statements, fix the file, then run `void db migrate` or `void deploy` again:
+復旧するには、適用済みのステートメントを取り消し、ファイルを修正してから、もう一度 `void db migrate` または `void deploy` を実行します。
 
 ```sh
 void db execute "DROP TABLE comments"
-void db execute --remote "DROP TABLE comments" # deployed database
+void db execute --remote "DROP TABLE comments" # デプロイ済みのデータベース
 ```
 
-MySQL rejects `IF NOT EXISTS` on `ADD COLUMN` and `CREATE INDEX`, so undoing a statement is usually simpler than making it safe to rerun. Small migrations leave less to undo.
+MySQL は `ADD COLUMN` や `CREATE INDEX` での `IF NOT EXISTS` を受け付けないため、再実行しても安全なステートメントにするよりも、ステートメントを取り消すほうが通常は簡単です。マイグレーションを小さくしておくと、取り消す内容が少なくなります。
 
-## Database commands
+## データベースコマンド {#database-commands}
 
-`void db push`, `generate`, `migrate`, `status`, `reset`, `seed`, `execute`, `studio`, `export`, `rename-migrations`, and `set-url` all understand MySQL. Local commands use `DATABASE_URL` from `.env`; `--remote` execution and Studio use the encrypted URL stored for a linked Void project.
+`void db push`、`generate`、`migrate`、`status`、`reset`、`seed`、`execute`、`studio`、`export`、`rename-migrations`、`set-url` はすべて MySQL に対応しています。ローカルコマンドは `.env` の `DATABASE_URL` を使用します。`--remote` での実行と Studio は、リンクされた Void プロジェクトに保存されている暗号化済みの URL を使用します。

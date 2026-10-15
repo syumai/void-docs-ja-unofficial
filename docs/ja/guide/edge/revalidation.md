@@ -2,17 +2,17 @@
 outline: deep
 ---
 
-# Revalidation (ISR)
+# 再検証 (ISR) {#revalidation-isr}
 
-Revalidation caches rendered pages and refreshes them in the background. When a cached page becomes stale, visitors can keep reading it while the Worker renders an updated version. This is often called [Incremental Static Regeneration (ISR)](https://vercel.com/docs/incremental-static-regeneration).
+再検証は、レンダリング済みのページをキャッシュし、バックグラウンドで更新します。キャッシュされたページが古くなっても、Worker が更新版をレンダリングしている間、訪問者はそのページを読み続けられます。これは [Incremental Static Regeneration (ISR)](https://vercel.com/docs/incremental-static-regeneration) と呼ばれることもあります。
 
-Use revalidation with [Void SSR](../ssr.md), [Pages mode](../pages-routing/overview), or a [supported SSR framework](../../integrations/frameworks/overview.md). For framework apps, Void caches public HTML document responses, not framework data requests.
+再検証は、[Void SSR](../ssr.md)、[Pages モード](../pages-routing/overview)、または[サポートされている SSR フレームワーク](../../integrations/frameworks/overview.md)で使用できます。フレームワークアプリでは、Void はフレームワークのデータリクエストではなく、公開 HTML ドキュメントのレスポンスをキャッシュします。
 
-To disable Void's ISR caching across the app while keeping your per-page settings, set `"routing": { "isr": false }` in `void.config.ts`. This overrides per-page revalidate and prerender policies. Set `isr` back to `true` to enable those policies again. Build-time HTML generation with `output: "static"` is unaffected.
+ページごとの設定を維持したまま、アプリ全体で Void の ISR キャッシュを無効にするには、`void.config.ts` に `"routing": { "isr": false }` を設定します。これはページごとの revalidate と prerender のポリシーを上書きします。`isr` を `true` に戻すと、それらのポリシーが再び有効になります。`output: "static"` によるビルド時の HTML 生成には影響しません。
 
-## Enabling revalidation
+## 再検証を有効にする {#enabling-revalidation}
 
-Add a `routing.revalidate` field to `void.config.ts` with a TTL in seconds:
+`void.config.ts` に、TTL を秒数で指定した `routing.revalidate` フィールドを追加します。
 
 ```json
 {
@@ -22,11 +22,11 @@ Add a `routing.revalidate` field to `void.config.ts` with a TTL in seconds:
 }
 ```
 
-Setting `revalidate` to `0` disables revalidation (equivalent to plain SSR).
+`revalidate` を `0` に設定すると再検証が無効になります (通常の SSR と同等です)。
 
-## Per-path revalidation
+## パスごとの再検証 {#per-path-revalidation}
 
-You can set different TTLs for different URL patterns using an object:
+オブジェクトを使用して、URL パターンごとに異なる TTL を設定できます。
 
 ```json
 {
@@ -41,93 +41,91 @@ You can set different TTLs for different URL patterns using an object:
 }
 ```
 
-Rules are matched in order, and the first match wins. The `*` glob matches any characters including `/`.
+ルールは順番に照合され、最初に一致したものが採用されます。`*` グロブは `/` を含む任意の文字に一致します。
 
-Special values:
+特別な値:
 
-- `31536000` (1 year): effectively cached until the next deploy, since deploys clear the ISR cache
-- `0`: never cached and always rendered by the worker, which is equivalent to plain SSR for that path
+- `31536000` (1 年): デプロイによって ISR キャッシュがクリアされるため、実質的に次のデプロイまでキャッシュされます
+- `0`: キャッシュされず、常に Worker でレンダリングされます。そのパスでは通常の SSR と同等です
 
-## Per-page revalidation (Pages mode)
+## ページごとの再検証 (Pages モード) {#per-page-revalidation-pages-mode}
 
-In [Pages mode](../pages-routing/overview), you can export a `revalidate` value from a `.server.ts` file to override the global config for that page:
+[Pages モード](../pages-routing/overview)では、`.server.ts` ファイルから `revalidate` の値をエクスポートして、そのページのグローバル設定を上書きできます。
 
 ```ts
 // pages/products/index.server.ts
-export const revalidate = 120; // cache for 2 minutes
+export const revalidate = 120; // 2 分間キャッシュする
 
 export const loader = defineHandler(async (c) => {
   // ...
 });
 ```
 
-Per-page values take precedence over `void.config.ts` patterns.
+ページごとの値は、`void.config.ts` のパターンより優先されます。
 
-A page's `revalidate` export also applies to `routes/` handlers whose URLs match the page pattern. For example, if `pages/[...slug].server.ts` exports `revalidate`, Void can also cache the `GET` response of `routes/now.ts`. Void never caches paths under `/api`. To keep a route handler's response out of the cache, set `x-revalidate: 0` on it. See [Per-response TTL override](#per-response-ttl-override).
+ページの `revalidate` エクスポートは、URL がそのページのパターンに一致する `routes/` のハンドラーにも適用されます。たとえば `pages/[...slug].server.ts` が `revalidate` をエクスポートしている場合、Void は `routes/now.ts` の `GET` レスポンスもキャッシュできます。Void は `/api` 以下のパスをキャッシュしません。ルートハンドラーのレスポンスをキャッシュから除外するには、そのレスポンスに `x-revalidate: 0` を設定します。[レスポンスごとの TTL の上書き](#per-response-ttl-override)を参照してください。
 
-## Precedence
+## 優先順位 {#precedence}
 
-When multiple sources set a revalidate TTL, the most specific wins:
+複数の設定元が revalidate の TTL を指定している場合は、最も具体的なものが優先されます。
 
-1. `x-revalidate` response header (per-response)
-2. `.server.ts` export (per-page, Pages mode only)
-3. `void.config.ts` `routing.revalidate` path pattern match
-4. `void.config.ts` `routing.revalidate` global number or `"*"` fallback
+1. `x-revalidate` レスポンスヘッダー (レスポンスごと)
+2. `.server.ts` のエクスポート (ページごと、Pages モードのみ)
+3. `void.config.ts` の `routing.revalidate` のパスパターンの一致
+4. `void.config.ts` の `routing.revalidate` のグローバルな数値または `"*"` のフォールバック
 
-## How revalidation works
+## 再検証の仕組み {#how-revalidation-works}
 
-The first request renders and caches the page. While the cached page is fresh, visitors receive it immediately. Once it becomes stale, Void serves it while rendering an updated version in the background.
+最初のリクエストでページがレンダリングされ、キャッシュされます。キャッシュされたページが新鮮な間は、訪問者はそれをすぐに受け取ります。古くなると、Void はそれを返しつつ、バックグラウンドで更新版をレンダリングします。
 
-A request without a cached entry waits for the page to render.
+キャッシュエントリがないリクエストは、ページのレンダリングが完了するまで待機します。
 
-## Per-response TTL override
+## レスポンスごとの TTL の上書き {#per-response-ttl-override}
 
-Route handlers can set the `x-revalidate` response header to override the TTL for a specific response:
+ルートハンドラーは、`x-revalidate` レスポンスヘッダーを設定して、特定のレスポンスの TTL を上書きできます。
 
 ```ts
 export const GET = defineHandler(async (c) => {
-  // Don't cache this particular response
+  // この特定のレスポンスはキャッシュしない
   c.header('x-revalidate', '0');
 
   return c.html('...');
 });
 ```
 
-- `x-revalidate: 0`: skip caching for this response
-- `x-revalidate: 300`: cache for 5 minutes instead of the default
+- `x-revalidate: 0`: このレスポンスのキャッシュをスキップします
+- `x-revalidate: 300`: デフォルトの代わりに 5 分間キャッシュします
 
-Only complete `200` responses are cached. A response with `Cache-Control: private`,
-`no-store`, or `no-cache`, or any `Set-Cookie` header, stays private to that request.
-If a public page starts returning one of those headers, Void removes its cached response.
+キャッシュされるのは、完全な `200` レスポンスのみです。`Cache-Control: private`、`no-store`、`no-cache` のいずれか、または `Set-Cookie` ヘッダーを持つレスポンスは、そのリクエスト限りのプライベートなものとして扱われます。公開ページがこれらのヘッダーのいずれかを返し始めた場合、Void はキャッシュされたレスポンスを削除します。
 
-Responses that vary by request headers, such as `Vary: Accept-Language` or `Vary: Origin`, are rendered live. `Vary: *` also disables shared caching. Void's `X-VoidPages` header is supported because HTML and Pages JSON have separate cached responses.
+`Vary: Accept-Language` や `Vary: Origin` のように、リクエストヘッダーによって変化するレスポンスは、ライブでレンダリングされます。`Vary: *` も共有キャッシュを無効にします。Void の `X-VoidPages` ヘッダーは、HTML と Pages の JSON が別々のキャッシュレスポンスを持つため、サポートされています。
 
-## Cache bypass
+## キャッシュのバイパス {#cache-bypass}
 
-Requests with `Cookie`, `Authorization`, or Cloudflare Access's `Cf-Access-Jwt-Assertion` header bypass the ISR cache entirely and always dispatch to the worker. Authenticated responses are not shared between users, including when Access authentication supplies no cookie.
+`Cookie`、`Authorization`、または Cloudflare Access の `Cf-Access-Jwt-Assertion` ヘッダーを持つリクエストは、ISR キャッシュを完全にバイパスし、常に Worker にディスパッチされます。認証済みのレスポンスは、Access 認証が Cookie を提供しない場合も含め、ユーザー間で共有されません。
 
-## Cache keys and rewrites
+## キャッシュキーとリライト {#cache-keys-and-rewrites}
 
-For a dispatch rewrite, the cache key includes both the destination and original pathname. A direct request to `/en/docs/foo` therefore uses a different entry from `/docs/foo` rewritten to that destination.
+ディスパッチのリライトでは、キャッシュキーに宛先と元のパス名の両方が含まれます。そのため、`/en/docs/foo` への直接のリクエストは、その宛先にリライトされた `/docs/foo` とは別のエントリを使用します。
 
-Query parameters are excluded by default. Add `routing.revalidateQueryAllowlist` when specific parameters should produce separate cached responses. Requests with other query parameters get the cached page. If nothing is cached yet, they render live and are not stored, so add every parameter a page reads to `routing.revalidateQueryAllowlist`. Middleware `c.rewrite()` runs after the ISR lookup, so it doesn't create an additional cache variant.
+クエリパラメーターはデフォルトで除外されます。特定のパラメーターごとに別々のキャッシュレスポンスを生成したい場合は、`routing.revalidateQueryAllowlist` を追加します。それ以外のクエリパラメーターを持つリクエストには、キャッシュされたページが返されます。まだ何もキャッシュされていない場合は、ライブでレンダリングされ、保存されません。そのため、ページが読み取るすべてのパラメーターを `routing.revalidateQueryAllowlist` に追加してください。ミドルウェアの `c.rewrite()` は ISR のルックアップの後に実行されるため、追加のキャッシュバリアントは作成されません。
 
-Purge the destination pathname with `revalidate({ paths })`. Purging `/en/docs/foo` clears both direct and rewritten variants. Purging only `/docs/foo` won't clear them, because the entries are stored under the destination.
+宛先のパス名は `revalidate({ paths })` でパージします。`/en/docs/foo` をパージすると、直接のバリアントとリライトされたバリアントの両方がクリアされます。エントリは宛先のもとに保存されているため、`/docs/foo` だけをパージしてもクリアされません。
 
-## On-demand revalidation
+## オンデマンドの再検証 {#on-demand-revalidation}
 
-You can purge ISR cache entries programmatically from a route handler:
+ルートハンドラーから、ISR キャッシュのエントリをプログラムでパージできます。
 
 ```ts
 import { revalidate } from 'void/isr';
 
 export const POST = defineHandler(async (c) => {
-  // ... update content in database ...
+  // ... データベースのコンテンツを更新 ...
 
-  // Purge specific pages
+  // 特定のページをパージする
   await revalidate({ paths: ['/', '/blog/hello-world'] });
 
-  // Or purge all cached pages
+  // またはキャッシュされたすべてのページをパージする
   await revalidate({ all: true });
 
   return c.json({ ok: true });

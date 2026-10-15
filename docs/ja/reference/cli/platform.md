@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Platform Management {#platform-management}
+# プラットフォーム管理 {#platform-management}
 
-Void-managed projects deploy to an explicitly selected platform. Join one with [`void connect`](./auth.md#connect). Connections are stored per API origin, and credentials are scoped to that origin.
+Void が管理するプロジェクトは、明示的に選択したプラットフォームにデプロイされます。[`void connect`](./auth.md#connect) でプラットフォームに参加します。接続は API オリジンごとに保存され、認証情報はそのオリジンにスコープされます。
 
-## Connection commands {#connection-commands}
+## 接続コマンド {#connection-commands}
 
 ```sh
 void platform list
@@ -14,39 +14,36 @@ void platform use [id]
 void platform status [id]
 ```
 
-`list` shows the currently selected platform first, followed by other saved platforms. For a platform with local installation records, its installation slug appears beside its name, such as `Cloudflare Void (cloudflare)`. Select it with `void platform use cloudflare`. For a connected platform without a local installation slug, use its printed API URL.
+`list` は、現在選択されているプラットフォームを先頭に、保存されている他のプラットフォームを表示します。ローカルのインストール記録があるプラットフォームでは、`Cloudflare Void (cloudflare)` のように、名前の横にインストールのスラッグが表示されます。`void platform use cloudflare` で選択します。ローカルのインストールスラッグがない接続済みのプラットフォームでは、表示された API URL を使用します。
 
-`use` and `status` accept an installation slug, display name, saved ID, or API URL. If a slug or name matches several platforms, use the API URL to choose one. They auto-select the only configured platform; with multiple platforms they show a picker interactively and require an explicit selector in non-interactive use. A project with a recorded platform URL keeps using that platform when the global default changes.
+`use` と `status` は、インストールのスラッグ、表示名、保存済みの ID、または API URL を受け付けます。スラッグや名前が複数のプラットフォームに一致する場合は、API URL を使って 1 つを選択します。設定済みのプラットフォームが 1 つだけの場合は自動的に選択されます。複数ある場合、対話的な利用ではピッカーが表示され、非対話的な利用では明示的なセレクターが必要です。プラットフォーム URL が記録されているプロジェクトは、グローバルのデフォルトが変更されても、そのプラットフォームを使い続けます。
 
-For a self-hosted installation, `status <installation-id>` prints locally saved
-lifecycle progress before checking the live API. The saved checkpoint may be out
-of date. If live discovery fails during maintenance, the command still shows that
-checkpoint and exits with an error; it does not confirm current availability.
+セルフホストのインストールでは、`status <installation-id>` は、稼働中の API を確認する前に、ローカルに保存されたライフサイクルの進行状況を表示します。保存されたチェックポイントは古くなっていることがあります。メンテナンス中に稼働中の API の検出に失敗した場合でも、コマンドはそのチェックポイントを表示してエラーで終了します。現在の可用性を確認するものではありません。
 
-## Operator commands {#operator-commands}
+## オペレーターコマンド {#operator-commands}
 
-Use `void platform` to administer the users and apps on your selected platform. Start with the [Platform Administration guide](../../guide/platform-administration.md) for signing in, giving people access, and investigating deployments.
+選択したプラットフォーム上のユーザーとアプリを管理するには、`void platform` を使用します。サインイン、ユーザーへのアクセス権の付与、デプロイの調査については、まず[プラットフォーム管理ガイド](../../guide/platform-administration.md)を参照してください。
 
-Every command below accepts `--connection <slug-or-url>` to select a registered platform and `--json` for structured output. Display names and saved IDs also work. Without `--connection`, Void uses `VOID_API_URL` if set, then the active platform connection. Application project files do not change this selection.
+以下のすべてのコマンドは、登録済みのプラットフォームを選択する `--connection <slug-or-url>` と、構造化された出力のための `--json` を受け付けます。表示名や保存済みの ID も使用できます。`--connection` を指定しない場合、Void は `VOID_API_URL` が設定されていればそれを使用し、そうでなければアクティブなプラットフォーム接続を使用します。アプリケーションのプロジェクトファイルは、この選択を変更しません。
 
-### Making Changes {#making-changes}
+### 変更を行う {#making-changes}
 
-Commands that change users, projects, signup access, invitations, or Workers show a preview before asking for confirmation:
+ユーザー、プロジェクト、サインアップアクセス、招待、Worker を変更するコマンドは、確認を求める前にプレビューを表示します。
 
 ```sh
 void platform user plan <user-id> pro --plan
 void platform user plan <user-id> pro --yes
 ```
 
-`--plan` validates the change and prints its effect without applying it. `--yes` applies the change without prompting, which is required in scripts. Use one or the other; they cannot be combined. These flags also apply to deployment cancellation and maintenance commands, but not to authentication commands.
+`--plan` は、変更を検証し、適用せずにその影響を表示します。`--yes` は、確認なしで変更を適用します。スクリプトでは必須です。どちらか一方のみを使用してください。組み合わせることはできません。これらのフラグは、デプロイのキャンセルとメンテナンスコマンドにも適用されますが、認証コマンドには適用されません。
 
-Each preview and apply request allows five minutes. Set `--timeout <seconds>` to an integer from 1 to 3600 to change that limit. Read requests and individual log polls allow 30 seconds.
+プレビューと適用の各リクエストには、5 分が許容されます。この制限を変更するには、`--timeout <seconds>` に 1 から 3600 の整数を設定します。読み取りリクエストと個々のログのポーリングには、30 秒が許容されます。
 
-Void does not automatically retry changes. If a request loses its connection or times out, inspect the affected objects and `void platform system events` before repeating it. Partial results describe the work that completed and exit with a nonzero status.
+Void は、変更を自動的に再試行しません。リクエストの接続が切れた場合やタイムアウトした場合は、繰り返す前に、影響を受けるオブジェクトと `void platform system events` を確認してください。部分的な結果は、完了した作業を示し、0 以外のステータスで終了します。
 
-### Authentication {#operator-authentication}
+### 認証 {#operator-authentication}
 
-Sign in, inspect your session, or sign out:
+サインイン、セッションの確認、サインアウトを行います。
 
 ```sh
 void platform auth login [--provider <connection-id>] [--token-stdin]
@@ -55,23 +52,23 @@ void platform auth logout
 void platform auth token [--token-stdin]
 ```
 
-Browser login offers the platform's enabled methods; `--provider <connection-id>` selects one. Login saves a one-hour administrator session in your system keychain. Logout revokes that session and removes its local credential.
+ブラウザーでのログインでは、プラットフォームで有効なログイン方法が提示されます。`--provider <connection-id>` で 1 つを選択します。ログインすると、有効期間 1 時間の管理者セッションがシステムのキーチェーンに保存されます。ログアウトすると、そのセッションが失効し、ローカルの認証情報が削除されます。
 
-`auth token` prints your current operator token. With `--token-stdin`, it exchanges a full administrator API login session from standard input for a new operator token. `auth login --token-stdin` saves the exchanged token to the keychain instead of printing it.
+`auth token` は、現在のオペレータートークンを表示します。`--token-stdin` を指定すると、標準入力から渡された完全な管理者 API ログインセッションを、新しいオペレータートークンと交換します。`auth login --token-stdin` は、交換したトークンを表示せずにキーチェーンに保存します。
 
-For automation, supply `VOID_OPERATOR_TOKEN` with an explicit `VOID_API_URL` or `--connection`. Operator tokens are stored separately from application deployment credentials. The API checks your current administrator access on every request. See [Using Scripts](../../guide/platform/administration/operations.md#using-scripts) for an example.
+自動化では、明示的な `VOID_API_URL` または `--connection` とともに、`VOID_OPERATOR_TOKEN` を指定します。オペレータートークンは、アプリケーションのデプロイ用認証情報とは別に保存されます。API はリクエストのたびに、現在の管理者アクセスを確認します。例については、[スクリプトの使用](../../guide/platform/administration/operations.md#using-scripts)を参照してください。
 
-## Pagination and JSON {#pagination-and-json}
+## ページネーションと JSON {#pagination-and-json}
 
-User, project, deployment, invitation, and event lists default to page `1` with 20 items. `--limit` accepts 1 to 100 for these lists. Their JSON responses include the page, limit, and total count.
+ユーザー、プロジェクト、デプロイ、招待、イベントの一覧は、デフォルトでページ `1`、20 件になります。これらの一覧では、`--limit` に 1 から 100 を指定できます。JSON のレスポンスには、ページ、制限、合計件数が含まれます。
 
-With `--json`, results go to standard output and command errors go to standard error as JSON. Errors and partial failures exit with a nonzero status. An unhealthy `system health` result stays on standard output and also exits nonzero. Log following writes one JSON object per response, including each page and empty responses.
+`--json` を指定すると、結果は標準出力に、コマンドのエラーは JSON として標準エラーに出力されます。エラーと部分的な失敗は、0 以外のステータスで終了します。`system health` の結果が異常な場合も標準出力に出力され、0 以外で終了します。ログのフォローでは、各ページと空のレスポンスを含め、レスポンスごとに 1 つの JSON オブジェクトが書き込まれます。
 
-## Platform Command Groups
+## プラットフォームコマンドグループ {#platform-command-groups}
 
-- [Installation and maintenance](./platform-installation.md)
-- [Plans and authentication configuration](./platform-config.md)
-- [Users, projects, and signup access](./platform-users.md)
-- [Project Zero Trust](./platform-zero-trust.md)
-- [Deployments, builds, and system operations](./platform-operations.md)
-- [Email administration](./platform-email.md)
+- [インストールとメンテナンス](./platform-installation.md)
+- [プランと認証の設定](./platform-config.md)
+- [ユーザー、プロジェクト、サインアップアクセス](./platform-users.md)
+- [プロジェクトのゼロトラスト](./platform-zero-trust.md)
+- [デプロイ、ビルド、システムオペレーション](./platform-operations.md)
+- [メール管理](./platform-email.md)

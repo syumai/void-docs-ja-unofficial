@@ -2,26 +2,26 @@
 outline: deep
 ---
 
-# React Router v7
+# React Router v7 {#react-router-v7}
 
-Add `voidPlugin()` alongside the [React Router v7](https://reactrouter.com/) Vite plugin to use Void's database, storage, and deployment features. You don't need a separate Cloudflare adapter.
+[React Router v7](https://reactrouter.com/) の Vite プラグインと併せて `voidPlugin()` を追加すると、Void のデータベース、ストレージ、デプロイの機能を使用できます。別途 Cloudflare アダプターは必要ありません。
 
-## Setup
+## セットアップ {#setup}
 
-### 1. Create a new project
+### 1. 新しいプロジェクトを作成する {#1-create-a-new-project}
 
 ```bash
 npm create react-router@latest my-app
 cd my-app
 ```
 
-### 2. Install dependencies
+### 2. 依存関係をインストールする {#2-install-dependencies}
 
 ```bash
 npm install -D void
 ```
 
-### 3. Configure `vite.config.ts`
+### 3. `vite.config.ts` を設定する {#3-configure-vite-config-ts}
 
 ```ts
 import { reactRouter } from '@react-router/dev/vite';
@@ -36,20 +36,20 @@ export default defineConfig({
 });
 ```
 
-### 4. Deploy
+### 4. デプロイする {#4-deploy}
 
 ```bash
 void auth login
 void deploy
 ```
 
-## Using Void Features
+## Void の機能を使用する {#using-void-features}
 
-Most [Void platform features](../../guide/app-types.md#void-apps) work with React Router. Use them in loaders and actions:
+[Void プラットフォームの機能](../../guide/app-types.md#void-apps)の多くは、React Router でも動作します。ローダーとアクションで使用します。
 
-Void-managed auth is not supported in framework mode yet. Use Better Auth's official React Router integration directly for now.
+Void が管理する認証は、フレームワークモードではまだサポートされていません。当面は、Better Auth の公式の React Router インテグレーションを直接使用してください。
 
-### Database
+### データベース {#database}
 
 ```tsx
 import { users } from '@schema';
@@ -61,19 +61,19 @@ export async function loader({}: Route.LoaderArgs) {
 }
 ```
 
-### Other resources
+### その他のリソース {#other-resources}
 
-Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
+[KV](../../guide/kv.md)、[オブジェクトストレージ](../../guide/storage.md)、[AI](../../guide/ai.md) は、Void アプリと同じインポートでサーバーサイドのコードから使用できます。[cron ジョブ](../../guide/jobs.md)は `crons/` に、[キューコンシューマー](../../guide/queues.md)は `queues/` に追加します。
 
-### Environment Variables
+### 環境変数 {#environment-variables}
 
-Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
+`env.ts` で変数を宣言し、`import { env } from "void/env"` で読み取ります。ローカルの値、本番環境のシークレット、公開される `VITE_*` の値については、[環境変数](../../guide/env-vars.md)を参照してください。
 
-Read server secrets in a `.server.ts` companion module and import it into your loader or action. Void rejects server-secret reads in route files that also contain browser components.
+サーバーシークレットは `.server.ts` のコンパニオンモジュールで読み取り、ローダーやアクションにインポートしてください。Void は、ブラウザーコンポーネントも含むルートファイルでのサーバーシークレットの読み取りを拒否します。
 
-## Accessing Bindings Directly
+## バインディングに直接アクセスする {#accessing-bindings-directly}
 
-You can also access Cloudflare bindings via the `cloudflare:workers` module:
+`cloudflare:workers` モジュールを介して、Cloudflare のバインディングにアクセスすることもできます。
 
 ```tsx
 import { env } from 'cloudflare:workers';

@@ -2,36 +2,25 @@
 outline: deep
 ---
 
-# Using Void with Coding Agents
+# コーディングエージェントで Void を使う {#using-void-with-coding-agents}
 
-`void init` sets up coding agents as part of project initialization:
+`void init` は、プロジェクトの初期化の一環として、コーディングエージェントをセットアップします。
 
 ```sh
 npx void init
 ```
 
-New projects get a minimal `AGENTS.md` explaining Void and where to read its docs.
-In an existing project, Void asks before creating, appending to, or updating
-`AGENTS.md`. It preserves your instructions outside the Void section. Declining
-keeps the file unchanged; CI and non-interactive runs skip changes to existing
-projects' instructions.
+新しいプロジェクトには、Void の説明とドキュメントの参照先を記した、最小限の `AGENTS.md` が作成されます。既存のプロジェクトでは、`AGENTS.md` を作成、追記、更新する前に Void が確認を求めます。Void のセクション以外のあなたの指示は保持されます。辞退した場合、ファイルは変更されません。CI や非対話型の実行では、既存プロジェクトの指示への変更はスキップされます。
 
-The complete Markdown docs ship at `node_modules/void/docs/`. Start with
-`guide/quickstart.md` for setup and `reference/cli.md` for commands. Agents can
-read them directly, even without a linked skill.
+Markdown 形式の完全なドキュメントは、`node_modules/void/docs/` に同梱されています。セットアップは `guide/quickstart.md` から、コマンドは `reference/cli.md` から読み始めてください。エージェントは、スキルがリンクされていなくても、これらを直接読めます。
 
-## Skills
+## スキル {#skills}
 
-Skills point your agent to the commands and docs it needs for the task. They link to the installed `void` package, so the guidance matches the version your app uses.
+スキルは、タスクに必要なコマンドとドキュメントをエージェントに示します。インストール済みの `void` パッケージにリンクされるため、ガイダンスはアプリが使用しているバージョンと一致します。
 
-Void ships two skills:
+Void には 2 つのスキルが同梱されています。
 
-- **`void`:** commands and docs for app development.
-- **`migrate-vite-cloudflare-to-void`:** migration skill for converting existing `@cloudflare/vite-plugin` apps to Void.
+- **`void`:** アプリ開発向けのコマンドとドキュメント。
+- **`migrate-vite-cloudflare-to-void`:** 既存の `@cloudflare/vite-plugin` アプリを Void に変換するための移行スキル。
 
-Skills are linked automatically by `void init` when it detects a supported
-agent's configuration. For example, Claude Code uses `.claude/skills/` and Codex
-uses `.agents/skills/`. The skills use the app's installed docs so their guidance
-matches its Void version. Globally installed skills can use the docs in their
-Void package when there is no local installation. If no agent is detected, the
-instructions still point directly to the bundled docs.
+スキルは、`void init` がサポート対象のエージェントの設定を検出すると、自動的にリンクされます。たとえば、Claude Code は `.claude/skills/` を、Codex は `.agents/skills/` を使用します。スキルはアプリにインストールされたドキュメントを使うため、ガイダンスは Void のバージョンと一致します。グローバルにインストールされたスキルは、ローカルにインストールがない場合、Void パッケージ内のドキュメントを使用できます。エージェントが検出されない場合でも、指示は同梱のドキュメントを直接指し示します。

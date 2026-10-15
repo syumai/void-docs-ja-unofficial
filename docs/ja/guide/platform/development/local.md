@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Local Development
+# ローカル開発 {#local-development}
 
-## Setting Up the Repository
+## リポジトリのセットアップ {#setting-up-the-repository}
 
-Clone your fork and install the workspace dependencies with Vite+:
+フォークをクローンし、Vite+ でワークスペースの依存関係をインストールします。
 
 ```sh
 git clone https://github.com/your-org/void.git
@@ -16,65 +16,65 @@ vpr install:void-dev
 void-dev --help
 ```
 
-Use the Node.js version recorded in `.node-version`.
+`.node-version` に記載されている Node.js のバージョンを使用してください。
 
-`install:void-dev` builds the CLI, shared packages, and platform runtime, then makes this checkout's built CLI globally available as `void-dev`. Public packages export their built files, so run `vp run build:core` after later source changes to refresh the alias. The installer refuses to replace an unrelated global command. Remove only this checkout's alias with `vpr uninstall:void-dev`. The commands on these development pages run from the repository root.
+`install:void-dev` は、CLI、共有パッケージ、プラットフォームランタイムをビルドし、このチェックアウトのビルド済み CLI を `void-dev` としてグローバルに使えるようにします。公開パッケージはビルド済みファイルをエクスポートするため、以降にソースを変更した後は `vp run build:core` を実行してエイリアスを更新してください。インストーラーは、無関係なグローバルコマンドを置き換えることを拒否します。このチェックアウトのエイリアスだけを削除するには `vpr uninstall:void-dev` を使用します。これらの開発ページのコマンドは、リポジトリのルートから実行します。
 
-## Finding the Implementation
+## 実装の場所を探す {#finding-the-implementation}
 
-| Directory                                            | Purpose                                                              |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| `packages/void`                                      | Framework, application runtime, and CLI                              |
-| `packages/platform`                                  | Installer contracts, packaged Workers, and platform migrations       |
-| `packages/deploy-core`, `packages/deploy-cloudflare` | Shared deployment contracts and Cloudflare upload code               |
-| `platform/packages/api`                              | Users, projects, deployments, provisioning, and administrator API/UI |
-| `platform/packages/dispatch`                         | Application routing and static assets                                |
-| `platform/packages/proxy`                            | AI, remote bindings, and revalidation                                |
-| `platform/packages/email-gateway`                    | Inbound mail routing and tenant delivery                             |
-| `platform/packages/tail`                             | Runtime log ingestion                                                |
-| `platform/packages/dashboard`                        | Dashboard source and local UI components in `ui/`                    |
+| ディレクトリ                                         | 用途                                                                                |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `packages/void`                                      | フレームワーク、アプリケーションランタイム、CLI                                     |
+| `packages/platform`                                  | インストーラーの契約、パッケージ化された Worker、プラットフォームのマイグレーション |
+| `packages/deploy-core`, `packages/deploy-cloudflare` | 共有のデプロイ契約と Cloudflare のアップロードコード                                |
+| `platform/packages/api`                              | ユーザー、プロジェクト、デプロイ、プロビジョニング、管理者 API/UI                   |
+| `platform/packages/dispatch`                         | アプリケーションのルーティングと静的アセット                                        |
+| `platform/packages/proxy`                            | AI、リモートバインディング、再検証                                                  |
+| `platform/packages/email-gateway`                    | 受信メールのルーティングとテナントへの配信                                          |
+| `platform/packages/tail`                             | ランタイムログの取り込み                                                            |
+| `platform/packages/dashboard`                        | ダッシュボードのソースと、`ui/` 内のローカル UI コンポーネント                      |
 
-The `@voidcloud/*` names identify workspace implementation packages. Their `private: true` flags prevent publishing those packages to npm. Deployable core Workers are bundled into the public `@void/platform` package.
+`@voidcloud/*` という名前は、ワークスペースの実装パッケージを示します。これらの `private: true` フラグにより、それらのパッケージが npm に公開されることを防いでいます。デプロイ可能なコア Worker は、公開パッケージ `@void/platform` にバンドルされます。
 
-The core installer creates the API, dispatch, proxy, tail, and email gateway Workers. The dashboard and managed GitHub build services are available in the source tree but are not included in that installation. Adding an optional service requires its infrastructure, bindings, authentication, and capability configuration together.
+コアのインストーラーは、API、dispatch、proxy、tail、メールゲートウェイの各 Worker を作成します。ダッシュボードと、管理された GitHub ビルドサービスはソースツリーに含まれていますが、そのインストールには含まれません。オプションのサービスを追加するには、そのインフラ、バインディング、認証、ケイパビリティの設定をまとめて行う必要があります。
 
-## Running the API Locally
+## API をローカルで実行する {#running-the-api-locally}
 
-Start a local PostgreSQL server and make `psql` and `pg_isready` available on your path. Then create the development database, apply its migrations, and seed an administrator:
+ローカルの PostgreSQL サーバーを起動し、`psql` と `pg_isready` をパスから利用できるようにします。その後、開発用データベースを作成し、マイグレーションを適用して、管理者をシードします。
 
 ```sh
 vp run --filter @voidcloud/api setup --admin-email dev@example.com
 vp run --filter @voidcloud/api dev:admin
 ```
 
-The command disables the optional build containers, so basic API and admin work
-does not require Docker. To develop managed builds, install Docker and run the
-API with containers enabled.
+このコマンドはオプションのビルド用コンテナを無効にするため、基本的な API と管理画面の作業に
+Docker は不要です。管理されたビルドを開発するには、Docker をインストールし、
+コンテナを有効にして API を実行してください。
 
-Open `http://localhost:8787/admin/`. Setup writes the API's local database connection and development authentication bypass to `platform/packages/api/.dev.vars`. It configures `platform/packages/dashboard/.env` for the separate dashboard. Both files are ignored by Git. Production installations get separate credentials through the installer.
+`http://localhost:8787/admin/` を開きます。セットアップでは、API のローカルデータベース接続と開発用の認証バイパスが `platform/packages/api/.dev.vars` に書き込まれます。別途動かすダッシュボード用には `platform/packages/dashboard/.env` が設定されます。どちらのファイルも Git では無視されます。本番インストールでは、インストーラーによって別の認証情報が発行されます。
 
-The API's development bypass lets you work on the browser admin UI without setting up OAuth. Operator CLI sessions still require administrator authentication; they do not use the browser bypass.
+API の開発用バイパスにより、OAuth を設定せずにブラウザの管理 UI の開発ができます。オペレーター用 CLI のセッションでは引き続き管理者認証が必要で、ブラウザ用のバイパスは使用されません。
 
-`dev:admin` watches source files and automatically reloads the browser after edits. Keep it running while working on the admin dashboard's React components and styles; no platform deployment is needed. The setup includes sample users, projects, and deployments for trying each view locally.
+`dev:admin` はソースファイルを監視し、編集後にブラウザを自動的にリロードします。管理ダッシュボードの React コンポーネントやスタイルの作業中は、起動したままにしてください。プラットフォームのデプロイは不要です。セットアップには、各ビューをローカルで試せるサンプルのユーザー、プロジェクト、デプロイが含まれています。
 
-## Running the Dashboard Locally
+## ダッシュボードをローカルで実行する {#running-the-dashboard-locally}
 
-The dashboard is a separate source app. After API setup, start it in another terminal:
+ダッシュボードは、独立したソースアプリです。API のセットアップ後、別のターミナルで起動します。
 
 ```sh
 vp run --filter @voidcloud/dashboard dev
 ```
 
-Setup points the dashboard's local `.env` at the API you started:
+セットアップにより、ダッシュボードのローカルの `.env` は、起動した API を指すように設定されます。
 
 ```dotenv
 API_URL=http://localhost:8787
 SITE_DOMAIN=apps.example.com
 ```
 
-Open the Vite URL and choose **Dev login (local API)**. That button appears for a localhost API and uses the local development sign-in endpoint.
+Vite の URL を開き、**Dev login (local API)** を選択します。このボタンは localhost の API に対して表示され、ローカルの開発用サインインエンドポイントを使用します。
 
-You can also point the dashboard at an API that you operate. If Cloudflare Access protects that API, install `cloudflared` and opt into the dashboard's local token helper with matching origins:
+自分で運用している API をダッシュボードから指すこともできます。その API が Cloudflare Access で保護されている場合は、`cloudflared` をインストールし、オリジンを一致させたうえで、ダッシュボードのローカルトークンヘルパーを有効にします。
 
 ```dotenv
 API_URL=https://platform.example.com
@@ -82,29 +82,28 @@ CF_ACCESS_APP_URL=https://platform.example.com
 SITE_DOMAIN=apps.example.com
 ```
 
-The helper refreshes an Access session before the dev server starts. Human
-dashboard requests require the user's Access session as well as their Void login;
-a service token does not represent that user. Service-token pairs are for scoped
-machine operations. This is dashboard development configuration; Access
-credentials are separate from platform login credentials.
+このヘルパーは、開発サーバーの起動前に Access セッションを更新します。人間によるダッシュボードへの
+リクエストには、ユーザーの Void ログインに加えて Access セッションが必要です。
+サービストークンはそのユーザーを表しません。サービストークンのペアは、スコープを絞った
+マシン操作用です。これはダッシュボード開発用の設定です。Access の
+認証情報は、プラットフォームのログイン認証情報とは別のものです。
 
-For a deployed dashboard, bind its `API` service to your platform API, configure
-`DASHBOARD_URL` on both the dashboard and API, and include that exact dashboard origin in the
-platform's Access protection application. The dashboard passes the browser's
-company identity to the API using that service binding. Its login page shows
-the platform's currently enabled methods, and **Account** supports adding an
-additional login identity.
+デプロイ済みのダッシュボードでは、その `API` サービスをプラットフォームの API にバインドし、
+ダッシュボードと API の両方で `DASHBOARD_URL` を設定し、そのダッシュボードのオリジンを正確に
+プラットフォームの Access 保護アプリケーションに含めます。ダッシュボードは、そのサービスバインディングを使って、
+ブラウザの会社 ID を API に渡します。ログインページには、プラットフォームで現在有効なログイン方法が表示され、
+**Account** では追加のログイン ID を登録できます。
 
-## Testing Changes
+## 変更のテスト {#testing-changes}
 
-Run tests for the area you changed while developing:
+開発中は、変更した領域のテストを実行します。
 
 ```sh
 vp test run platform/packages/api/test/integration/operator-auth.test.ts
 vp run check
 ```
 
-Before preparing a release, build the packages and run the complete checks:
+リリースの準備をする前に、パッケージをビルドし、すべてのチェックを実行します。
 
 ```sh
 vp run build:all
@@ -116,6 +115,6 @@ vp test run
 vp run build:docs
 ```
 
-Platform integration tests use their local test database by default. To test against PostgreSQL, set `VOID_TEST_DATABASE_URL` to a disposable database: these tests clear tables between cases.
+プラットフォームの統合テストは、デフォルトでローカルのテスト用データベースを使用します。PostgreSQL でテストするには、`VOID_TEST_DATABASE_URL` に使い捨てのデータベースを設定してください。これらのテストはケースごとにテーブルをクリアします。
 
-To exercise a deployed application, deploy a disposable copy of `playground/kitchen-sink` and pass its URL as `SMOKE_URL` to the smoke test described in `platform/scripts/kitchen-sink-smoke-test.md`. That test creates and removes application data.
+デプロイ済みのアプリケーションを検証するには、`playground/kitchen-sink` の使い捨てコピーをデプロイし、その URL を `SMOKE_URL` として、`platform/scripts/kitchen-sink-smoke-test.md` に記載されているスモークテストに渡します。このテストはアプリケーションデータを作成し、削除します。

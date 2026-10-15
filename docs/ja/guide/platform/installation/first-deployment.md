@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# First Deployment
+# 最初のデプロイ {#first-deployment}
 
-Open your platform's API URL in a browser to see its welcome page, CLI connection instructions, and a link to the administrator dashboard. Share this URL with teammates so they can connect to your platform.
+ブラウザーでプラットフォームの API URL を開くと、ウェルカムページ、CLI の接続手順、管理者ダッシュボードへのリンクが表示されます。チームメンバーがプラットフォームに接続できるように、この URL を共有してください。
 
-First verify the new platform and sign in with the administrator login method selected during setup:
+まず、新しいプラットフォームを確認し、セットアップ時に選択した管理者のログイン方法でサインインします。
 
 ```sh
 void platform status
@@ -14,41 +14,28 @@ void platform auth login
 void platform system health
 ```
 
-Administrator login is separate from the credentials used to deploy apps. In a new or unlinked Void app directory, connect using the installed API URL and deploy your first project:
+管理者のログインは、アプリのデプロイに使う認証情報とは別のものです。新規またはリンクされていない Void アプリのディレクトリで、インストール済みの API URL を使って接続し、最初のプロジェクトをデプロイします。
 
 ```sh
 void connect void-company-api.example.workers.dev
 void deploy --platform void --project my-first-app
 ```
 
-`void connect` validates the platform and signs you in when needed. Confirm project creation when deploy asks. To use a project that already exists, run `void project link` instead. An app already linked to another platform keeps its existing destination; use a fresh app directory for your first test.
+`void connect` はプラットフォームを検証し、必要に応じてサインインします。デプロイ時にプロジェクトの作成を確認されたら、承認してください。すでに存在するプロジェクトを使うには、代わりに `void project link` を実行します。すでに別のプラットフォームにリンクされているアプリは、既存の接続先を維持します。最初のテストには、新しいアプリのディレクトリを使ってください。
 
-Once accepted by the platform, a deployment continues independently of the CLI connection. The CLI reconnects automatically after a connection failure. Use `void project status` to inspect a deployment after closing the CLI, or `void project cancel` to request cancellation.
+プラットフォームに受け付けられたデプロイは、CLI の接続とは独立して続行されます。CLI は、接続の失敗後に自動的に再接続します。CLI を閉じた後でデプロイを確認するには `void project status` を、キャンセルを要求するには `void project cancel` を使います。
 
-The CLI stores login credentials in your system keychain, separately for each platform URL. With no URL, `void connect` offers Cloudflare or a Void platform; `void connect --platform void` offers saved platforms and an option to enter another URL.
+CLI は、ログインの認証情報をシステムのキーチェーンに、プラットフォームの URL ごとに別々に保存します。URL を指定しない場合、`void connect` は Cloudflare または Void プラットフォームを選択肢として提示します。`void connect --platform void` は、保存済みのプラットフォームと、別の URL を入力するオプションを提示します。
 
-For CI, create a bounded, project-scoped deploy credential while signed in as
-the project owner:
+CI では、プロジェクトのオーナーとしてサインインした状態で、期限付きでプロジェクトにスコープされたデプロイ用の認証情報を作成します。
 
 ```sh
 void project token create --name ci --expires-in 30
 ```
 
-Store the printed `VOID_TOKEN` and `VOID_API_URL` in the CI secret manager, then
-run `void connect "$VOID_API_URL" --no-login` before deploying in each fresh CI
-environment. Project files do not replace this connection step. CI cannot answer
-the project prompt, so choose the project before `void deploy`: set `VOID_PROJECT`,
-pass `--project <slug>`, or commit `.void/project.json` from `void project link`.
-New apps ignore `.void` in `.gitignore`; to commit the link, replace that line
-with `.void/*` and `!.void/project.json`. Rotate with `void project token renew <id>` and revoke with
-`void project token revoke <id>`. A human login token is not a CI credential.
+表示された `VOID_TOKEN` と `VOID_API_URL` を CI のシークレットマネージャーに保存し、新しい CI 環境でデプロイする前に、毎回 `void connect "$VOID_API_URL" --no-login` を実行します。プロジェクトファイルは、この接続のステップの代わりにはなりません。CI ではプロジェクトの確認プロンプトに答えられないため、`void deploy` の前にプロジェクトを選択しておきます。`VOID_PROJECT` を設定するか、`--project <slug>` を渡すか、`void project link` で作成した `.void/project.json` をコミットします。新しいアプリは `.gitignore` で `.void` を無視します。リンクをコミットするには、その行を `.void/*` と `!.void/project.json` に置き換えてください。ローテーションは `void project token renew <id>` で、失効は `void project token revoke <id>` で行います。人間のログイントークンは、CI の認証情報ではありません。
 
-If Cloudflare Access protects the platform, Access proof and the project
-credential are both required; the service token does not grant Void user or
-operator authority. A deploy that uses prerendering or remote bindings calls
-both the API and proxy, so store `VOID_ACCESS_CREDENTIALS` in the CI secret
-manager with entries for both exact HTTPS origins. Include both entries even
-when the same admitted service-token pair is used for both origins:
+Cloudflare Access でプラットフォームを保護している場合は、Access の証明と、プロジェクトの認証情報の両方が必要です。サービストークンは、Void のユーザーやオペレーターの権限を付与しません。プリレンダリングやリモートバインディングを使うデプロイでは、API とプロキシの両方を呼び出すため、`VOID_ACCESS_CREDENTIALS` を、正確な HTTPS オリジンの両方のエントリーとともに、CI のシークレットマネージャーに保存します。両方のオリジンで、承認済みの同じサービストークンのペアを使う場合でも、両方のエントリーを含めてください。
 
 ```json
 {
@@ -63,10 +50,9 @@ when the same admitted service-token pair is used for both origins:
 }
 ```
 
-`VOID_ACCESS_ORIGIN` can scope credentials to one origin only; setting it to
-the API origin does not authorize proxy requests.
+`VOID_ACCESS_ORIGIN` を使うと、認証情報を 1 つのオリジンのみに限定できます。これを API のオリジンに設定しても、プロキシへのリクエストは認可されません。
 
-Use these commands to inspect connections and installations:
+接続とインストールを確認するには、次のコマンドを使います。
 
 ```sh
 void platform list
@@ -74,21 +60,21 @@ void platform use [id]
 void platform status [id]
 ```
 
-## Managing Access
+## アクセスを管理する {#managing-access}
 
-After installation, sign in as the first administrator. For a teammate who uses GitHub, add their login to the signup allowlist:
+インストール後、最初の管理者としてサインインします。GitHub を使うチームメンバーには、そのログインをサインアップの許可リストに追加します。
 
 ```sh
 void platform auth login
 void platform signup allow github teammate
 ```
 
-Void shows the proposed access change and asks you to confirm it. Once approved, `teammate` can connect to the platform's API URL and sign in with GitHub.
+Void は、提案されたアクセスの変更を表示し、確認を求めます。承認されると、`teammate` はプラットフォームの API URL に接続して、GitHub でサインインできるようになります。
 
-To allow email addresses, domains, or OIDC identities, or to open signup, see [Giving People Access](/guide/platform/administration/access#giving-people-access).
+メールアドレス、ドメイン、OIDC アイデンティティを許可する場合や、サインアップを開放する場合は、[ユーザーにアクセスを付与する](/ja/guide/platform/administration/access#giving-people-access)を参照してください。
 
-Your administrator session lasts for one hour. Use it to inspect users, projects, logs, and platform health. The [Platform Administration guide](/guide/platform-administration) walks through those workflows, previews, and automation. You can also open `<API origin>/admin/login` to use the browser admin UI.
+管理者のセッションは 1 時間続きます。このセッションを使って、ユーザー、プロジェクト、ログ、プラットフォームの状態を確認できます。[プラットフォーム管理ガイド](/ja/guide/platform-administration)では、これらのワークフロー、プレビュー、自動化について説明しています。`<API origin>/admin/login` を開いて、ブラウザーの管理 UI を使うこともできます。
 
-### Protect Project Hostnames with Zero Trust
+### Zero Trust でプロジェクトのホスト名を保護する {#protect-project-hostnames-with-zero-trust}
 
-After installation, an administrator can require Cloudflare Access on new project hostnames while allowing each project owner or project administrator to opt out. This is independent of Access login and protection for the platform API itself, and it needs its own Cloudflare API token. See [Project Zero Trust](/guide/platform/administration/zero-trust) for the requirements, setup command, and recovery.
+インストール後、管理者は、新しいプロジェクトのホスト名に Cloudflare Access を必須にでき、各プロジェクトのオーナーやプロジェクト管理者がオプトアウトすることも許可できます。これは、プラットフォーム API 自体の Access ログインや保護とは独立しており、専用の Cloudflare API トークンが必要です。要件、セットアップコマンド、リカバリーについては、[プロジェクトの Zero Trust](/ja/guide/platform/administration/zero-trust) を参照してください。

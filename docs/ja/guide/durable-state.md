@@ -2,15 +2,15 @@
 outline: deep
 ---
 
-# Durable State
+# Durable State {#durable-state}
 
-Use a Durable Object when requests need to share state under one name, such as a shopping cart, room, or rate limiter. Void gives you typed methods and stores the object's state between calls.
+ショッピングカート、ルーム、レートリミッターなど、複数のリクエストが 1 つの名前のもとで状態を共有する必要がある場合は、Durable Object を使用します。Void は型付きのメソッドを提供し、呼び出しの間でオブジェクトの状態を保存します。
 
-Create a module in `durable-objects/` with `defineDurableState()`. Void provides a SQLite-backed Cloudflare Durable Object for it. This feature supports native Void apps on Void platforms and direct Cloudflare deployments.
+`durable-objects/` に、`defineDurableState()` を使ったモジュールを作成します。Void がそのための SQLite ベースの Cloudflare Durable Object を提供します。この機能は、Void プラットフォーム上のネイティブな Void アプリと、Cloudflare への直接デプロイをサポートしています。
 
-Commit `void.lock.json` when Void adds a resource. Keep its deployed migration entries in their original order.
+Void がリソースを追加したときは `void.lock.json` をコミットしてください。デプロイ済みのマイグレーションエントリは、元の順序のまま維持してください。
 
-## Define state and methods
+## 状態とメソッドを定義する {#define-state-and-methods}
 
 ```ts
 // durable-objects/counter.ts
@@ -32,11 +32,11 @@ export const Counter = defineDurableState({
 export default Counter;
 ```
 
-Default-export the object returned by `defineDurableState()`.
+`defineDurableState()` が返すオブジェクトを default export してください。
 
-## Call it from a route
+## ルートから呼び出す {#call-it-from-a-route}
 
-Import your definition and call `get()` with a name to select an object. Method arguments and return values are typed:
+定義をインポートし、名前を指定して `get()` を呼び出すとオブジェクトを選択できます。メソッドの引数と戻り値には型が付きます。
 
 ```ts
 // routes/api/counter.ts
@@ -50,22 +50,22 @@ export const POST = defineHandler(async () => {
 });
 ```
 
-The same name always resolves to the same Durable Object. Use `getById(id)` when you already have a `DurableObjectId`. For advanced cases, both helpers also accept an explicit `DurableObjectNamespace` as their first argument.
+同じ名前は常に同じ Durable Object に解決されます。すでに `DurableObjectId` を持っている場合は `getById(id)` を使います。高度なケースでは、どちらのヘルパーも最初の引数に明示的な `DurableObjectNamespace` を受け取れます。
 
-## Execution and persistence
+## 実行と永続化 {#execution-and-persistence}
 
-Void loads state before the first operation and runs RPC methods one at a time. After a method, `fetch`, or `alarm` handler succeeds, it saves the updated state.
+Void は最初の操作の前に状態を読み込み、RPC メソッドを 1 つずつ実行します。メソッド、`fetch`、`alarm` ハンドラーが成功すると、更新後の状態を保存します。
 
-If the handler or save fails, Void restores `context.state` to its previous value. Direct writes to `context.storage` aren't included in that rollback.
+ハンドラーまたは保存が失敗した場合、Void は `context.state` を以前の値に戻します。`context.storage` への直接の書き込みは、このロールバックの対象に含まれません。
 
-Each method receives:
+各メソッドは次を受け取ります。
 
-- `context.state`, which can be mutated or replaced
-- `context.env`, the Durable Object environment
-- `context.id` and `context.storage`
-- `context.setAlarm()` and `context.deleteAlarm()`
+- `context.state`: 変更または置き換えが可能です
+- `context.env`: Durable Object の環境
+- `context.id` と `context.storage`
+- `context.setAlarm()` と `context.deleteAlarm()`
 
-Methods named `fetch`, `alarm`, or `constructor` are reserved. Define `fetch` and `alarm` as top-level hooks instead:
+`fetch`、`alarm`、`constructor` という名前のメソッドは予約されています。`fetch` と `alarm` は、代わりにトップレベルのフックとして定義してください。
 
 ```ts
 export const Room = defineDurableState({
@@ -83,9 +83,9 @@ export const Room = defineDurableState({
 export default Room;
 ```
 
-## State migrations
+## 状態のマイグレーション {#state-migrations}
 
-Version the persisted value when its shape changes. Versions start at `1`, must be contiguous, and run in order before an operation handles the migrated state.
+永続化された値の形が変わる場合は、その値にバージョンを付けます。バージョンは `1` から始まり、連続している必要があり、操作がマイグレーション済みの状態を扱う前に順番に実行されます。
 
 ```ts
 export const Counter = defineDurableState({
@@ -115,26 +115,26 @@ export const Counter = defineDurableState({
 export default Counter;
 ```
 
-State migrations update your saved values. Void manages Cloudflare’s separate class migrations in `void.lock.json`.
+状態のマイグレーションは保存済みの値を更新します。Cloudflare の別個のクラスマイグレーションは、Void が `void.lock.json` で管理します。
 
-For direct Cloudflare deployments, do not delete or reorder generated Durable Object migrations in `void.lock.json` after deployment. For a class addition, rename, or removal on an existing Worker, review the migration and run `void deploy --platform cloudflare --atomic`. If this Worker needs atomic publication on every deploy, set `deploy: { cloudflare: { mode: 'atomic' } }` in `void.config.ts`. Cloudflare applies class lifecycle changes in one deployment. The Worker receives traffic before Void checks readiness, and you cannot roll back across that migration boundary. Staged deploys keep pre-traffic readiness verification.
+Cloudflare への直接デプロイでは、デプロイ後に `void.lock.json` 内の生成された Durable Object マイグレーションを削除したり並べ替えたりしないでください。既存の Worker でクラスの追加、名前変更、削除を行う場合は、マイグレーションを確認して `void deploy --platform cloudflare --atomic` を実行してください。この Worker で毎回のデプロイにアトミックな公開が必要な場合は、`void.config.ts` に `deploy: { cloudflare: { mode: 'atomic' } }` を設定します。Cloudflare はクラスのライフサイクルの変更を 1 回のデプロイで適用します。Void が準備完了を確認する前に Worker はトラフィックを受け取り、そのマイグレーションの境界をまたいだロールバックはできません。段階的なデプロイでは、トラフィック受信前の準備完了の検証が維持されます。
 
-## Rename a file while keeping its state
+## ファイルの名前を変更しつつ状態を維持する {#rename-a-file-while-keeping-its-state}
 
-Before renaming a deployed definition, run:
+デプロイ済みの定義の名前を変更する前に、次を実行します。
 
 ```sh
 void info
 ```
 
-For `durable-objects/counter.ts`, Void prints:
+`durable-objects/counter.ts` の場合、Void は次のように出力します。
 
 ```text
 To preserve this resource when moving its code, add this to 'defineDurableState':
   name: "counter",
 ```
 
-Add that property to the existing definition:
+そのプロパティを既存の定義に追加します。
 
 ```ts
 export const Counter = defineDurableState({
@@ -150,27 +150,27 @@ export const Counter = defineDurableState({
 export default Counter;
 ```
 
-Rename the file within `durable-objects/`, update its imports, and deploy. Keep `name: 'counter'` and the names passed to `Counter.get()` unchanged to preserve the stored state.
+`durable-objects/` 内でファイルの名前を変更し、インポートを更新してデプロイします。保存された状態を維持するには、`name: 'counter'` と `Counter.get()` に渡す名前を変更しないでください。
 
-`name` is optional. Use a static string, either inline or in a local `const`, containing words that start with a letter, such as `'shopping-cart'`. Names must produce distinct Worker classes and bindings. Changing an existing resource's `name` selects a different resource.
+`name` は省略可能です。静的な文字列を、インラインまたはローカルの `const` で指定してください。文字で始まる単語を含む `'shopping-cart'` のような文字列にします。名前は、それぞれ別の Worker クラスとバインディングになるようにしてください。既存リソースの `name` を変更すると、別のリソースが選択されます。
 
-If you already moved the file, `void info` also shows resources recorded in `void.lock.json` without a matching definition. Identify the original resource and use its suggested name. If no name can be suggested, restore the original file from source history and run `void info` before moving it again. Keep the existing lock and migration history.
+すでにファイルを移動してしまった場合、`void info` は、`void.lock.json` に記録されているものの対応する定義がないリソースも表示します。元のリソースを特定し、提案された名前を使用してください。名前を提案できない場合は、ソース履歴から元のファイルを復元し、再度移動する前に `void info` を実行してください。既存のロックファイルとマイグレーション履歴は維持してください。
 
-## Deployment support
+## デプロイのサポート {#deployment-support}
 
-Typed state works in local development, on Void platforms, and in direct Cloudflare deploys of native Void apps. Use `void deploy` for a Void platform or `void deploy --platform cloudflare` for your own Cloudflare account.
+型付きの状態は、ローカル開発、Void プラットフォーム、ネイティブ Void アプリの Cloudflare への直接デプロイで動作します。Void プラットフォームには `void deploy`、ご自身の Cloudflare アカウントには `void deploy --platform cloudflare` を使用します。
 
-On a Void platform, each class keeps its storage across deployments and rollbacks. A rollback restores the class code and keeps the current stored data. Removing a definition makes the class inactive; adding it again with the same resource name restores access to its data. Deleting the project deletes its Durable Object storage.
+Void プラットフォームでは、各クラスのストレージはデプロイやロールバックをまたいで維持されます。ロールバックではクラスのコードが復元され、現在保存されているデータは維持されます。定義を削除するとクラスは非アクティブになり、同じリソース名で再び追加するとそのデータへのアクセスが復元されます。プロジェクトを削除すると、その Durable Object のストレージも削除されます。
 
-A project supports up to 32 distinct custom classes, including removed classes whose storage is retained. Keep resource names and instance names stable to preserve data. Upgrade an older Void installation before deploying an app that uses custom Durable Objects.
+1 つのプロジェクトでは、ストレージが保持されている削除済みのクラスを含め、最大 32 個の異なるカスタムクラスをサポートします。データを維持するには、リソース名とインスタンス名を安定させてください。カスタム Durable Object を使用するアプリをデプロイする前に、古い Void のインストールをアップグレードしてください。
 
-Custom Durable Object modules are not supported in meta-frameworks or on Node.js, Bun, and Deno.
+カスタム Durable Object モジュールは、メタフレームワークおよび Node.js、Bun、Deno ではサポートされていません。
 
-This is separate from [typed WebSocket routes](./websockets.md), which also use SQLite-backed Durable Objects and work on both direct Cloudflare and hosted Void deployments.
+これは、同じく SQLite ベースの Durable Object を使用し、Cloudflare への直接デプロイとホスト型の Void デプロイの両方で動作する[型付き WebSocket ルート](./websockets.md)とは別のものです。
 
-## Native Durable Object classes
+## ネイティブの Durable Object クラス {#native-durable-object-classes}
 
-Use `defineDurableObject` to keep a native Cloudflare class, including classes extending Cloudflare Agents. Void discovers its binding and exports the class without replacing its constructor, lifecycle, or RPC methods. Like Durable State, this supports Void platforms and direct Cloudflare deployments.
+Cloudflare Agents を拡張するクラスを含む、ネイティブな Cloudflare クラスを維持するには `defineDurableObject` を使用します。Void はそのバインディングを検出し、コンストラクター、ライフサイクル、RPC メソッドを置き換えることなくクラスをエクスポートします。Durable State と同様に、Void プラットフォームと Cloudflare への直接デプロイをサポートします。
 
 ```ts
 // durable-objects/workspace.ts
@@ -190,4 +190,4 @@ export const Workspace = defineDurableObject({
 export default Workspace;
 ```
 
-Call `Workspace.get('project-id')` from a server handler to obtain its typed stub. Keep the resource name and instance name stable across deployments to retain storage.
+サーバーハンドラーから `Workspace.get('project-id')` を呼び出すと、型付きのスタブを取得できます。ストレージを維持するには、デプロイをまたいでリソース名とインスタンス名を安定させてください。

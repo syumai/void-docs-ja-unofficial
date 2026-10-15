@@ -2,15 +2,15 @@
 outline: deep
 ---
 
-# Live Event Streams
+# ライブイベントストリーム {#live-event-streams}
 
-`void/live` lets a browser subscribe to several topics over one SSE connection. Publish an event from a route, scheduled job, or queue consumer, and Void delivers it to connected subscribers using Durable Objects.
+`void/live` を使うと、ブラウザは 1 本の SSE 接続で複数のトピックを購読できます。ルート、スケジュールジョブ、キューコンシューマーからイベントを発行すると、Void が Durable Objects を使って接続中の購読者に配信します。
 
-For example, a page can subscribe to updates for a post and its comments, then change those subscriptions as the user navigates. If a single request produces the whole stream, such as an AI response, [`void/sse`](./sse.md) is enough.
+たとえば、ページで投稿とそのコメントの更新を購読し、ユーザーのナビゲーションに合わせて購読を切り替えられます。AI のレスポンスのように、単一のリクエストがストリーム全体を生成する場合は、[`void/sse`](./sse.md) で十分です。
 
-## Define A Stream
+## ストリームを定義する {#define-a-stream}
 
-Define a stream in a server-only module:
+サーバー専用モジュールでストリームを定義します。
 
 ```ts
 // src/live.ts
@@ -22,11 +22,11 @@ export const live = defineLiveStream({
 });
 ```
 
-This example accepts visitors who are not signed in. Without `onSubscribe`, any connection can subscribe to any topic, so read [Authorization](#authorization) before you publish private data.
+この例では、サインインしていない訪問者も受け付けます。`onSubscribe` がない場合、どの接続でも任意のトピックを購読できるため、非公開データを発行する前に[認可](#authorization)を確認してください。
 
-Void enables live streams when a [scanned file](../reference/resource-inference.md#scanned-directories) imports `void/live`, so keep this module in `src/` or another scanned directory. To keep it in an unscanned directory such as `lib/`, add that directory to [`inference.scanDirs`](../reference/resource-inference.md#custom-scan-directories) and list the default directories you still use, because `scanDirs` replaces them.
+Void は、[スキャン対象のファイル](../reference/resource-inference.md#scanned-directories)が `void/live` をインポートしている場合にライブストリームを有効にします。そのため、このモジュールは `src/` などスキャン対象のディレクトリに置いてください。`lib/` のようなスキャン対象外のディレクトリに置きたい場合は、そのディレクトリを [`inference.scanDirs`](../reference/resource-inference.md#custom-scan-directories) に追加し、引き続き使うデフォルトのディレクトリも併せて列挙してください。`scanDirs` はデフォルトの値を置き換えるためです。
 
-Expose it from a normal route:
+通常のルートから公開します。
 
 ```ts
 // routes/live.ts
@@ -37,12 +37,11 @@ export const GET = defineHandler((c) => live.connect(c));
 export const POST = defineHandler((c) => live.control(c));
 ```
 
-`GET` opens the SSE connection. `POST` accepts subscribe and unsubscribe control
-operations for that connection.
+`GET` は SSE 接続を開きます。`POST` は、その接続に対する購読と購読解除の制御操作を受け付けます。
 
-## Subscribe From The Browser
+## ブラウザから購読する {#subscribe-from-the-browser}
 
-Use the browser helper from `void/live/client`:
+`void/live/client` のブラウザ向けヘルパーを使います。
 
 ```ts
 import { connectLiveStream } from 'void/live/client';
@@ -75,11 +74,11 @@ await unsubscribePost();
 stream.close();
 ```
 
-Subscription IDs are scoped to a connection. Reusing an ID replaces its subscription. After reconnecting, the helper restores active subscriptions and sends their latest `eventId` as `lastEventId`.
+購読 ID は接続ごとにスコープされます。同じ ID を再利用すると、その購読が置き換えられます。再接続後、ヘルパーは有効な購読を復元し、それぞれの最新の `eventId` を `lastEventId` として送信します。
 
-## Publish
+## 発行する {#publish}
 
-Publish from any server-side code that has a Void runtime env:
+Void のランタイム env を利用できるサーバー側コードであれば、どこからでも発行できます。
 
 ```ts
 import { live } from '../src/live';
@@ -91,30 +90,28 @@ await live.publish(
 );
 ```
 
-Choose your own topic names and JSON payloads. Void includes `type` and `eventId` in the event envelope without interpreting or storing them. It doesn't use native SSE `id` fields.
+トピック名と JSON ペイロードは自由に決められます。Void は `type` と `eventId` をイベントエンベロープに含めますが、解釈も保存もしません。ネイティブの SSE の `id` フィールドは使用しません。
 
-If you are outside an active request/runtime context, pass env explicitly:
+アクティブなリクエストやランタイムのコンテキストの外にいる場合は、env を明示的に渡します。
 
 ```ts
 await live.withEnv(env).publish('post:12', { title: 'Updated title' });
 ```
 
-## Authorization
+## 認可 {#authorization}
 
-Only a connection's owner can change its subscriptions. The example above allows anonymous connections; authenticated streams use the current Void user by default.
+接続の購読を変更できるのは、その接続の所有者だけです。上の例は匿名の接続を許可しています。認証付きのストリームでは、デフォルトで現在の Void ユーザーが使われます。
 
-The owner decides who can change a connection's subscriptions, not which topics the connection can read.
+所有者が決めるのは、接続の購読を誰が変更できるかであり、その接続がどのトピックを読み取れるかではありません。
 
-For authenticated streams, pass the same owner key to `connect()` and
-`control()`:
+認証付きのストリームでは、`connect()` と `control()` に同じ所有者キーを渡します。
 
 ```ts
 return live.connect(c, { owner: `user:${session.userId}` });
 return live.control(c, { owner: `user:${session.userId}` });
 ```
 
-If every route should derive ownership the same way, define it once with
-`identifyConnection`:
+すべてのルートで同じ方法で所有者を導出したい場合は、`identifyConnection` で一度だけ定義します。
 
 ```ts
 export const live = defineLiveStream({
@@ -126,12 +123,9 @@ export const live = defineLiveStream({
 });
 ```
 
-When `identifyConnection` returns `null` or `undefined`, Void falls back to the
-current authenticated user and uses `user:${user.id}` when the user has a string
-`id`. If neither path produces an owner and `allowAnonymousControl` is not set,
-the request is rejected with `403`.
+`identifyConnection` が `null` または `undefined` を返した場合、Void は現在の認証済みユーザーにフォールバックし、そのユーザーが文字列の `id` を持っていれば `user:${user.id}` を使います。どちらの方法でも所有者が得られず、`allowAnonymousControl` も設定されていない場合、リクエストは `403` で拒否されます。
 
-Without `onSubscribe`, any connection that passes the owner check (any signed-in user, or any visitor when `allowAnonymousControl` is set) can subscribe to any topic and receives everything published to it. Topic names are easy to guess. Use `onSubscribe` to decide who can read each topic: return a `Response` to reject the subscription, or return nothing to allow it.
+`onSubscribe` がない場合、所有者チェックを通過した接続(サインイン済みのユーザー、または `allowAnonymousControl` が設定されている場合は任意の訪問者)は、任意のトピックを購読でき、そのトピックに発行されたすべてを受け取ります。トピック名は簡単に推測できます。各トピックを誰が読み取れるかは `onSubscribe` で決めてください。購読を拒否するには `Response` を返し、許可するには何も返しません。
 
 ```ts
 export const live = defineLiveStream({
@@ -146,19 +140,19 @@ export const live = defineLiveStream({
 });
 ```
 
-## Limits
+## 制限 {#limits}
 
-`void/live` is designed for small and medium fanout. By default, a stream allows:
+`void/live` は、小規模から中規模のファンアウトを想定して設計されています。デフォルトでは、ストリームには次の制限があります。
 
-- `256` active subscriptions per browser connection
-- `256` active subscriptions per topic
-- `100` subscribe or unsubscribe operations per control request
-- `100` queued events per connection
-- `64 KiB` per encoded event envelope
+- ブラウザ接続ごとに有効な購読は `256` 件
+- トピックごとに有効な購読は `256` 件
+- 制御リクエストごとに購読または購読解除の操作は `100` 件
+- 接続ごとにキューに入れられるイベントは `100` 件
+- エンコード後のイベントエンベロープごとに `64 KiB`
 
-Each active topic supports up to 256 subscriptions, regardless of how many topic names your app uses. For example, `post:${postId}` gives each post its own subscriber limit. A user with two open tabs can count twice.
+アプリが使うトピック名の数にかかわらず、有効な各トピックは最大 256 件の購読をサポートします。たとえば `post:${postId}` を使うと、投稿ごとに独立した購読者数の上限が適用されます。タブを 2 つ開いているユーザーは 2 件として数えられることがあります。
 
-You can lower limits per stream:
+ストリームごとに制限を下げることができます。
 
 ```ts
 export const live = defineLiveStream({
@@ -169,10 +163,10 @@ export const live = defineLiveStream({
 });
 ```
 
-`maxSubscriptionsPerTopic` cannot be raised above `256`. For larger broadcasts, split subscribers across application topics or use a dedicated realtime system.
+`maxSubscriptionsPerTopic` は `256` を超えて引き上げることはできません。より大規模なブロードキャストでは、購読者をアプリケーション側のトピックに分割するか、専用のリアルタイムシステムを使用してください。
 
-## Delivery Semantics
+## 配信セマンティクス {#delivery-semantics}
 
-Events are ordered within a topic and delivered at most once. Deploys, rollbacks, restarts, and reconnects can drop live state, so clients may miss events. Raw HTTP clients must resubscribe after reconnecting.
+イベントはトピック内で順序が保たれ、最大 1 回だけ配信されます。デプロイ、ロールバック、再起動、再接続によってライブの状態が失われることがあり、クライアントがイベントを取りこぼす可能性があります。生の HTTP クライアントは、再接続後に再購読する必要があります。
 
-For replay, store events in your application and use `eventId` and `lastEventId` to resume. Void does not store events or manage client state.
+リプレイが必要な場合は、イベントをアプリケーション側で保存し、`eventId` と `lastEventId` を使って再開してください。Void はイベントを保存せず、クライアントの状態も管理しません。

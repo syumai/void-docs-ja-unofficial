@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Fetch Client {#fetch-client}
+# Fetch クライアント {#fetch-client}
 
-Imported from `"void/client"`.
+`"void/client"` からインポートします。
 
 ## `fetch(path, options?)` {#fetch-path-options}
 
-Type-safe fetch client for calling your API routes from client code, built on top of [ofetch](https://github.com/unjs/ofetch). Route paths and return types are inferred from the generated `RouteMap`.
+クライアントコードから API ルートを呼び出すための、型安全な fetch クライアントです。[ofetch](https://github.com/unjs/ofetch) をベースに構築されています。ルートのパスと戻り値の型は、生成された `RouteMap` から推論されます。
 
 ```ts
 import { fetch } from 'void/client';
@@ -20,7 +20,7 @@ const user = await fetch('/api/users/:id', {
 });
 ```
 
-**Signature:**
+**シグネチャ:**
 
 ```ts
 function fetch<P extends keyof RouteMap, M extends MethodsOf<P>>(
@@ -29,25 +29,25 @@ function fetch<P extends keyof RouteMap, M extends MethodsOf<P>>(
 ): Promise<OutputOf<P, M>>;
 ```
 
-**Options:**
+**オプション:**
 
-| Option    | Type                     | Description                                                |
-| --------- | ------------------------ | ---------------------------------------------------------- |
-| `method`  | `string`                 | HTTP method. Defaults to `"GET"`.                          |
-| `body`    | `unknown`                | Request body (auto-serialized as JSON).                    |
-| `query`   | `Record<string, string>` | Query string parameters.                                   |
-| `params`  | `Record<string, string>` | URL path parameters (`:id` segments).                      |
-| `headers` | `HeadersInit`            | Additional request headers.                                |
-| `signal`  | `AbortSignal`            | Abort signal.                                              |
-| `baseURL` | `string`                 | Base URL prepended to the path. Useful for external calls. |
-| `retry`   | `number`                 | Number of retry attempts (ofetch default: 1 for GET).      |
-| `timeout` | `number`                 | Request timeout in milliseconds.                           |
+| オプション | 型                       | 説明                                                         |
+| ---------- | ------------------------ | ------------------------------------------------------------ |
+| `method`   | `string`                 | HTTP メソッド。デフォルトは `"GET"` です。                   |
+| `body`     | `unknown`                | リクエストボディ(JSON として自動的にシリアライズされます)。  |
+| `query`    | `Record<string, string>` | クエリ文字列のパラメーター。                                 |
+| `params`   | `Record<string, string>` | URL パスのパラメーター(`:id` セグメント)。                   |
+| `headers`  | `HeadersInit`            | 追加のリクエストヘッダー。                                   |
+| `signal`   | `AbortSignal`            | 中止シグナル。                                               |
+| `baseURL`  | `string`                 | パスの前に付加されるベース URL。外部への呼び出しに便利です。 |
+| `retry`    | `number`                 | リトライの回数(ofetch のデフォルト: GET では 1)。            |
+| `timeout`  | `number`                 | リクエストのタイムアウト(ミリ秒)。                           |
 
-Returns the parsed JSON response body, or `undefined` for 204 responses. Throws `FetchError` on non-2xx responses.
+パースされた JSON のレスポンスボディを返します。204 レスポンスの場合は `undefined` を返します。2xx 以外のレスポンスでは `FetchError` をスローします。
 
 ## `FetchError` {#fetcherror}
 
-Error class thrown by `fetch` on non-2xx responses.
+`fetch` が 2xx 以外のレスポンスでスローするエラークラスです。
 
 ```ts
 import { fetch, FetchError } from 'void/client';
@@ -62,26 +62,26 @@ try {
 }
 ```
 
-**Properties:**
+**プロパティ:**
 
-| Property   | Type       | Description                          |
-| ---------- | ---------- | ------------------------------------ |
-| `status`   | `number`   | HTTP status code.                    |
-| `response` | `Response` | The raw `Response` object.           |
-| `data`     | `unknown`  | Parsed response body (if available). |
+| プロパティ | 型         | 説明                                           |
+| ---------- | ---------- | ---------------------------------------------- |
+| `status`   | `number`   | HTTP ステータスコード。                        |
+| `response` | `Response` | 生の `Response` オブジェクト。                 |
+| `data`     | `unknown`  | パースされたレスポンスボディ(利用可能な場合)。 |
 
-## Differences from Native `fetch` {#differences-from-native-fetch}
+## ネイティブの `fetch` との違い {#differences-from-native-fetch}
 
-The typed client is built on [ofetch](https://github.com/unjs/ofetch) with a typed route layer on top. Key differences from native `fetch`:
+型付きクライアントは [ofetch](https://github.com/unjs/ofetch) をベースに、型付きのルート層を重ねたものです。ネイティブの `fetch` との主な違いは次のとおりです。
 
-| Behavior               | Native `fetch`                                       | `void/client` `fetch`                                                                                                  |
-| ---------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Return type**        | `Promise<Response>`, so you call `.json()` yourself  | `Promise<T>`, which auto-parses JSON and returns the typed result directly (`undefined` for `204`)                     |
-| **Error handling**     | Resolves on any HTTP status; you check `response.ok` | Throws `FetchError` on non-2xx responses                                                                               |
-| **URL construction**   | Raw URL string                                       | Route path with `:param` interpolation from `options.params` + query string from `options.query`                       |
-| **Body serialization** | Manual `JSON.stringify()` + `Content-Type` header    | Auto-serializes `options.body` as JSON and sets `Content-Type: application/json`                                       |
-| **Type safety**        | Accepts any URL or method                            | Constrains paths to `RouteMap` keys and methods to those defined per route. Invalid combinations fail at compile time. |
-| **Retry**              | None                                                 | Auto-retries on 408, 429, and 5xx (configurable via `retry` option)                                                    |
-| **Timeout**            | None                                                 | Configurable via `timeout` option                                                                                      |
+| 動作                     | ネイティブの `fetch`                                                 | `void/client` の `fetch`                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **戻り値の型**           | `Promise<Response>`。`.json()` は自分で呼び出します                  | `Promise<T>`。JSON を自動でパースし、型付きの結果を直接返します(`204` では `undefined`)                                  |
+| **エラー処理**           | どの HTTP ステータスでも解決される。`response.ok` を自分で確認します | 2xx 以外のレスポンスでは `FetchError` をスローします                                                                     |
+| **URL の構築**           | 生の URL 文字列                                                      | ルートパスに対する `options.params` からの `:param` 補間と、`options.query` からのクエリ文字列                           |
+| **ボディのシリアライズ** | 手動の `JSON.stringify()` と `Content-Type` ヘッダー                 | `options.body` を JSON として自動的にシリアライズし、`Content-Type: application/json` を設定します                       |
+| **型安全性**             | 任意の URL とメソッドを受け付けます                                  | パスを `RouteMap` のキーに、メソッドをルートごとに定義されたものに制限します。無効な組み合わせはコンパイル時に失敗します |
+| **リトライ**             | なし                                                                 | 408、429、5xx で自動的にリトライします(`retry` オプションで設定可能)                                                     |
+| **タイムアウト**         | なし                                                                 | `timeout` オプションで設定可能                                                                                           |
 
-`headers` and `signal` are passed through to the underlying fetch unchanged.
+`headers` と `signal` は、変更されずにそのまま内部の fetch に渡されます。

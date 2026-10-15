@@ -4,94 +4,94 @@ theme: dark
 
 hero:
   name: Void
-  text: Build with Vite. Deploy with Void.
-  tagline: Void is a CLI, platform, and full-stack SDK that unifies building & deploying apps.
+  text: Vite でビルド。Void でデプロイ。
+  tagline: Void は、アプリのビルドとデプロイを統合する CLI、プラットフォーム、フルスタック SDK です。
   actions:
     - theme: brand
-      text: Get Started
+      text: はじめる
       link: ./guide/
     - theme: alt
-      text: View on GitHub
+      text: GitHub で見る
       link: https://github.com/voidzero-dev/void
     - theme: alt
-      text: Read the Announcement
+      text: 発表記事を読む
       link: https://blog.cloudflare.com/deploy-with-void
 features:
   - iconify: lucide:layers
     visual: stack
-    title: Full-Stack, Inferred
-    details: Import what you need. Void provides local resources and provisions them on deploy.
+    title: 推論されるフルスタック
+    details: 必要なものをインポートするだけ。Void がローカルリソースを提供し、デプロイ時にプロビジョニングします。
     highlights:
-      - Server routes and authentication
-      - Databases, storage, and AI
-      - Queues and scheduled jobs
+      - サーバールートと認証
+      - データベース、ストレージ、AI
+      - キューとスケジュールジョブ
     guide:
-      text: Explore the SDK
-      link: /guide/
+      text: SDK を見る
+      link: /ja/guide/
   - iconify: lucide:wand-sparkles
     visual: resources
-    title: Typed from Database to UI
-    details: Share types across your database, server loaders, and page components.
+    title: データベースから UI まで型付き
+    details: データベース、サーバーローダー、ページコンポーネントの間で型を共有できます。
     highlights:
-      - Types from your database schema
-      - Typed loaders, actions, and APIs
-      - Server code stays on the server
+      - データベーススキーマから型を生成
+      - 型付きのローダー、アクション、API
+      - サーバーコードはサーバーに留まる
     guide:
-      text: Explore Type Safety
-      link: /guide/type-safety
+      text: 型安全性を見る
+      link: /ja/guide/type-safety
   - iconify: lucide:blocks
     visual: frameworks
-    title: Use Your Favorite Framework
-    details: Build with Void's adapters or keep your existing Vite framework.
+    title: お好みのフレームワークで
+    details: Void のアダプターで構築することも、既存の Vite フレームワークをそのまま使うこともできます。
     highlights:
-      - Ships with adapters for Async React, Vue, Svelte, and Solid
-      - Supports TanStack Start, SvelteKit, Nuxt, and more
-      - Build APIs, SPAs, or server-rendered pages
+      - Async React、Vue、Svelte、Solid 向けのアダプターを同梱
+      - TanStack Start、SvelteKit、Nuxt などをサポート
+      - API、SPA、サーバーレンダリングのページを構築
     guide:
-      text: Explore Frameworks
-      link: /integrations/frameworks/overview
+      text: フレームワークを見る
+      link: /ja/integrations/frameworks/overview
 platform_features:
   - id: platform-ai-coding
     iconify: lucide:bot
-    title: Secure Vibe Coding for Your Team
-    details: Let your team build and deploy with coding agents while admins retain control of Cloudflare access.
+    title: チームのための安全なバイブコーディング
+    details: 管理者が Cloudflare へのアクセスを管理したまま、チームがコーディングエージェントでビルドとデプロイを行えます。
     highlights:
-      - Enable non-technical teammates to build their own apps
-      - Keep Cloudflare credentials with your admin team
-      - Deploy prototypes fast and share apps for feedback
+      - 非エンジニアのチームメンバーが自分のアプリを作れるようにする
+      - Cloudflare の認証情報は管理者チームが保持
+      - プロトタイプを素早くデプロイし、アプリを共有してフィードバックを得る
     guide:
-      text: Explore team deployments
-      link: /guide/self-hosted-platform
+      text: チームでのデプロイを見る
+      link: /ja/guide/self-hosted-platform
     visual: rive
-    image_alt: Animated illustration of apps being built for a team
+    image_alt: チーム向けにアプリが構築される様子を表したアニメーションイラスト
   - id: platform-control-plane
     iconify: lucide:panels-top-left
     visual: resources
-    title: Control Plane for Managing Apps
-    details: Manage users, projects, deployments, and platform health from the admin UI or CLI.
+    title: アプリを管理するコントロールプレーン
+    details: ユーザー、プロジェクト、デプロイ、プラットフォームの状態を、管理 UI または CLI から管理できます。
     highlights:
-      - Manage users and project access & resources
-      - Inspect deployments, logs, and rollbacks
-      - Monitor platform health and usage
+      - ユーザーとプロジェクトのアクセス、リソースを管理
+      - デプロイ、ログ、ロールバックを確認
+      - プラットフォームの状態と使用状況を監視
     guide:
-      text: Platform administration
-      link: /guide/platform-administration
-    image_alt: List of Void platform commands for access, builds, invitations, and administration
+      text: プラットフォーム管理
+      link: /ja/guide/platform-administration
+    image_alt: アクセス、ビルド、招待、管理のための Void プラットフォームコマンドの一覧
   - id: platform-security
     iconify: lucide:shield-check
-    title: Bring your Own Security
-    details: Fork and customize your own Void platform based on your team's security standards.
+    title: 独自のセキュリティを持ち込む
+    details: チームのセキュリティ基準に合わせて、Void プラットフォームをフォークしてカスタマイズできます。
     highlights:
-      - Manage access through Cloudflare Access, Google, GitHub, or OIDC
-      - Control who can sign in and deploy
-      - Protect projects with your access policies
+      - Cloudflare Access、Google、GitHub、OIDC でアクセスを管理
+      - サインインとデプロイができるユーザーを制御
+      - アクセスポリシーでプロジェクトを保護
     guide:
-      text: Configure platform access
-      link: /guide/platform/administration/access
+      text: プラットフォームのアクセスを設定する
+      link: /ja/guide/platform/administration/access
     visual: rive
-    image_alt: Animated illustration of self-hosted platform security
-footer_heading: Build with Vite. Deploy with Void.
-footer_subheading: Server code, resources, and deployment in one workflow.
+    image_alt: セルフホストのプラットフォームのセキュリティを表したアニメーションイラスト
+footer_heading: Vite でビルド。Void でデプロイ。
+footer_subheading: サーバーコード、リソース、デプロイを 1 つのワークフローで。
 ---
 
 <script setup>

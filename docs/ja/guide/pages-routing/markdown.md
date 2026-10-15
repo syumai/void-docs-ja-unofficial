@@ -13,7 +13,7 @@ function mdFileItems(ext) {
         {
           name: "docs/",
           children: [
-            { name: `layout.island${ext}`, description: "docs layout (sidebar, TOC)" },
+            { name: `layout.island${ext}`, description: "docs のレイアウト（サイドバー、TOC）" },
             { name: "getting-started.md" },
             { name: "configuration.md" },
             {
@@ -31,13 +31,13 @@ function mdFileItems(ext) {
 
 </script>
 
-# Markdown
+# Markdown {#markdown}
 
-Add `.md` files to `pages/` for Markdown routes. Pages inherit layouts and render as HTML, with JavaScript only for [islands](./islands), client scripts, and code-copy buttons.
+`pages/` に `.md` ファイルを追加すると、Markdown のルートになります。ページはレイアウトを継承し、HTML としてレンダリングされます。JavaScript が使われるのは、[アイランド](./islands)、クライアントスクリプト、コードのコピーボタンのみです。
 
-## Setup
+## セットアップ {#setup}
 
-Install `@void/md` alongside your framework adapter:
+フレームワークアダプターと一緒に `@void/md` をインストールします。
 
 ::: code-group
 
@@ -59,7 +59,7 @@ npm install @void/md @void/solid
 
 :::
 
-Add the plugin to your Vite config **after** the framework adapter:
+Vite の設定で、フレームワークアダプターの**後ろ**にプラグインを追加します。
 
 ::: code-group
 
@@ -113,9 +113,9 @@ export default defineConfig({
 
 :::
 
-## Page Anatomy
+## ページの構成 {#page-anatomy}
 
-A markdown page has three optional parts: a script block, frontmatter, and the body.
+Markdown ページは、スクリプトブロック、フロントマター、本文の 3 つの省略可能な部分で構成されます。
 
 ```md
 <script>
@@ -136,13 +136,13 @@ Welcome to Void. Here's an interactive demo:
 <Counter />
 ```
 
-- **`<script>` block:** extracted before markdown compilation. Island imports use `with { island: "..." }` syntax (see [islands](./islands)). Any other code in the block becomes a [client script](#client-scripts) that runs in the browser.
-- **Frontmatter:** YAML metadata between `---` fences. Layouts can read it through [`useFrontmatter()`](#frontmatter-access).
-- **Body:** standard markdown plus GFM. Uppercase tags such as `<Counter />` reference imported components and render as islands.
+- **`<script>` ブロック:** Markdown のコンパイル前に抽出されます。アイランドのインポートには `with { island: "..." }` 構文を使用します（[アイランド](./islands)を参照）。ブロック内のそれ以外のコードは、ブラウザで実行される[クライアントスクリプト](#client-scripts)になります。
+- **フロントマター:** `---` で囲まれた YAML メタデータです。レイアウトからは [`useFrontmatter()`](#frontmatter-access) で読み取れます。
+- **本文:** 標準の Markdown と GFM です。`<Counter />` のような大文字で始まるタグはインポートしたコンポーネントを参照し、アイランドとしてレンダリングされます。
 
-## Client Scripts
+## クライアントスクリプト {#client-scripts}
 
-Use the `<script>` block for island imports and JavaScript that runs when the page loads:
+`<script>` ブロックは、アイランドのインポートと、ページの読み込み時に実行される JavaScript に使用します。
 
 ```md
 <script>
@@ -159,19 +159,19 @@ document.querySelector('.date').textContent = format(new Date(), 'PPP')
 Published: <span class="date"></span>
 ```
 
-Only the current page's client script loads. Pages without client code need no additional script.
+読み込まれるのは、現在のページのクライアントスクリプトだけです。クライアントコードのないページには、追加のスクリプトは不要です。
 
-## File Structure
+## ファイル構成 {#file-structure}
 
-Markdown pages live in `pages/` alongside regular pages and route the same way:
+Markdown ページは `pages/` 内の通常のページと同じ場所に置き、同じようにルーティングされます。
 
 <FileTree :items="mdFileItems" adapter-tabs default-expanded />
 
-A `.md` file inherits layouts, supports companion `.server.ts` files for dynamic data, and [auto-prerenders](/guide/edge/prerendering) when static. The rules are the same as any other page.
+`.md` ファイルはレイアウトを継承し、動的データ用のコンパニオン `.server.ts` ファイルをサポートし、静的な場合は[自動的にプリレンダリング](/ja/guide/edge/prerendering)されます。ルールは他のページと同じです。
 
-## Frontmatter Access
+## フロントマターへのアクセス {#frontmatter-access}
 
-Use `useFrontmatter()` in layout components to read the current page's frontmatter:
+レイアウトコンポーネントで `useFrontmatter()` を使うと、現在のページのフロントマターを読み取れます。
 
 ::: code-group
 
@@ -230,16 +230,16 @@ export default function DocsLayout(props) {
 
 :::
 
-## Pages Virtual Module
+## Pages 仮想モジュール {#pages-virtual-module}
 
-Import `@void/md/pages` to get metadata for all markdown pages at build time. Use it to build sidebars, navigation, or search indexes:
+`@void/md/pages` をインポートすると、ビルド時にすべての Markdown ページのメタデータを取得できます。サイドバー、ナビゲーション、検索インデックスの構築に使用できます。
 
 ```ts
 import pages from '@void/md/pages';
 // [{ path: "/docs/getting-started", title: "Getting Started", frontmatter: {...}, headings: [...] }, ...]
 ```
 
-Each entry has this shape:
+各エントリは次の形をしています。
 
 ```ts
 interface MdPage {
@@ -250,31 +250,31 @@ interface MdPage {
 }
 ```
 
-The array is sorted by path and updates on HMR in dev when `.md` files are added, removed, or changed.
+配列はパス順にソートされ、開発中に `.md` ファイルが追加、削除、変更されると HMR で更新されます。
 
-## Default CSS Theme
+## デフォルトの CSS テーマ {#default-css-theme}
 
-The markdown plugin provides a minimal CSS theme with two entry points:
+Markdown プラグインは、2 つのエントリポイントを持つ最小限の CSS テーマを提供します。
 
-### Full theme (reset + baseline + content)
+### フルテーマ（リセット + ベースライン + コンテンツ） {#full-theme-reset-baseline-content}
 
-For standalone markdown sites that need a complete stylesheet, use this package. It includes a modern CSS reset, baseline body styles, and all markdown content styles:
+完全なスタイルシートが必要なスタンドアロンの Markdown サイトには、このパッケージを使用します。モダンな CSS リセット、ベースのボディスタイル、Markdown コンテンツのすべてのスタイルが含まれます。
 
 ```css
 @import '@void/md/theme.css';
 ```
 
-### Content only (scoped to `.void-md`)
+### コンテンツのみ（`.void-md` にスコープ） {#content-only-scoped-to-void-md}
 
-For embedding markdown in an existing app that already has its own reset and global styles, use this one. It only includes the `.void-md`-scoped content styles:
+すでに独自のリセットやグローバルスタイルを持つ既存のアプリに Markdown を埋め込む場合は、こちらを使用します。`.void-md` にスコープされたコンテンツのスタイルだけが含まれます。
 
 ```css
 @import '@void/md/theme-content.css';
 ```
 
-### Usage
+### 使い方 {#usage}
 
-Wrap your markdown content in a `.void-md` element to scope the styles:
+スタイルをスコープするため、Markdown コンテンツを `.void-md` 要素で囲みます。
 
 ```html
 <main class="void-md">
@@ -282,16 +282,16 @@ Wrap your markdown content in a `.void-md` element to scope the styles:
 </main>
 ```
 
-The theme covers:
+テーマが対象とする要素は次のとおりです。
 
-- **Prose:** headings, paragraphs, lists, blockquotes, tables, inline code, links, horizontal rules, task lists, `<kbd>`, `<mark>`, definition lists, and footnotes. Dark mode works through `prefers-color-scheme` and the `data-theme` attribute.
-- **Code blocks:** Shiki dual-theme highlighting with CSS-driven switching and zero JS.
-- **Containers:** styles for `:::tip`, `:::warning`, `:::danger`, `:::info`, and `:::details`.
-- **GitHub alerts:** support for `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, and similar syntax.
+- **本文:** 見出し、段落、リスト、引用、テーブル、インラインコード、リンク、水平線、タスクリスト、`<kbd>`、`<mark>`、定義リスト、脚注。ダークモードは `prefers-color-scheme` と `data-theme` 属性で動作します。
+- **コードブロック:** CSS で切り替わる Shiki のデュアルテーマハイライト。JS は不要です。
+- **コンテナ:** `:::tip`、`:::warning`、`:::danger`、`:::info`、`:::details` のスタイル。
+- **GitHub アラート:** `> [!NOTE]`、`> [!TIP]`、`> [!WARNING]` などの構文のサポート。
 
-### CSS Variables
+### CSS 変数 {#css-variables}
 
-All styles are customizable via CSS variables set on `.void-md`. Override them to match your brand:
+すべてのスタイルは、`.void-md` に設定する CSS 変数でカスタマイズできます。ブランドに合わせて上書きしてください。
 
 ```css
 .void-md {
@@ -300,27 +300,27 @@ All styles are customizable via CSS variables set on `.void-md`. Override them t
 }
 ```
 
-| Variable            | Light default                                                                  | Dark default | Description                                                            |
-| ------------------- | ------------------------------------------------------------------------------ | ------------ | ---------------------------------------------------------------------- |
-| `--vmd-font-body`   | `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`                     | default      | Body font stack                                                        |
-| `--vmd-font-mono`   | `ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace` | default      | Monospace font stack                                                   |
-| `--vmd-text`        | `#1a1a2e`                                                                      | `#e2e8f0`    | Primary text color                                                     |
-| `--vmd-text-muted`  | `#64748b`                                                                      | `#94a3b8`    | Secondary/muted text (blockquotes, line numbers, footnotes)            |
-| `--vmd-link`        | `#2563eb`                                                                      | `#60a5fa`    | Link color                                                             |
-| `--vmd-link-hover`  | `#1d4ed8`                                                                      | `#93bbfd`    | Link hover color                                                       |
-| `--vmd-border`      | `#e2e8f0`                                                                      | `#334155`    | Borders (h2 underline, tables, inline code, `<kbd>`, horizontal rules) |
-| `--vmd-bg-soft`     | `#f8fafc`                                                                      | `#1e293b`    | Soft background (table headers, inline code, code blocks, `<kbd>`)     |
-| `--vmd-line-height` | `1.75`                                                                         | default      | Body line height                                                       |
+| 変数                | ライトのデフォルト                                                             | ダークのデフォルト | 説明                                                                        |
+| ------------------- | ------------------------------------------------------------------------------ | ------------------ | --------------------------------------------------------------------------- |
+| `--vmd-font-body`   | `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`                     | デフォルト         | 本文のフォントスタック                                                      |
+| `--vmd-font-mono`   | `ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace` | デフォルト         | 等幅フォントスタック                                                        |
+| `--vmd-text`        | `#1a1a2e`                                                                      | `#e2e8f0`          | 主要なテキストの色                                                          |
+| `--vmd-text-muted`  | `#64748b`                                                                      | `#94a3b8`          | 補助的な（控えめな）テキスト（引用、行番号、脚注）                          |
+| `--vmd-link`        | `#2563eb`                                                                      | `#60a5fa`          | リンクの色                                                                  |
+| `--vmd-link-hover`  | `#1d4ed8`                                                                      | `#93bbfd`          | リンクのホバー時の色                                                        |
+| `--vmd-border`      | `#e2e8f0`                                                                      | `#334155`          | 罫線（h2 の下線、テーブル、インラインコード、`<kbd>`、水平線）              |
+| `--vmd-bg-soft`     | `#f8fafc`                                                                      | `#1e293b`          | 控えめな背景（テーブルヘッダー、インラインコード、コードブロック、`<kbd>`） |
+| `--vmd-line-height` | `1.75`                                                                         | デフォルト         | 本文の行の高さ                                                              |
 
-Dark mode values apply automatically via `prefers-color-scheme: dark` (auto mode) and `[data-theme="dark"]` (explicit toggle). To force light mode on a dark-preference system, set `data-theme="light"` on `<html>`.
+ダークモードの値は、`prefers-color-scheme: dark`（自動モード）と `[data-theme="dark"]`（明示的な切り替え）によって自動的に適用されます。ダークを好む設定のシステムでライトモードを強制するには、`<html>` に `data-theme="light"` を設定します。
 
-Users who want full control can skip the import and write their own CSS.
+完全に制御したい場合は、このインポートを使わずに独自の CSS を書くこともできます。
 
-## Markdown Features
+## Markdown の機能 {#markdown-features}
 
-Markdown features render as static HTML. Code-copy buttons add a small client script.
+Markdown の機能は静的な HTML としてレンダリングされます。コードのコピーボタンのために、小さなクライアントスクリプトが追加されます。
 
-### Containers
+### コンテナ {#containers}
 
 ```md
 ::: tip
@@ -344,9 +344,9 @@ Hidden content here.
 :::
 ```
 
-Custom titles work too: `::: tip Pro Tip`.
+`::: tip Pro Tip` のように、タイトルをカスタマイズすることもできます。
 
-### GitHub Alerts
+### GitHub アラート {#github-alerts}
 
 ```md
 > [!NOTE]
@@ -365,13 +365,13 @@ Custom titles work too: `::: tip Pro Tip`.
 > Dangerous actions.
 ```
 
-### Syntax Highlighting
+### シンタックスハイライト {#syntax-highlighting}
 
-Code blocks use [Shiki](https://shiki.style) with `github-light` and `github-dark` themes by default.
+コードブロックには [Shiki](https://shiki.style) が使われ、デフォルトのテーマは `github-light` と `github-dark` です。
 
-### Line Highlighting
+### 行のハイライト {#line-highlighting}
 
-Highlight specific lines with `{lines}` in the code fence meta:
+コードフェンスのメタ情報に `{lines}` を指定すると、特定の行をハイライトできます。
 
 ````md
 ```ts {1,3-5}
@@ -383,9 +383,9 @@ const e = 5; // highlighted
 ```
 ````
 
-### Diff, Focus, and Error Levels
+### Diff、フォーカス、エラーレベル {#diff-focus-and-error-levels}
 
-Use inline comments to annotate lines:
+インラインコメントで行に注釈を付けます。
 
 ```ts
 export function hello() {
@@ -397,11 +397,11 @@ export function hello() {
 }
 ```
 
-Code blocks include a copy button.
+コードブロックにはコピーボタンが付きます。
 
-### Line Numbers
+### 行番号 {#line-numbers}
 
-Enable per code block with `:line-numbers`:
+コードブロックごとに `:line-numbers` で有効にします。
 
 ````md
 ```ts :line-numbers
@@ -410,15 +410,15 @@ const b = 2;
 ```
 ````
 
-Start from a specific number with `:line-numbers=5`.
+`:line-numbers=5` のように指定すると、特定の番号から始められます。
 
-### Emoji
+### 絵文字 {#emoji}
 
-Shortcodes convert to unicode: `:tada:` becomes :tada:, `:rocket:` becomes :rocket:.
+ショートコードは Unicode に変換されます。`:tada:` は :tada: に、`:rocket:` は :rocket: になります。
 
-### Footnotes
+### 脚注 {#footnotes}
 
-Reference a footnote inline and define it anywhere in the document:
+脚注への参照を文中に書き、定義は文書内の任意の場所に書きます。
 
 ```md
 Here is a statement with a footnote.[^1]
@@ -426,11 +426,11 @@ Here is a statement with a footnote.[^1]
 [^1]: And here is the footnote body.
 ```
 
-The references and definitions render into a linked footnote list at the end of the content.
+参照と定義は、コンテンツの末尾でリンク付きの脚注リストとしてレンダリングされます。
 
-### Attributes
+### 属性 {#attributes}
 
-Add classes, IDs, or attributes to any element:
+任意の要素にクラス、ID、属性を追加できます。
 
 ```md
 # Heading {.custom-class #my-id}
@@ -438,11 +438,11 @@ Add classes, IDs, or attributes to any element:
 Paragraph with attributes. {.note}
 ```
 
-### Navigation and Media
+### ナビゲーションとメディア {#navigation-and-media}
 
-Headings include permalink anchors. Use `[[toc]]` for a table of contents. Images are lazy-loaded, and `.md` links resolve to page routes.
+見出しにはパーマリンクのアンカーが付きます。目次には `[[toc]]` を使用します。画像は遅延読み込みされ、`.md` へのリンクはページのルートに解決されます。
 
-## Plugin Options
+## プラグインオプション {#plugin-options}
 
 ```ts
 voidMarkdown({
@@ -452,15 +452,15 @@ voidMarkdown({
 });
 ```
 
-| Option         | Type                             | Default                                          | Description        |
-| -------------- | -------------------------------- | ------------------------------------------------ | ------------------ |
-| `shiki.themes` | `{ light: string; dark: string}` | `{ light: "github-light", dark: "github-dark" }` | Shiki color themes |
+| オプション     | 型                               | デフォルト                                       | 説明                 |
+| -------------- | -------------------------------- | ------------------------------------------------ | -------------------- |
+| `shiki.themes` | `{ light: string; dark: string}` | `{ light: "github-light", dark: "github-dark" }` | Shiki のカラーテーマ |
 
-Code block languages load on demand from Shiki's bundled languages.
+コードブロックの言語は、Shiki にバンドルされている言語からオンデマンドで読み込まれます。
 
-## Building a Sidebar
+## サイドバーの構築 {#building-a-sidebar}
 
-Use `@void/md/pages` to select the pages for your sidebar:
+`@void/md/pages` を使って、サイドバーに表示するページを選択します。
 
 ```ts
 import pages from '@void/md/pages';
@@ -468,4 +468,4 @@ import pages from '@void/md/pages';
 const docPages = pages.filter((page) => page.path.startsWith('/docs/'));
 ```
 
-Render a link with `page.path` and `page.title` for each entry. Use `useFrontmatter()` in the layout to display the current page's metadata, and wrap its content in `.void-md` when using the provided theme.
+各エントリについて、`page.path` と `page.title` でリンクを描画します。レイアウトで `useFrontmatter()` を使うと現在のページのメタデータを表示でき、付属のテーマを使う場合はそのコンテンツを `.void-md` で囲みます。

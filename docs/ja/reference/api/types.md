@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Types {#types}
+# 型 {#types}
 
 ## `CloudContext` {#cloudcontext}
 
-Hono `Context` pre-typed with [`CloudEnv`](#cloudenv). This is the type of the `c` parameter in all route handlers and middleware.
+[`CloudEnv`](#cloudenv) で型付けされた Hono の `Context` です。すべてのルートハンドラーとミドルウェアにおける、パラメーター `c` の型です。
 
 ```ts
 import type { CloudContext } from 'void';
@@ -14,7 +14,7 @@ import type { CloudContext } from 'void';
 
 ## `CloudEnv` {#cloudenv}
 
-Hono environment type for Void workers. Extends Hono's `Env` with Cloudflare bindings and context variables.
+Void の Worker 用の Hono の環境型です。Hono の `Env` を拡張し、Cloudflare のバインディングとコンテキスト変数を持ちます。
 
 ```ts
 interface CloudEnv extends Env {
@@ -32,7 +32,7 @@ interface CloudEnv extends Env {
 
 ## `CloudContextVariables` {#cloudcontextvariables}
 
-The context variables type used by `c.set()` / `c.get()`. Augment this interface to add typed variables that flow through all middleware and handlers:
+`c.set()` / `c.get()` で使用されるコンテキスト変数の型です。このインターフェースを拡張すると、すべてのミドルウェアとハンドラーを通じて引き継がれる型付きの変数を追加できます。
 
 ```ts
 interface CloudContextVariables {
@@ -42,7 +42,7 @@ interface CloudContextVariables {
 }
 ```
 
-**Augmentation example:**
+**拡張の例:**
 
 ```ts
 declare module 'void' {
@@ -54,11 +54,11 @@ declare module 'void' {
 // c.get("requestId") → string
 ```
 
-See [Type Safety](../../guide/type-safety.md#context-variables) for details.
+詳細は[型安全性](../../guide/type-safety.md#context-variables)を参照してください。
 
 ## `TypedHandler<V, R>` {#typedhandler-v-r}
 
-The return type of `defineHandler`, with validator types (`V`) and the handler’s return type (`R`).
+`defineHandler` の戻り値の型です。バリデーターの型(`V`)とハンドラーの戻り値の型(`R`)を持ちます。
 
 ```ts
 interface TypedHandler<V extends ValidatorSlots = {}, R = unknown> {
@@ -70,7 +70,7 @@ interface TypedHandler<V extends ValidatorSlots = {}, R = unknown> {
 
 ## `HeadDescriptor` {#headdescriptor}
 
-Shape of page head metadata returned by `defineHead`. All fields are optional.
+`defineHead` が返す、ページの head メタデータの形です。すべてのフィールドは省略可能です。
 
 ```ts
 interface HeadDescriptor {
@@ -85,7 +85,7 @@ interface HeadDescriptor {
 
 ## `RouteMap` {#routemap}
 
-Generated route types used by the typed `fetch` client. Contains each route’s methods, inputs, and outputs.
+型付きの `fetch` クライアントが使用する、生成されたルートの型です。各ルートのメソッド、入力、出力を含みます。
 
 ```ts
 import type { RouteMap } from 'void/routes';

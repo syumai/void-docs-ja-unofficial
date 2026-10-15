@@ -2,84 +2,67 @@
 outline: deep
 ---
 
-# Sign-in and Access
+# サインインとアクセス {#sign-in-and-access}
 
-## Signing In
+## サインイン {#signing-in}
 
-For the browser admin UI, open `<API URL>/admin` and use the administrator login method selected during setup. On a new installation, follow the printed administrator setup instructions to create the first admin user. You do not need to create an app or sign in through the CLI first.
+ブラウザーの管理 UI を使うには、`<API URL>/admin` を開き、セットアップ時に選択した管理者のログイン方法を使用します。新規インストールでは、表示される管理者セットアップの手順に従って最初の管理ユーザーを作成してください。先にアプリを作成したり、CLI でサインインしたりする必要はありません。
 
-Connect to your platform's API URL, then sign in as an administrator:
+プラットフォームの API URL に接続してから、管理者としてサインインします。
 
 ```sh
 void connect platform.example.com --no-login
 void platform auth login
 ```
 
-The first command saves the connection. The second opens your browser to sign in and saves an administrator session in your system keychain. Sessions last for one hour and are stored separately for each platform.
+最初のコマンドで接続を保存します。2 番目のコマンドはブラウザーを開いてサインインし、管理者セッションをシステムのキーチェーンに保存します。セッションの有効期間は 1 時間で、プラットフォームごとに別々に保存されます。
 
-You can check which account is signed in at any time:
+どのアカウントでサインインしているかは、いつでも確認できます。
 
 ```sh
 void platform auth status
 ```
 
-This shows your account, the session's expiry, and the features available on the platform. To end the session, run `void platform auth logout`.
+アカウント、セッションの有効期限、プラットフォームで利用できる機能が表示されます。セッションを終了するには、`void platform auth logout` を実行します。
 
-If the platform is protected by Cloudflare Access, `void connect <url>` handles
-the company sign-in before Void login. Interactive Access authentication uses a
-locally installed `cloudflared` and saves its short-lived credential in your
-system keychain for that platform origin. You do not need to copy browser cookies.
+プラットフォームが Cloudflare Access で保護されている場合、`void connect <url>` は Void ログインの前に会社のサインインを処理します。対話的な Access 認証にはローカルにインストールされた `cloudflared` を使用し、短期間有効な認証情報をそのプラットフォームのオリジンごとにシステムのキーチェーンに保存します。ブラウザーの Cookie をコピーする必要はありません。
 
-For CI, use a [project deploy token](/guide/platform/installation/first-deployment) alongside your Access credentials in origin-keyed `VOID_ACCESS_CREDENTIALS`. An Access service token does not authorize a Void deployment. See [CI deployment setup](/guide/platform/installation/first-deployment) for the required origins and shape.
+CI では、オリジンをキーとする `VOID_ACCESS_CREDENTIALS` の Access 認証情報とあわせて、[プロジェクトのデプロイトークン](/ja/guide/platform/installation/first-deployment)を使用します。Access のサービストークンでは Void のデプロイを認可できません。必要なオリジンと形式については、[CI デプロイのセットアップ](/ja/guide/platform/installation/first-deployment)を参照してください。
 
-## Choosing a Platform
+## プラットフォームの選択 {#choosing-a-platform}
 
-If you manage more than one platform, list your connections and choose a default:
+複数のプラットフォームを管理している場合は、接続を一覧表示して既定のものを選択します。
 
 ```sh
 void platform list
 void platform use <connection-id>
 ```
 
-You can also select a platform for a single command with `--connection`:
+`--connection` を使うと、1 つのコマンドだけに対してプラットフォームを選択することもできます。
 
 ```sh
 void platform user list --connection <connection-id>
 ```
 
-Use an ID or URL from the connection list. Administrative commands use this selection even when you run them inside an app with a different deployment destination.
+接続一覧に表示されている ID または URL を使用してください。管理コマンドは、デプロイ先が異なるアプリの内部で実行した場合でも、この選択を使用します。
 
-## Recovering Administrator Login
+## 管理者ログインの復旧 {#recovering-administrator-login}
 
-If no administrator can use the configured identity provider, the installation
-owner can recover an existing administrator with Cloudflare management access,
-direct database access, and the original encrypted recovery credentials:
+設定済みの ID プロバイダーをどの管理者も使用できない場合、インストールの所有者は、Cloudflare の管理アクセス、データベースへの直接アクセス、元の暗号化された復旧用認証情報を使って、既存の管理者を復旧できます。
 
 ```sh
 void platform config auth recover company --installation <id> --file recovery.json
 ```
 
-The file identifies the existing account, for example
-`{"administratorUserId":"existing-admin-id"}`. Recovery opens a real login test
-and asks you to confirm the exact identity before restoring access. It does not
-create a new administrator. To use a replacement provider, include its nonsecret
-`configuration` with a new connection ID and supply the secret through
-`--client-secret-env <name>`. To rotate an existing provider's secret, keep its
-connection ID and identity configuration.
+このファイルでは既存のアカウントを指定します（例: `{"administratorUserId":"existing-admin-id"}`）。復旧では実際のログインテストが開かれ、アクセスを復元する前に正確な ID を確認するよう求められます。新しい管理者は作成されません。代替のプロバイダーを使用するには、新しい接続 ID とともにその機密ではない `configuration` を含め、シークレットは `--client-secret-env <name>` で渡します。既存のプロバイダーのシークレットをローテーションするには、その接続 ID と ID の設定を維持してください。
 
-For `--yes`, also pin `expectedIdentity` with the exact `issuer` and `subject` in
-the file. A successful browser login is still required. Use `--plan` to preview
-the affected administrator and connection before starting recovery.
+`--yes` を使う場合は、ファイルに正確な `issuer` と `subject` を含む `expectedIdentity` も固定してください。ブラウザーでのログインの成功は引き続き必要です。復旧を開始する前に、`--plan` を使って影響を受ける管理者と接続をプレビューできます。
 
-## Giving People Access
+## ユーザーへのアクセス付与 {#giving-people-access}
 
-Open **Settings** in the administrator UI, or run `void platform config auth`,
-to add, test, enable, or disable login methods. Access protection and login
-methods are separate settings. A provider test shows the authenticated account
-before you explicitly link it or enable the configuration.
+ログイン方法を追加、テスト、有効化、無効化するには、管理者 UI の **Settings** を開くか、`void platform config auth` を実行します。Access による保護とログイン方法は別々の設定です。プロバイダーのテストでは、明示的にリンクしたり設定を有効にしたりする前に、認証されたアカウントが表示されます。
 
-To change the company gate after installation, use the installing workstation
-with its saved recovery credentials:
+インストール後に会社のゲートを変更するには、保存された復旧用認証情報を持つインストール元のワークステーションを使用します。
 
 ```sh
 void platform config auth protection show
@@ -87,78 +70,56 @@ void platform config auth protection enable --installation <id>
 void platform config auth protection disable --installation <id>
 ```
 
-Enabling offers application creation or connection to an existing application.
-It checks every API, proxy, and configured dashboard origin and requires a company
-user sign-in. Changing protection ends all current human sessions; sign in again
-afterwards. Before removing a gate used for company signup, select another
-verified company rule or restricted signup. Removing protection retains the
-Cloudflare applications for deliberate cleanup. Disabling an Access login method
-does not remove the gate.
+有効にすると、アプリケーションの作成、または既存のアプリケーションへの接続を選択できます。すべての API、プロキシ、設定済みのダッシュボードのオリジンを確認し、会社のユーザーによるサインインを必須にします。保護を変更すると現在のすべての人間のセッションが終了するため、その後は再度サインインしてください。会社のサインアップに使用しているゲートを削除する前に、検証済みの別の会社ルールまたは制限付きサインアップを選択してください。保護を削除しても、Cloudflare のアプリケーションは意図的なクリーンアップのために残されます。Access のログイン方法を無効にしても、ゲートは削除されません。
 
-Users can add another enabled login to their existing account with
-`void account link <connection-id>` or **Account** in the optional
-dashboard. Sign in again first if prompted, then authenticate with the additional
-provider and confirm the identity shown. Matching email addresses alone do not
-link accounts.
+ユーザーは、`void account link <connection-id>` またはオプションのダッシュボードの **Account** から、既存のアカウントに別の有効なログインを追加できます。求められた場合は先に再度サインインし、追加のプロバイダーで認証して、表示された ID を確認してください。メールアドレスが一致するだけではアカウントはリンクされません。
 
-In the admin dashboard, open **People → Access** to choose who can join, invite
-people, and manage individual signup grants. Choose **Company-approved or
-individually approved users** to create accounts automatically for people who
-meet your configured company rules while still allowing explicit invitations
-and allowlist grants. Company protection at the platform edge still applies
-before anyone reaches a login page.
+管理ダッシュボードで **People → Access** を開くと、参加できるユーザーの選択、ユーザーの招待、個別のサインアップ許可の管理ができます。**Company-approved or individually approved users** を選択すると、設定済みの会社のルールを満たすユーザーのアカウントが自動的に作成されます。そのうえで、明示的な招待と許可リストによる許可も引き続き利用できます。プラットフォームのエッジでの会社の保護は、ログインページに到達する前に引き続き適用されます。
 
-With invited/allowlisted signup selected, let a teammate join with GitHub by adding their login to the allowlist:
+招待制 / 許可リスト制のサインアップを選択している場合、チームメイトの GitHub ログインを許可リストに追加すると、GitHub で参加できるようになります。
 
 ```sh
 void platform signup allow github teammate
 ```
 
-Void shows the change and asks you to confirm it. The teammate can then run `void connect` with the platform's URL and sign in.
+Void は変更内容を表示し、確認を求めます。その後、チームメイトはプラットフォームの URL を指定して `void connect` を実行し、サインインできます。
 
-You can allow an email address or a whole email domain in the same way:
+同じ方法で、メールアドレスまたはメールドメイン全体を許可することもできます。
 
 ```sh
 void platform signup allow email teammate@example.com
 void platform signup allow email '*@example.com'
 ```
 
-Email patterns apply across the platform's sign-in providers. Quote a domain pattern so your shell passes the `*` to Void.
+メールのパターンは、プラットフォームのすべてのサインインプロバイダーに適用されます。シェルが `*` を Void にそのまま渡すように、ドメインのパターンは引用符で囲んでください。
 
-For an OIDC login without a verified email, allow the identity by its login connection and stable provider subject instead:
+検証済みのメールアドレスを持たない OIDC ログインでは、代わりにログイン接続と、プロバイダーが発行する不変のサブジェクトで ID を許可します。
 
 ```sh
 void platform signup allow identity company-sso 'Employee-42'
 ```
 
-Use the connection ID shown by `void platform config auth list` and the exact subject reported by your identity provider. The match is case-sensitive and does not infer an email address or link another account. Any domain or group restrictions configured for that login method still apply, and the account joins as an ordinary user. Remove the grant with `void platform signup disallow identity company-sso 'Employee-42'`.
+`void platform config auth list` に表示される接続 ID と、ID プロバイダーが報告する正確なサブジェクトを使用してください。照合は大文字小文字を区別し、メールアドレスの推測や別のアカウントとのリンクは行いません。そのログイン方法に設定されているドメインやグループの制限は引き続き適用され、アカウントは通常のユーザーとして参加します。許可を削除するには、`void platform signup disallow identity company-sso 'Employee-42'` を使用します。
 
-To invite someone else by email, use:
+他のユーザーをメールで招待するには、次のコマンドを使用します。
 
 ```sh
 void platform invitation send alex@example.org
 ```
 
-An invitation grants signup access for that exact email address. The person must
-sign in with a login method that supplies the same verified email address.
-When platform email delivery is configured, Void also sends connection
-instructions. If delivery is unavailable or fails, the grant still works:
-share the platform's `/invite` page or `void connect '<platform URL>'` command
-with the person yourself. The admin dashboard shows the delivery outcome
-separately from the invitation's pending, accepted, or revoked status.
+招待は、その正確なメールアドレスに対してサインインのアクセスを許可します。招待された人は、同じ検証済みメールアドレスを提供するログイン方法でサインインする必要があります。プラットフォームのメール配信が設定されている場合、Void は接続手順も送信します。配信が利用できない場合や失敗した場合でも、許可は有効です。プラットフォームの `/invite` ページまたは `void connect '<platform URL>'` コマンドを、ご自身で相手に共有してください。管理ダッシュボードには、招待の保留中、承諾済み、取り消し済みというステータスとは別に、配信結果が表示されます。
 
-Inspect the current access settings and invitations with:
+現在のアクセス設定と招待は、次のコマンドで確認できます。
 
 ```sh
 void platform signup show
 void platform invitation list
 ```
 
-Invitation history remains available after an involved account is removed. The stored actor ID
-remains visible when that account's login no longer exists.
+招待の履歴は、関係するアカウントが削除された後も利用できます。保存されているアクターの ID は、そのアカウントのログインが存在しなくなっても表示されたままです。
 
-`void platform signup open` allows anyone to sign up. Everyone who signs up can deploy apps on your application domain, so check how those apps [share cookies](/guide/platform/installation/domains#adding-a-domain) before opening signup. Use `void platform signup restrict` to require an allowlist match again. Disallowing an entry affects future signup; it does not suspend an existing account.
+`void platform signup open` は、誰でもサインアップできるようにします。サインアップしたユーザーは全員、アプリケーションドメインにアプリをデプロイできるため、サインアップを開放する前に、それらのアプリが[どのように Cookie を共有するか](/ja/guide/platform/installation/domains#adding-a-domain)を確認してください。再び許可リストへの一致を必須にするには、`void platform signup restrict` を使用します。エントリを許可から外しても、影響するのは今後のサインアップであり、既存のアカウントは停止されません。
 
-## Connected apps
+## 連携アプリ {#connected-apps}
 
-Register separate applications as OAuth clients through [Connected apps](./connected-apps.md). Users connect their identity and approve each publish on Void.
+別々のアプリケーションを、[連携アプリ](./connected-apps.md)を通じて OAuth クライアントとして登録します。ユーザーは自分の ID を接続し、Void への各公開を承認します。

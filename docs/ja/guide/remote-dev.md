@@ -2,22 +2,22 @@
 outline: deep
 ---
 
-# Remote Development
+# リモート開発 {#remote-development}
 
-Void normally uses local D1, KV, and R2 through [Miniflare](https://miniflare.dev/). Remote mode lets you run local code against a project deployed to your Void platform, for example to test with existing data or investigate an issue.
+Void は通常、[Miniflare](https://miniflare.dev/) を通じてローカルの D1、KV、R2 を使用します。リモートモードを使うと、Void プラットフォームにデプロイされたプロジェクトに対して、ローカルのコードを実行できます。たとえば、既存のデータでテストしたり、問題を調査したりする場合に便利です。
 
-Calls such as `db.select()` and `env.KV.get()` use the deployed resources without changing your application code. Writes affect real data, so use a staging project when possible.
+`db.select()` や `env.KV.get()` などの呼び出しは、アプリケーションコードを変更することなく、デプロイされたリソースを使用します。書き込みは実際のデータに影響するため、可能であればステージングプロジェクトを使用してください。
 
-## Prerequisites
+## 前提条件 {#prerequisites}
 
-Before enabling remote mode, you need:
+リモートモードを有効にする前に、次のものが必要です。
 
-1. Connect to your team's platform with `void connect <url>`. It signs you in when needed.
-2. Link a project with `void project link`. Deploy it at least once so its resources exist.
+1. `void connect <url>` でチームのプラットフォームに接続します。必要に応じてサインインが求められます。
+2. `void project link` でプロジェクトをリンクします。リソースが存在するように、少なくとも 1 回はデプロイしてください。
 
-## Enabling Remote Mode
+## リモートモードを有効にする {#enabling-remote-mode}
 
-### In `void.config.ts` (persistent)
+### `void.config.ts` で(永続的) {#in-void-config-ts-persistent}
 
 ```json
 {
@@ -25,28 +25,28 @@ Before enabling remote mode, you need:
 }
 ```
 
-### Via environment variable (one-off)
+### 環境変数で(一時的) {#via-environment-variable-one-off}
 
 ```bash
 VOID_REMOTE=1 vite dev
 ```
 
-`VOID_REMOTE=0` disables remote mode even if `void.config.ts` has `"remote": true`.
+`void.config.ts` に `"remote": true` があっても、`VOID_REMOTE=0` を指定するとリモートモードは無効になります。
 
-## Supported Bindings
+## サポートされているバインディング {#supported-bindings}
 
-| Binding | Local (default)            | Remote              |
-| ------- | -------------------------- | ------------------- |
-| D1      | Local SQLite via Miniflare | Remote D1 database  |
-| KV      | Local file-backed KV       | Remote KV namespace |
-| R2      | Local file-backed R2       | Remote R2 bucket    |
-| AI      | Always proxied             | Always proxied      |
+| バインディング | ローカル(既定)                  | リモート                   |
+| -------------- | ------------------------------- | -------------------------- |
+| D1             | Miniflare 経由のローカル SQLite | リモートの D1 データベース |
+| KV             | ローカルのファイルベース KV     | リモートの KV 名前空間     |
+| R2             | ローカルのファイルベース R2     | リモートの R2 バケット     |
+| AI             | 常にプロキシされる              | 常にプロキシされる         |
 
-AI requests use your platform’s account and allowance in both local and remote mode. There is no local AI simulator.
+AI リクエストは、ローカルモードでもリモートモードでも、プラットフォームのアカウントと割り当てを使用します。ローカルの AI シミュレーターはありません。
 
-## Checking Remote Mode
+## リモートモードの確認 {#checking-remote-mode}
 
-When the dev server starts with remote mode active, it prints:
+リモートモードが有効な状態で開発サーバーを起動すると、次のように表示されます。
 
 ```
 [void] Remote bindings active
@@ -55,12 +55,12 @@ When the dev server starts with remote mode active, it prints:
          STORAGE → remote R2
 ```
 
-## Limitations
+## 制限事項 {#limitations}
 
-- **Network latency:** each binding call makes a network request, so responses may be slower than local development.
-- **R2 multipart uploads:** `createMultipartUpload()` and `resumeMultipartUpload()` are not supported in remote mode.
-- **R2 range and conditional reads:** in remote mode, `get()` ignores request headers passed as `range` or `onlyIf` and returns the whole object. For example, `get(key, { range: request.headers, onlyIf: request.headers })` returns the whole object when the request has a `Range` or `If-None-Match` header. `get()` throws when `range` or `onlyIf` is an object that asks for a byte range or a condition, such as `{ offset: 0, length: 100 }` or `{ etagMatches: etag }`.
-- **R2 conditional writes:** `put(..., { onlyIf })` requires an updated platform and project deployment. Failed preconditions return `null`.
-- **R2 metadata and list options:** custom metadata, HTTP metadata, and `list()` with `delimiter`, `startAfter`, or `include` require an updated project deployment. Without one, `list()` with these options and `put()` with metadata other than `contentType` throw an error.
-- **D1 dump:** `db.dump()` is not supported in remote mode.
-- **D1 batches:** `db.batch()` requires an updated platform and project deployment.
+- **ネットワークレイテンシー:** バインディングを呼び出すたびにネットワークリクエストが発生するため、ローカル開発よりもレスポンスが遅くなる場合があります。
+- **R2 マルチパートアップロード:** リモートモードでは、`createMultipartUpload()` と `resumeMultipartUpload()` はサポートされていません。
+- **R2 の範囲読み取りと条件付き読み取り:** リモートモードでは、`get()` は `range` または `onlyIf` として渡されたリクエストヘッダーを無視し、オブジェクト全体を返します。たとえば、`get(key, { range: request.headers, onlyIf: request.headers })` は、リクエストに `Range` または `If-None-Match` ヘッダーがあってもオブジェクト全体を返します。`range` または `onlyIf` が、`{ offset: 0, length: 100 }` や `{ etagMatches: etag }` のようにバイト範囲や条件を要求するオブジェクトである場合、`get()` はエラーをスローします。
+- **R2 の条件付き書き込み:** `put(..., { onlyIf })` には、更新されたプラットフォームとプロジェクトのデプロイが必要です。事前条件が満たされなかった場合は `null` を返します。
+- **R2 のメタデータとリストのオプション:** カスタムメタデータ、HTTP メタデータ、および `delimiter`、`startAfter`、`include` を指定した `list()` には、更新されたプロジェクトのデプロイが必要です。デプロイが更新されていない場合、これらのオプションを指定した `list()` と、`contentType` 以外のメタデータを指定した `put()` はエラーをスローします。
+- **D1 のダンプ:** リモートモードでは `db.dump()` はサポートされていません。
+- **D1 のバッチ:** `db.batch()` には、更新されたプラットフォームとプロジェクトのデプロイが必要です。

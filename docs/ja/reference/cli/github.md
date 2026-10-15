@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# GitHub and Builds {#github}
+# GitHub とビルド {#github}
 
-Deploy-on-GitHub works from **any** Void login — Google, GitHub, or other SSO. The first time you connect GitHub, Void links your GitHub identity to your current account (a one-time step, independent of how you logged in); it never creates a second account.
+GitHub へのデプロイは、Google、GitHub、その他の SSO など、**どの** Void ログインでも利用できます。初めて GitHub を接続するときに、Void は GitHub の ID を現在のアカウントにリンクします(ログイン方法に依存しない 1 回限りの手順です)。2 つ目のアカウントが作成されることはありません。
 
-Project-scoped `github` and `build` commands resolve the project in the same order as deploy: the `[project]` argument or `--project`, then `VOID_PROJECT`, then the linked project (`.void/project.json`).
+プロジェクトスコープの `github` コマンドと `build` コマンドは、デプロイと同じ順序でプロジェクトを解決します。`[project]` 引数または `--project`、次に `VOID_PROJECT`、最後にリンクされたプロジェクト(`.void/project.json`)の順です。
 
 ## `void github link` {#void-github-link}
 
@@ -14,10 +14,10 @@ Project-scoped `github` and `build` commands resolve the project in the same ord
 void github link
 ```
 
-Link your signed-in Void account to GitHub through your browser. `void github install` does this automatically when needed.
+サインイン中の Void アカウントを、ブラウザー経由で GitHub にリンクします。必要な場合は `void github install` が自動的にこれを行います。
 
-::: warning Existing GitHub sign-in
-A GitHub identity can belong to only one Void account. If it is already linked elsewhere, sign in to that Void account or authorize a different GitHub identity.
+::: warning 既存の GitHub サインイン
+GitHub の ID は 1 つの Void アカウントにのみ属することができます。すでに別の場所にリンクされている場合は、そちらの Void アカウントにサインインするか、別の GitHub の ID を認可してください。
 :::
 
 ## `void github install` {#void-github-install}
@@ -26,7 +26,7 @@ A GitHub identity can belong to only one Void account. If it is already linked e
 void github install
 ```
 
-Open the GitHub App install page in your browser. If your account has no linked GitHub identity yet, `void github install` first runs the GitHub link automatically (browser authorize), then continues. After installing, run `void github connect` to link a repository to your project.
+ブラウザーで GitHub App のインストールページを開きます。アカウントにまだリンクされた GitHub の ID がない場合、`void github install` はまず GitHub のリンクを自動的に実行し(ブラウザーでの認可)、その後に続行します。インストール後、`void github connect` を実行してリポジトリをプロジェクトにリンクします。
 
 ## `void github installations` {#void-github-installations}
 
@@ -34,7 +34,7 @@ Open the GitHub App install page in your browser. If your account has no linked 
 void github installations
 ```
 
-List all GitHub App installations linked to your account. Each entry includes the `[id: <installation_id>]` needed for `--installation` in non-interactive use.
+アカウントにリンクされているすべての GitHub App インストールを一覧表示します。各エントリには、非対話モードで `--installation` に必要な `[id: <installation_id>]` が含まれます。
 
 ## `void github join` {#void-github-join}
 
@@ -42,9 +42,9 @@ List all GitHub App installations linked to your account. Each entry includes th
 void github join
 ```
 
-Join an existing organization installation through your browser. `void github connect` can do this automatically in an interactive terminal. Run `join` locally before non-interactive setup when needed.
+既存の組織のインストールに、ブラウザー経由で参加します。`void github connect` は、対話的なターミナルではこれを自動的に実行できます。非対話のセットアップの前に必要な場合は、ローカルで `join` を実行してください。
 
-Requires a signed-in Void account and organization-installation sharing enabled by your platform. Use `void github installations` to find the installation ID.
+サインイン済みの Void アカウントと、プラットフォームで有効化された組織インストールの共有が必要です。インストール ID を調べるには `void github installations` を使用します。
 
 ## `void github connect` {#void-github-connect}
 
@@ -52,26 +52,26 @@ Requires a signed-in Void account and organization-installation sharing enabled 
 void github connect [project] [options]
 ```
 
-Connect a GitHub repository to a Void project for automatic deploys. On every push to the configured branch, Void builds and deploys your project automatically.
+自動デプロイのために、GitHub リポジトリを Void プロジェクトに接続します。設定したブランチへのプッシュのたびに、Void はプロジェクトを自動的にビルドしてデプロイします。
 
-The CLI opens your browser when it needs GitHub authorization. If no installation is available, run `void github install`.
+CLI は、GitHub の認可が必要な場合にブラウザーを開きます。利用可能なインストールがない場合は、`void github install` を実行してください。
 
-**Options**
+**オプション**
 
-| Flag                  | Description                                                                       |
-| --------------------- | --------------------------------------------------------------------------------- |
-| `--project <name>`    | Project name (alias for the positional argument)                                  |
-| `--installation <id>` | GitHub App installation ID (required when you have multiple installations)        |
-| `--repo <owner/repo>` | Repository full name — required unless the installation grants exactly one repo   |
-| `--branch <name>`     | Branch to deploy from — **required in non-interactive mode**                      |
-| `--executor <type>`   | Build executor: `container` (default) or `github_actions`                         |
-| `--workflow <path>`   | Authorized deploy workflow file — defaults to `.github/workflows/void-deploy.yml` |
+| フラグ                | 説明                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `--project <name>`    | プロジェクト名(位置引数の別名)                                                             |
+| `--installation <id>` | GitHub App のインストール ID(複数のインストールがある場合は必須)                           |
+| `--repo <owner/repo>` | リポジトリのフルネーム。インストールが付与しているリポジトリがちょうど 1 つでない限り必須  |
+| `--branch <name>`     | デプロイ元のブランチ。**非対話モードでは必須**                                             |
+| `--executor <type>`   | ビルドエグゼキューター: `container`(デフォルト)または `github_actions`                     |
+| `--workflow <path>`   | 認可されたデプロイワークフローのファイル。デフォルトは `.github/workflows/void-deploy.yml` |
 
-Choose `container` for platform builds or `github_actions` for a deployment workflow. The CLI prompts for the executor and, for GitHub Actions, the workflow file. Pass the corresponding flags to skip those prompts.
+プラットフォームでのビルドには `container`、デプロイワークフローには `github_actions` を選択します。CLI はエグゼキューターを、GitHub Actions の場合はさらにワークフローファイルを対話的に尋ねます。対応するフラグを渡すと、そのプロンプトをスキップできます。
 
-The workflow must be a `.yml` or `.yaml` file under `.github/workflows/`. Only that workflow can obtain the project's OIDC deployment token. Prefer a dedicated deployment workflow.
+ワークフローは `.github/workflows/` 配下の `.yml` または `.yaml` ファイルである必要があります。そのワークフローだけが、プロジェクトの OIDC デプロイトークンを取得できます。専用のデプロイワークフローを使うことをおすすめします。
 
-For CI, supply the project and branch, plus the installation and repository when they cannot be selected automatically. Organization connections require repository authorization in a local browser first.
+CI では、プロジェクトとブランチを指定し、自動的に選択できない場合はインストールとリポジトリも指定します。組織の接続では、まずローカルのブラウザーでリポジトリの認可が必要です。
 
 ```
 void github connect my-app \
@@ -80,9 +80,9 @@ void github connect my-app \
   --branch main
 ```
 
-You can connect only repositories your GitHub account can access.
+接続できるのは、ご自身の GitHub アカウントがアクセスできるリポジトリのみです。
 
-A project has one GitHub connection. Running `void github connect` on a project that is already connected fails. To connect a different repository, run `void github disconnect` first.
+1 つのプロジェクトは 1 つの GitHub 接続を持ちます。すでに接続済みのプロジェクトで `void github connect` を実行すると失敗します。別のリポジトリに接続するには、先に `void github disconnect` を実行してください。
 
 ## `void github update` {#void-github-update}
 
@@ -90,18 +90,18 @@ A project has one GitHub connection. Running `void github connect` on a project 
 void github update [project] [options]
 ```
 
-Change the branch, executor, or workflow for an existing connection. To change the repository, disconnect and reconnect.
+既存の接続のブランチ、エグゼキューター、ワークフローを変更します。リポジトリを変更するには、切断して再接続してください。
 
-**Options**
+**オプション**
 
-| Flag                | Description                                                      |
-| ------------------- | ---------------------------------------------------------------- |
-| `--project <name>`  | Project name (alias for the positional argument)                 |
-| `--branch <name>`   | New branch to deploy from                                        |
-| `--executor <type>` | New build executor: `container` or `github_actions`              |
-| `--workflow <path>` | New authorized deploy workflow file (under `.github/workflows/`) |
+| フラグ              | 説明                                                                      |
+| ------------------- | ------------------------------------------------------------------------- |
+| `--project <name>`  | プロジェクト名(位置引数の別名)                                            |
+| `--branch <name>`   | 新しいデプロイ元のブランチ                                                |
+| `--executor <type>` | 新しいビルドエグゼキューター: `container` または `github_actions`         |
+| `--workflow <path>` | 新しい認可されたデプロイワークフローのファイル(`.github/workflows/` 配下) |
 
-The CLI prompts for new settings using the current values as defaults. In CI, pass at least one of `--branch`, `--executor`, or `--workflow`.
+CLI は、現在の値をデフォルトとして新しい設定を対話的に尋ねます。CI では、`--branch`、`--executor`、`--workflow` のうち少なくとも 1 つを渡してください。
 
 ```
 void github update my-app --executor github_actions
@@ -113,13 +113,13 @@ void github update my-app --executor github_actions
 void github status [project]
 ```
 
-Show the connected repository, branch, executor, and workflow. Container builds do not use the workflow file.
+接続されているリポジトリ、ブランチ、エグゼキューター、ワークフローを表示します。コンテナビルドではワークフローファイルは使用されません。
 
-**Options**
+**オプション**
 
-| Flag               | Description                                      |
-| ------------------ | ------------------------------------------------ |
-| `--project <name>` | Project name (alias for the positional argument) |
+| フラグ             | 説明                           |
+| ------------------ | ------------------------------ |
+| `--project <name>` | プロジェクト名(位置引数の別名) |
 
 ```
 void github status my-app
@@ -131,24 +131,24 @@ void github status my-app
 void github disconnect [project]
 ```
 
-Disconnect a project from its GitHub repository, stopping automatic deploys. Any in-flight builds for the project are cancelled before the connection is removed. If the project has no connection, it reports that and exits successfully. To point a project at a different repository, disconnect first, then run `void github connect`.
+プロジェクトを GitHub リポジトリから切断し、自動デプロイを停止します。接続を削除する前に、プロジェクトの実行中のビルドはすべてキャンセルされます。プロジェクトに接続がない場合は、その旨を報告して正常終了します。プロジェクトを別のリポジトリに向けるには、先に切断してから `void github connect` を実行してください。
 
-You are asked to confirm before anything is removed. Pass `--yes` to skip the prompt; `--yes` is **required** in a non-interactive shell (CI), where there is no prompt to answer.
+何かが削除される前に、確認を求められます。プロンプトをスキップするには `--yes` を渡します。応答するプロンプトが存在しない非対話シェル(CI)では、`--yes` は**必須**です。
 
-**Options**
+**オプション**
 
-| Flag               | Description                                                       |
-| ------------------ | ----------------------------------------------------------------- |
-| `--project <name>` | Project name (alias for the positional argument)                  |
-| `--yes`            | Skip the confirmation prompt (required in non-interactive shells) |
+| フラグ             | 説明                                               |
+| ------------------ | -------------------------------------------------- |
+| `--project <name>` | プロジェクト名(位置引数の別名)                     |
+| `--yes`            | 確認プロンプトをスキップする(非対話シェルでは必須) |
 
 ```
 void github disconnect my-app --yes
 ```
 
-## Build {#build}
+## ビルド {#build}
 
-Inspect Deploy-on-GitHub builds.
+GitHub へのデプロイのビルドを確認します。
 
 ### `void build logs` {#void-build-logs}
 
@@ -156,22 +156,19 @@ Inspect Deploy-on-GitHub builds.
 void build logs [build] [--follow] [--output <file>] [--project <slug>]
 ```
 
-Stream, tail, or download the build logs for a **container** build. With no
-`[build]` argument, targets the project's most recent build.
+**コンテナ**ビルドのビルドログをストリーミング、テール、またはダウンロードします。`[build]` 引数を省略すると、プロジェクトの最新のビルドが対象になります。
 
-| Flag                     | Purpose                                                                   | Default |
-| ------------------------ | ------------------------------------------------------------------------- | ------- |
-| `--follow`, `-f`         | Live-tail: poll until the build finishes and its final logs are captured. | off     |
-| `--output <file>`, `-o`  | Write logs to a file instead of stdout (appends while following).         | stdout  |
-| `--project <slug>`, `-p` | Target project.                                                           | linked  |
+| フラグ                   | 目的                                                                     | デフォルト |
+| ------------------------ | ------------------------------------------------------------------------ | ---------- |
+| `--follow`, `-f`         | ライブテール: ビルドが終了し、最終ログが取得されるまでポーリングします。 | オフ       |
+| `--output <file>`, `-o`  | ログを標準出力ではなくファイルに書き込みます(follow 中は追記されます)。  | 標準出力   |
+| `--project <slug>`, `-p` | 対象のプロジェクト。                                                     | リンク済み |
 
-Builds run on **GitHub Actions** keep their logs on GitHub — the command prints
-the Actions run URL instead of streaming. Only the last 10,000 log lines of a
-container build are retained.
+**GitHub Actions** で実行されたビルドのログは GitHub 上に保持されます。このコマンドはストリーミングの代わりに、Actions の実行 URL を表示します。コンテナビルドで保持されるのは、直近 10,000 行のログのみです。
 
-Following waits for the platform to confirm the final log tail. If the platform cannot confirm it, upgrade the platform runtime or read the retained logs without `--follow`. An unfinished final tail reports an error after two minutes; retry to recover it.
+follow はプラットフォームが最終ログの末尾を確認するまで待機します。プラットフォームが確認できない場合は、プラットフォームのランタイムをアップグレードするか、`--follow` を付けずに保持されたログを読んでください。最終ログの末尾が未完了の場合は 2 分後にエラーを報告します。再試行すると回復できます。
 
-Examples:
+例:
 
 ```
 void build logs                     # print the latest build's logs

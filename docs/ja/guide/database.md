@@ -7,10 +7,10 @@ const dbFileItems = [
   {
     name: "db/",
     children: [
-      { name: "schema.ts", description: "Table definitions (source of truth)" },
+      { name: "schema.ts", description: "テーブル定義（信頼できる唯一の情報源）" },
       {
         name: "schema/",
-        description: "Split schema files (optional)",
+        description: "分割したスキーマファイル（任意）",
         children: [
           { name: "users.ts" },
           { name: "posts.ts" },
@@ -18,40 +18,40 @@ const dbFileItems = [
       },
       {
         name: "migrations/",
-        description: "Generated SQL migration files",
+        description: "生成された SQL マイグレーションファイル",
         children: [
           { name: "20260410161500_create_users.sql" },
           { name: "20260410161501_add_posts.sql" },
         ],
       },
-      { name: "seed.ts", description: "Programmatic seed script (optional)" },
-      { name: "seed.sql", description: "Raw SQL seed file (optional alternative)" },
+      { name: "seed.ts", description: "プログラムによるシードスクリプト（任意）" },
+      { name: "seed.sql", description: "生の SQL シードファイル（代替手段、任意）" },
     ],
   },
 ]
 </script>
 
-# Database
+# データベース {#database}
 
-Define your tables in TypeScript, then query them with `db` from `void/db`. Void includes [Drizzle ORM](https://orm.drizzle.team) and configures the connection, so you can use the same schema and query workflow with D1, PostgreSQL, or MySQL.
+テーブルを TypeScript で定義し、`void/db` の `db` でクエリを実行します。Void は [Drizzle ORM](https://orm.drizzle.team) を同梱し、接続も設定するため、D1、PostgreSQL、MySQL のいずれでも同じスキーマとクエリのワークフローを使えます。
 
 <FileTree :items="dbFileItems" default-expanded />
 
-## Choosing a Dialect
+## ダイアレクトの選択 {#choosing-a-dialect}
 
-Choose a database during `void init`, or set `database` in `void.config.ts`:
+`void init` の実行時にデータベースを選択するか、`void.config.ts` の `database` を設定します。
 
-|            | [D1 (SQLite)](./database/d1) | [PostgreSQL](./database/postgresql) | [MySQL](./database/mysql) |
-| ---------- | ---------------------------- | ----------------------------------- | ------------------------- |
-| Config     | Default                      | `"database": "pg"`                  | `"database": "mysql"`     |
-| Managed by | Void                         | Bring your own database             | Bring your own database   |
-| Connection | Automatic D1 binding         | Hyperdrive                          | Hyperdrive                |
+|      | [D1 (SQLite)](./database/d1) | [PostgreSQL](./database/postgresql) | [MySQL](./database/mysql) |
+| ---- | ---------------------------- | ----------------------------------- | ------------------------- |
+| 設定 | デフォルト                   | `"database": "pg"`                  | `"database": "mysql"`     |
+| 管理 | Void                         | 自前のデータベースを用意            | 自前のデータベースを用意  |
+| 接続 | D1 バインディングを自動設定  | Hyperdrive                          | Hyperdrive                |
 
-A Void platform keeps Hyperdrive query caching off for your database connection, so reads reflect completed writes. An existing connection is updated on the project's next deploy.
+Void プラットフォームでは、データベース接続の Hyperdrive クエリキャッシュはオフのままになるため、読み取りには完了した書き込みが反映されます。既存の接続は、プロジェクトの次回のデプロイ時に更新されます。
 
-## Schema Definition
+## スキーマ定義 {#schema-definition}
 
-Define your tables in `db/schema.ts` using column helpers from `void/schema-d1`, `void/schema-pg`, or `void/schema-mysql`.
+`db/schema.ts` に、`void/schema-d1`、`void/schema-pg`、`void/schema-mysql` のカラムヘルパーを使ってテーブルを定義します。
 
 ::: code-group
 
@@ -98,9 +98,9 @@ export const users = mysqlTable('users', {
 
 :::
 
-The schema helpers are included in `void`. You can write tables yourself or generate a starting point with `void gen model`.
+スキーマヘルパーは `void` に含まれています。テーブルを自分で書くことも、`void gen model` で出発点を生成することもできます。
 
-You can also split your schema across multiple files under `db/schema/` and re-export from a barrel file:
+`db/schema/` 配下に複数のファイルとしてスキーマを分割し、バレルファイルから再エクスポートすることもできます。
 
 ```ts
 // db/schema/users.ts
@@ -114,92 +114,92 @@ export * from "./schema/users";
 export * from "./schema/posts";
 ```
 
-## Querying
+## クエリ {#querying}
 
-Void re-exports all common [Drizzle query operators](https://orm.drizzle.team/docs/select) from `void/db` so you don't need to install `drizzle-orm` separately. Import `db` from `void/db` and your tables from `@schema`:
+Void は一般的な [Drizzle のクエリ演算子](https://orm.drizzle.team/docs/select)をすべて `void/db` から再エクスポートしているため、`drizzle-orm` を別途インストールする必要はありません。`db` は `void/db` から、テーブルは `@schema` からインポートします。
 
 ```ts
 import { users } from '@schema';
 import { db } from 'void/db';
 ```
 
-::: info What is `@schema`?
-`@schema` is a Vite path alias that the Void plugin configures automatically. It points to your `db/schema.ts` file, or `db/schema/` if you split tables across files. You can just use it to import table definitions.
+::: info `@schema` とは？
+`@schema` は、Void プラグインが自動的に設定する Vite のパスエイリアスです。`db/schema.ts` を指し、テーブルを複数ファイルに分割している場合は `db/schema/` を指します。テーブル定義をインポートするためにそのまま使えます。
 :::
 
-### List rows
+### 行を一覧取得する {#list-rows}
 
 ```ts
 const allUsers = await db.select().from(users);
 ```
 
-### Filter with `where`
+### `where` で絞り込む {#filter-with-where}
 
 ```ts
 import { users } from '@schema';
 import { db, eq, and, or } from 'void/db';
 
-// Single condition
+// 単一の条件
 const user = await db.select().from(users).where(eq(users.id, 1));
 
-// Multiple conditions
+// 複数の条件
 const admins = await db
   .select()
   .from(users)
   .where(and(eq(users.role, 'admin'), eq(users.name, 'Alice')));
 
-// OR conditions
+// OR 条件
 const result = await db
   .select()
   .from(users)
   .where(or(eq(users.role, 'admin'), eq(users.role, 'editor')));
 ```
 
-### Insert
+### 挿入 {#insert}
 
 ```ts
-// Single row
+// 単一の行
 await db.insert(users).values({
   name: 'Alice',
   email: 'alice@example.com',
 });
 
-// Insert and return the created row
+// 挿入して作成された行を返す
 const [created] = await db
   .insert(users)
   .values({ name: 'Bob', email: 'bob@example.com' })
   .returning();
 
-// Multiple rows
+// 複数の行
 await db.insert(users).values([
   { name: 'Alice', email: 'alice@example.com' },
   { name: 'Bob', email: 'bob@example.com' },
 ]);
 ```
 
-### Update
+### 更新 {#update}
 
 ```ts
 await db.update(users).set({ role: 'admin' }).where(eq(users.id, 1));
 
-// Update and return the modified row
+// 更新して変更後の行を返す
 const [updated] = await db.update(users).set({ role: 'admin' }).where(eq(users.id, 1)).returning();
 ```
 
-### Delete
+### 削除 {#delete}
 
 ```ts
 await db.delete(users).where(eq(users.id, 1));
 ```
 
-### Column selection
+### カラムの選択 {#column-selection}
 
 ```ts
 const names = await db.select({ name: users.name, email: users.email }).from(users);
 // names: { name: string; email: string }[]
 ```
 
-### Ordering and pagination
+### 並び替えとページネーション {#ordering-and-pagination}
 
 ```ts
 import { users } from '@schema';
@@ -208,7 +208,7 @@ import { db, desc } from 'void/db';
 const page = await db.select().from(users).orderBy(desc(users.createdAt)).limit(10).offset(20);
 ```
 
-### Joins
+### 結合 {#joins}
 
 ```ts
 import { users, posts } from '@schema';
@@ -224,9 +224,9 @@ const results = await db
   .innerJoin(users, eq(posts.userId, users.id));
 ```
 
-### Relational queries
+### リレーショナルクエリ {#relational-queries}
 
-If your schema defines [relations](https://orm.drizzle.team/docs/relations), you can use Drizzle's relational query API:
+スキーマに[リレーション](https://orm.drizzle.team/docs/relations)を定義している場合は、Drizzle のリレーショナルクエリ API を使えます。
 
 ```ts
 const usersWithPosts = await db.query.users.findMany({
@@ -234,15 +234,15 @@ const usersWithPosts = await db.query.users.findMany({
 });
 ```
 
-## Seeding
+## シード {#seeding}
 
-Use `void db seed` to reset your local database, re-apply migrations, and then run a seed file.
+`void db seed` を使うと、ローカルデータベースをリセットし、マイグレーションを再適用してから、シードファイルを実行します。
 
-Use `db/seed.ts` for a programmatic seed or `db/seed.sql` for SQL. JavaScript and `.mts` / `.mjs` files also work. If more than one seed file exists, choose one with `--file <path>`.
+プログラムによるシードには `db/seed.ts` を、SQL には `db/seed.sql` を使います。JavaScript や `.mts` / `.mjs` ファイルも使えます。シードファイルが複数ある場合は、`--file <path>` で 1 つを選択します。
 
-### Programmatic seeding
+### プログラムによるシード {#programmatic-seeding}
 
-Use `db/seed.ts` when you want to generate seed data in code. Export a default function or a named `seed` function.
+コードでシードデータを生成したい場合は `db/seed.ts` を使います。デフォルトエクスポートの関数、または名前付きの `seed` 関数をエクスポートします。
 
 ```ts
 // db/seed.ts
@@ -257,23 +257,23 @@ export default defineSeed<typeof import('./schema')>(async ({ db, schema }) => {
 });
 ```
 
-The seed context includes:
+シードのコンテキストには次の値が含まれます。
 
-- `dialect`: `"sqlite"`, `"postgresql"`, or `"mysql"`
-- `db`: a Drizzle instance for the local database
-- `schema`: the exports from your `db/schema.ts` or `db/schema/` modules
+- `dialect`: `"sqlite"`、`"postgresql"`、または `"mysql"`
+- `db`: ローカルデータベース用の Drizzle インスタンス
+- `schema`: `db/schema.ts` または `db/schema/` のモジュールからのエクスポート
 
-### SQL seeding
+### SQL によるシード {#sql-seeding}
 
-If you prefer raw SQL, keep using `db/seed.sql`:
+生の SQL を使いたい場合は、引き続き `db/seed.sql` を使えます。
 
 ```sql
 INSERT INTO messages (text) VALUES ('Hello from SQL');
 ```
 
-## Schema-Derived Validators
+## スキーマから導出するバリデーター {#schema-derived-validators}
 
-Derive request validators from your tables with `void/drizzle-zod`, `void/drizzle-valibot`, or `void/drizzle-arktype`. Add the validator after your table definition:
+`void/drizzle-zod`、`void/drizzle-valibot`、`void/drizzle-arktype` を使って、テーブルからリクエストのバリデーターを導出できます。テーブル定義の後にバリデーターを追加します。
 
 ::: code-group
 
@@ -311,9 +311,9 @@ export const insertUserSchema = createInsertSchema(users, {
 
 :::
 
-`createInsertSchema` generates a validator that matches `$inferInsert`. Columns with defaults or auto-increments become optional, while `NOT NULL` columns stay required. The optional second argument lets you refine individual columns, either with a callback that receives the generated schema or by passing a type directly to override a field.
+`createInsertSchema` は `$inferInsert` に一致するバリデーターを生成します。デフォルト値や自動採番を持つカラムは任意になり、`NOT NULL` のカラムは必須のままです。省略可能な 2 番目の引数では、生成されたスキーマを受け取るコールバックを渡すか、型を直接渡してフィールドを上書きすることで、個々のカラムを調整できます。
 
-Use the derived schema in your route handlers with [`withValidator()`](./server-routing.md#validation):
+導出したスキーマは、ルートハンドラーで [`withValidator()`](./server-routing.md#validation) とともに使います。
 
 ```ts
 import { users, insertUserSchema } from '@schema';
@@ -329,15 +329,15 @@ export const POST = defineHandler.withValidator({
 });
 ```
 
-Three functions are available:
+次の 3 つの関数を使えます。
 
-| Function             | Purpose                                                                       |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `createInsertSchema` | Validates insert data, excluding auto-generated columns and applying defaults |
-| `createSelectSchema` | Matches the shape of selected rows                                            |
-| `createUpdateSchema` | Like insert but all fields are optional (partial update)                      |
+| 関数                 | 用途                                                                           |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `createInsertSchema` | 挿入データを検証します。自動生成されるカラムを除外し、デフォルト値を適用します |
+| `createSelectSchema` | 取得した行の形状に一致します                                                   |
+| `createUpdateSchema` | 挿入用と似ていますが、すべてのフィールドが任意です（部分更新）                 |
 
-Void already bundles the Drizzle adapters. Install the validator library itself if you use its direct APIs in your schema file:
+Void には Drizzle アダプターがすでにバンドルされています。スキーマファイルでバリデーターライブラリの API を直接使う場合は、ライブラリ自体をインストールしてください。
 
 ```bash
 npm install zod
@@ -347,46 +347,46 @@ npm install valibot
 npm install arktype
 ```
 
-## CLI Commands
+## CLI コマンド {#cli-commands}
 
-| Command            | Purpose                                              |
-| ------------------ | ---------------------------------------------------- |
-| `void db push`     | Apply schema changes locally without migration files |
-| `void db generate` | Generate SQL migrations                              |
-| `void db migrate`  | Apply pending migrations locally                     |
-| `void db status`   | Check schema drift and pending migrations            |
-| `void db seed`     | Reset the local database and run a seed file         |
+| コマンド           | 用途                                                       |
+| ------------------ | ---------------------------------------------------------- |
+| `void db push`     | マイグレーションファイルなしでスキーマ変更をローカルに適用 |
+| `void db generate` | SQL マイグレーションを生成                                 |
+| `void db migrate`  | 未適用のマイグレーションをローカルに適用                   |
+| `void db status`   | スキーマのずれと未適用のマイグレーションを確認             |
+| `void db seed`     | ローカルデータベースをリセットし、シードファイルを実行     |
 
-See the [CLI reference](../reference/cli/database.md#database) for connection setup, SQL execution, Studio, exports, and other commands.
+接続のセットアップ、SQL の実行、Studio、エクスポートなどのコマンドについては、[CLI リファレンス](../reference/cli/database.md#database)を参照してください。
 
-## Hand-written migrations {#hand-written-migrations}
+## 手書きのマイグレーション {#hand-written-migrations}
 
-Deploy compares your Drizzle schema with the snapshots in `db/migrations/meta/`. If you have SQL migrations without this metadata, running `void db generate` would create another migration for the same tables.
+デプロイでは、Drizzle スキーマを `db/migrations/meta/` のスナップショットと比較します。このメタデータのない SQL マイグレーションがある場合、`void db generate` を実行すると同じテーブルに対する別のマイグレーションが作成されてしまいます。
 
-To keep an existing migration history:
+既存のマイグレーション履歴を維持するには、次の手順を実行します。
 
-1. Make your Drizzle schema match the tables your SQL migrations create.
-2. In a scratch copy of the project, remove `db/migrations/` and run `void db generate`.
-3. Copy the generated `meta/` folder into your original migration directory. In `_journal.json`, replace `entries` with an entry for each existing SQL file in order. Use consecutive `idx` values starting at `0`, the file name without `.sql` as `tag`, increasing timestamps as `when`, and the generated entry's `version`. Set `breakpoints` to whether the file uses `--> statement-breakpoint` lines.
-4. Rename the generated snapshot to `<prefix>_snapshot.json`, where `<prefix>` is the part of the last migration tag before its first `_`. For `001_create_users.sql`, use `001_snapshot.json`.
+1. SQL マイグレーションが作成するテーブルに、Drizzle スキーマを一致させます。
+2. プロジェクトの作業用コピーで `db/migrations/` を削除し、`void db generate` を実行します。
+3. 生成された `meta/` フォルダーを元のマイグレーションディレクトリにコピーします。`_journal.json` では、`entries` を既存の各 SQL ファイルに対応するエントリーに順番に置き換えます。`idx` は `0` から始まる連続した値、`tag` は `.sql` を除いたファイル名、`when` は増加するタイムスタンプ、`version` は生成されたエントリーの値を使います。`breakpoints` には、そのファイルが `--> statement-breakpoint` 行を使っているかどうかを設定します。
+4. 生成されたスナップショットを `<prefix>_snapshot.json` にリネームします。`<prefix>` は、最後のマイグレーションのタグのうち最初の `_` より前の部分です。`001_create_users.sql` の場合は、`001_snapshot.json` を使います。
 
-Review and commit the metadata, then run `void deploy` again. If no database has applied the SQL yet, you can instead replace it with migrations from `void db generate`.
+メタデータを確認してコミットしたら、もう一度 `void deploy` を実行します。まだどのデータベースにも SQL が適用されていない場合は、代わりに `void db generate` で生成したマイグレーションに置き換えることもできます。
 
-For D1 migrations containing triggers, and MySQL migrations containing triggers, procedures, functions or events, add a `--> statement-breakpoint` line after each complete SQL statement, including the trigger's closing `END;`. Keep the trigger body together.
+トリガーを含む D1 のマイグレーション、およびトリガー、プロシージャ、関数、イベントを含む MySQL のマイグレーションでは、トリガーの末尾の `END;` を含め、完結した各 SQL 文の後に `--> statement-breakpoint` の行を追加してください。トリガーの本体は 1 つにまとめたままにします。
 
-## Scaffolding
+## スキャフォールディング {#scaffolding}
 
-The `void gen model` command generates dialect-appropriate `sqliteTable`, `pgTable`, or `mysqlTable` definitions.
+`void gen model` コマンドは、ダイアレクトに合った `sqliteTable`、`pgTable`、または `mysqlTable` の定義を生成します。
 
 ```bash
 void gen model posts title:string body:text published:boolean
 ```
 
-This creates:
+これにより、次のものが作成されます。
 
-1. `db/schema/posts.ts`: a Drizzle table definition with `id`, `createdAt`, `updatedAt`, and your columns
-2. Updates `db/schema.ts` with `export * from "./schema/posts"`
-3. `routes/api/posts/index.ts`: `GET` for list and `POST` for insert with validation
-4. `routes/api/posts/[id].ts`: `GET` by id with `404` handling
+1. `db/schema/posts.ts`: `id`、`createdAt`、`updatedAt` と指定したカラムを持つ Drizzle のテーブル定義
+2. `db/schema.ts` を更新し、`export * from "./schema/posts"` を追加
+3. `routes/api/posts/index.ts`: 一覧取得用の `GET` と、バリデーション付きの挿入用 `POST`
+4. `routes/api/posts/[id].ts`: `404` の処理を含む、ID による `GET`
 
-See the [CLI reference](../reference/cli/generate.md#code-generation) for the full list of generators.
+ジェネレーターの全一覧については、[CLI リファレンス](../reference/cli/generate.md#code-generation)を参照してください。

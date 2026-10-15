@@ -2,102 +2,86 @@
 outline: deep
 ---
 
-# Domains and Resources
+# ドメインとリソース {#domains-and-resources}
 
-## Adding a Domain
+## ドメインを追加する {#adding-a-domain}
 
-When your domain is ready, run:
+ドメインの準備ができたら、次を実行します。
 
 ```sh
 void platform domain set example.app --plan
 void platform domain set example.app
 ```
 
-The command selects your installed platform (or offers a picker), finds or creates its zone, sets up DNS and routing, and verifies HTTPS before publishing the new application URLs. Set the management token as described in [installation setup](/guide/platform/installation/setup) when creating DNS or a zone. Grant the existing runtime token **Cache Purge: Purge** on the new zone; Void checks that permission through the running platform without asking you to paste its token again.
+このコマンドは、インストール済みのプラットフォームを選択し（または選択画面を表示し）、そのゾーンを検索または作成し、DNS とルーティングを設定したうえで、HTTPS を検証してから新しいアプリケーション URL を公開します。DNS やゾーンを作成する場合は、[インストールのセットアップ](/ja/guide/platform/installation/setup)で説明されているとおりに管理トークンを設定してください。既存のランタイムトークンには、新しいゾーンに対する **Cache Purge: Purge** を付与します。Void は、実行中のプラットフォームを通じてその権限を確認するため、トークンを再度貼り付ける必要はありません。
 
-If nameservers, certificates, or project Zero Trust protection are pending, follow the printed guidance and rerun the same command. Void preserves each project's public or protected setting before making the new URLs available. Your workers.dev app URLs continue working during and after setup. Projects, deployments, secrets, and the platform API URL stay the same, so developers do not reconnect and configured login callbacks do not change. DNS and configuration changes may take time to propagate.
+ネームサーバー、証明書、またはプロジェクトの Zero Trust 保護が保留中の場合は、表示されるガイダンスに従って、同じコマンドを再実行してください。Void は、新しい URL を利用可能にする前に、各プロジェクトの公開または保護の設定を維持します。workers.dev のアプリ URL は、セットアップ中もその後も引き続き動作します。プロジェクト、デプロイ、シークレット、プラットフォームの API URL は変わらないため、開発者が再接続する必要はなく、設定済みのログインコールバックも変更されません。DNS や設定の変更が反映されるまでには時間がかかる場合があります。
 
-Use `--installation <id>` to select an installation explicitly, `--zone example.com` for an app domain such as `apps.example.com`, or `--dedicated-zone` for catch-all routing on a dedicated zone. Nested domains still need the wildcard certificate described below. This command adds the first domain; replacing an existing application domain is not currently supported. It uses the installed runtime and does not require `--runtime` or an app redeploy.
+インストールを明示的に選択するには `--installation <id>` を、`apps.example.com` のようなアプリドメインには `--zone example.com` を、専用ゾーンでのキャッチオールルーティングには `--dedicated-zone` を使います。ネストされたドメインでも、後述のワイルドカード証明書が必要です。このコマンドは最初のドメインを追加するもので、既存のアプリケーションドメインの置き換えは現在サポートされていません。インストール済みのランタイムを使用するため、`--runtime` やアプリの再デプロイは不要です。
 
-Choose an application domain whose wildcard leaves existing Worker Custom Domains reachable. Existing more-specific routes covering all requests can preserve those hostnames. If Void reports a conflict, choose another application domain; for a new installation, you can start with `void platform install --workers-dev` and add a suitable domain later.
+既存の Worker カスタムドメインに引き続き到達できるように、ワイルドカードがそれらと競合しないアプリケーションドメインを選んでください。すべてのリクエストを対象とする、より限定的な既存のルートがあれば、それらのホスト名を維持できます。Void が競合を報告した場合は、別のアプリケーションドメインを選んでください。新規インストールでは、`void platform install --workers-dev` で開始し、適切なドメインを後から追加できます。
 
-Browser login sessions are specific to each origin. Apps using their own OAuth providers may need to register their new callback URLs. Void's built-in auth uses the request origin automatically unless the app overrides that configuration.
+ブラウザーのログインセッションは、オリジンごとに固有です。独自の OAuth プロバイダーを使用するアプリは、新しいコールバック URL の登録が必要になる場合があります。Void の組み込み認証は、アプリがその設定を上書きしない限り、リクエストのオリジンを自動的に使用します。
 
-Apps on one application domain can set cookies that the other apps there receive. With a nested domain such as `apps.example.com`, apps can also set cookies for `example.com` and its other subdomains. Apps on `workers.dev` testing URLs can set cookies that every Worker on your account's `workers.dev` subdomain receives. If people outside your team can deploy, use a domain that serves only Void apps. A platform that serves thousands of independent developers can also apply to list its application domain on the [Public Suffix List](https://github.com/publicsuffix/list/wiki/Guidelines).
+1 つのアプリケーションドメイン上のアプリは、そこにある他のアプリが受け取る Cookie を設定できます。`apps.example.com` のようなネストされたドメインでは、アプリは `example.com` とその他のサブドメイン向けの Cookie も設定できます。`workers.dev` のテスト用 URL 上のアプリは、アカウントの `workers.dev` サブドメイン上のすべての Worker が受け取る Cookie を設定できます。チーム外の人がデプロイできる場合は、Void のアプリのみを配信するドメインを使用してください。何千もの独立した開発者にサービスを提供するプラットフォームは、そのアプリケーションドメインを [Public Suffix List](https://github.com/publicsuffix/list/wiki/Guidelines) に掲載申請することもできます。
 
-### What Changes in Testing Mode?
+### テストモードでは何が変わるか {#what-changes-in-testing-mode}
 
-In testing mode, each app gets a `workers.dev` URL. These URLs continue working after you add a domain; new apps then use the domain.
+テストモードでは、各アプリに `workers.dev` の URL が割り当てられます。これらの URL は、ドメインを追加した後も引き続き動作し、新しいアプリはそのドメインを使用します。
 
-Testing URLs support WebSockets, SSE, and shared ISR storage, but skip the extra edge response cache. Their forwarding Workers remain for manual cleanup after uninstall. Platform disablement and project suspension still block their traffic.
+テスト用 URL は、WebSocket、SSE、共有 ISR ストレージをサポートしますが、追加のエッジレスポンスキャッシュは使用しません。転送用の Worker は、アンインストール後に手動でのクリーンアップ用に残ります。プラットフォームの無効化とプロジェクトの停止は、引き続きそれらのトラフィックをブロックします。
 
-## Other Domain Options
+## その他のドメインオプション {#other-domain-options}
 
-::: details Custom API hostname
+::: details カスタム API ホスト名
 
-Pass `--control-plane-domain platform.example.net` during installation. The hostname must belong to a zone the selected account and management token can manage. Omitting it keeps the API on `workers.dev`.
+インストール時に `--control-plane-domain platform.example.net` を渡します。ホスト名は、選択したアカウントと管理トークンが管理できるゾーンに属している必要があります。省略すると、API は `workers.dev` に残ります。
 
 :::
 
-### Using a Nested Application Domain
+### ネストされたアプリケーションドメインを使う {#using-a-nested-application-domain}
 
-::: details Use apps.example.com within an existing company zone
+::: details 既存の会社のゾーン内で apps.example.com を使う
 
-An app at `my-app.apps.example.com` needs a certificate for `*.apps.example.com`. Universal SSL for `example.com` only covers first-level hostnames. Configure an active wildcard certificate with [Advanced Certificate Manager](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/), a paid add-on, or use an existing custom wildcard certificate before installation:
+`my-app.apps.example.com` のアプリには、`*.apps.example.com` の証明書が必要です。`example.com` の Universal SSL は、第 1 レベルのホスト名のみを対象とします。インストールの前に、有料アドオンの [Advanced Certificate Manager](https://developers.cloudflare.com/ssl/edge-certificates/advanced-certificate-manager/) でアクティブなワイルドカード証明書を設定するか、既存のカスタムワイルドカード証明書を使用してください。
 
 ```sh
 void platform install --application-domain apps.example.com --zone example.com --plan
 ```
 
-The management token needs **SSL and Certificates: Read** (or Edit) on that zone for the certificate check. Void does not order certificates or enable paid products automatically. Leave `--dedicated-zone` off: that flag is only for installations whose application domain is the entire zone and adds catch-all routes for otherwise unmatched traffic.
+管理トークンには、証明書の確認のために、そのゾーンに対する **SSL and Certificates: Read**（または Edit）が必要です。Void は、証明書を注文したり、有料プロダクトを自動的に有効にしたりしません。`--dedicated-zone` は指定しないでください。このフラグは、アプリケーションドメインがゾーン全体であるインストール専用で、他のどこにも一致しないトラフィック向けにキャッチオールのルートを追加します。
 
 :::
 
-## Optional Dashboard
+## オプションのダッシュボード {#optional-dashboard}
 
-The API's `/admin/` pages are included in the core installation. You can deploy
-the optional user dashboard separately and configure its HTTPS origin during
-installation with `--dashboard-url https://dash.example.com`.
+API の `/admin/` ページは、コアのインストールに含まれています。オプションのユーザーダッシュボードは別途デプロイでき、インストール時に `--dashboard-url https://dash.example.com` でその HTTPS オリジンを設定できます。
 
-For an existing installation, preview and apply the configuration with:
+既存のインストールでは、次のコマンドで設定をプレビューして適用します。
 
 ```sh
 void platform repair <installation-id> --dashboard-url https://dash.example.com --plan
 void platform repair <installation-id> --dashboard-url https://dash.example.com --yes
 ```
 
-The origin must contain no credentials, path, query, or fragment. Void saves it
-for login callbacks and keeps it across upgrades and repairs. The command does
-not create a dashboard Worker or DNS records. Follow the source app’s
-[standalone dashboard preparation](https://github.com/voidzero-dev/void/tree/main/platform/packages/dashboard#standalone-deployment)
-to deploy your own copy with an unused Worker name, your dashboard hostname,
-and the installed API Worker’s service binding. Set its `API_URL` to the public
-API origin, `DASHBOARD_URL` to the dashboard origin, and `SITE_DOMAIN` to the
-installation’s application domain. Omit the option to keep the saved origin.
-The dashboard provides sign-in, linked login methods, and sign-out; use the CLI
-for user project and team management.
+オリジンには、認証情報、パス、クエリ、フラグメントを含めることはできません。Void はこれをログインコールバック用に保存し、アップグレードや修復後も保持します。このコマンドは、ダッシュボード用の Worker や DNS レコードを作成しません。ソースアプリの[スタンドアロンダッシュボードの準備](https://github.com/voidzero-dev/void/tree/main/platform/packages/dashboard#standalone-deployment)に従って、未使用の Worker 名、ダッシュボードのホスト名、インストール済みの API Worker のサービスバインディングを使い、独自のコピーをデプロイしてください。`API_URL` には公開 API のオリジンを、`DASHBOARD_URL` にはダッシュボードのオリジンを、`SITE_DOMAIN` にはインストールのアプリケーションドメインを設定します。保存済みのオリジンを維持するには、このオプションを省略します。ダッシュボードで提供されるのは、サインイン、連携したログイン方法、サインアウトです。ユーザーのプロジェクトやチームの管理には、CLI を使ってください。
 
-If Access protects the platform, its application must cover this dashboard
-origin too. Configure the origin when installing protection. To change it on an
-already protected platform, deliberately remove protection through authentication
-configuration, apply the origin, then enable protection again. Choose a separate
-admission rule first if signup depends on the Access gate. Maintenance stops if
-the configured origin is outside the active coverage.
+Access でプラットフォームを保護している場合は、その Access アプリケーションがこのダッシュボードのオリジンも対象に含める必要があります。保護をインストールするときに、オリジンを設定してください。すでに保護されているプラットフォームでこれを変更するには、認証設定を通じて意図的に保護を削除し、オリジンを適用してから、再度保護を有効にします。サインアップが Access のゲートに依存している場合は、先に別の承認ルールを選択してください。設定されたオリジンが有効な保護の範囲外にある場合、メンテナンスは停止します。
 
-## Cloudflare footprint
+## Cloudflare のフットプリント {#cloudflare-footprint}
 
-New platform resources use deterministic `void-<installation-name>-<role>` names where Cloudflare allows them, such as `void-team-api`. Choose an unused installation name in the account; Void stops on an unowned name conflict instead of replacing that resource. Existing installations keep their recorded names, including older names with suffixes.
+新しいプラットフォームのリソースには、Cloudflare が許容する範囲で、`void-team-api` のような、決定的な `void-<installation-name>-<role>` 形式の名前が使われます。アカウント内で未使用のインストール名を選んでください。所有していない名前と競合した場合、Void はそのリソースを置き換えずに停止します。既存のインストールは、サフィックス付きの古い名前も含め、記録された名前を維持します。
 
-| Resource                                  |                                 Count | Purpose                                                                                       |
-| ----------------------------------------- | ------------------------------------: | --------------------------------------------------------------------------------------------- |
-| Workers                                   | 5, plus one per app using workers.dev | API/control plane, proxy, tail ingestion, dispatch, email gateway, and test-origin forwarders |
-| KV namespaces                             |                                     3 | Routing, ISR cache, and static asset storage                                                  |
-| R2 buckets                                |                                     1 | Static and deployment assets                                                                  |
-| Queues                                    |                                     3 | Usage events, cron firing, and deployments                                                    |
-| Workers for Platforms dispatch namespaces |                                     1 | User application Workers                                                                      |
-| Hyperdrive configurations                 |                                     1 | External platform PostgreSQL                                                                  |
-| AI Gateways                               |                                     1 | Installation-isolated AI routing and metering                                                 |
-| Proxied wildcard DNS records              |                                0 or 1 | Created only when an application domain is configured                                         |
-| Zones                                     |                                0 or 1 | Created only when the requested application zone is absent                                    |
+| リソース                                  |                                         数 | 用途                                                                                                            |
+| ----------------------------------------- | -----------------------------------------: | --------------------------------------------------------------------------------------------------------------- |
+| Workers                                   | 5、および workers.dev を使うアプリごとに 1 | API / コントロールプレーン、プロキシ、tail の取り込み、ディスパッチ、メールゲートウェイ、テストオリジンへの転送 |
+| KV namespaces                             |                                          3 | ルーティング、ISR キャッシュ、静的アセットのストレージ                                                          |
+| R2 buckets                                |                                          1 | 静的アセットとデプロイのアセット                                                                                |
+| Queues                                    |                                          3 | 使用量イベント、cron の起動、デプロイ                                                                           |
+| Workers for Platforms dispatch namespaces |                                          1 | ユーザーアプリケーションの Worker                                                                               |
+| Hyperdrive configurations                 |                                          1 | 外部のプラットフォーム用 PostgreSQL                                                                             |
+| AI Gateways                               |                                          1 | インストールごとに分離された AI のルーティングと計測                                                            |
+| プロキシ経由のワイルドカード DNS レコード |                                 0 または 1 | アプリケーションドメインが設定されている場合にのみ作成                                                          |
+| Zones                                     |                                 0 または 1 | 要求されたアプリケーションゾーンが存在しない場合にのみ作成                                                      |
 
-The API Worker uses four Durable Object classes for usage, cron scheduling, error monitoring, and concurrency. Worker bindings create the request and log datasets in Analytics Engine, which must be [enabled for the account](/guide/platform/installation/prerequisites#if-cloudflare-rejects-analytics-engine). The core installation doesn't create Container applications, a GitHub App, a dashboard Worker, or build Workers.
+API Worker は、使用量、cron のスケジューリング、エラー監視、同時実行制御のために、4 つの Durable Object クラスを使用します。Worker のバインディングは、Analytics Engine にリクエストおよびログのデータセットを作成します。Analytics Engine は[アカウントで有効化](/ja/guide/platform/installation/prerequisites#if-cloudflare-rejects-analytics-engine)されている必要があります。コアのインストールでは、Container アプリケーション、GitHub App、ダッシュボード用 Worker、ビルド用 Worker は作成されません。

@@ -1,10 +1,10 @@
-# Environment variables
+# 環境変数 {#environment-variables}
 
-Declare your environment variables in `env.ts`, then read them through `env` from `void/env`. Use `.env` for local values and `void secret put` for production server values.
+環境変数は `env.ts` で宣言し、`void/env` の `env` を通じて読み取ります。ローカルの値には `.env` を、本番のサーバー値には `void secret put` を使用します。
 
-## Define the schema
+## スキーマを定義する {#define-the-schema}
 
-Create `env.ts` at the project root:
+プロジェクトルートに `env.ts` を作成します。
 
 ```ts
 import { defineEnv, number, string, url } from 'void/env';
@@ -17,7 +17,7 @@ export default defineEnv({
 });
 ```
 
-Import the typed `env` object in your app:
+アプリ内で型付きの `env` オブジェクトをインポートします。
 
 ```ts
 import { env } from 'void/env';
@@ -25,13 +25,13 @@ import { env } from 'void/env';
 const databaseUrl = env.DATABASE_URL;
 ```
 
-The built-in helpers are `string()`, `number()`, `boolean()`, `url()`, `email()`, `oneOf([...])`, and `json<T>()`. They support `.optional()` and `.default(value)`. Any [Standard Schema](https://standardschema.dev/) validator can also be used directly.
+組み込みのヘルパーは `string()`、`number()`、`boolean()`、`url()`、`email()`、`oneOf([...])`、`json<T>()` です。いずれも `.optional()` と `.default(value)` をサポートします。[Standard Schema](https://standardschema.dev/) 対応のバリデーターも直接使用できます。
 
-Defaults are source-code constants. They are appropriate for non-sensitive fallback behavior; do not put credentials in a default.
+デフォルト値はソースコード内の定数です。機密性のないフォールバック動作には適していますが、認証情報をデフォルト値に含めないでください。
 
-## Local development
+## ローカル開発 {#local-development}
 
-Put local values in a single root `.env` file:
+ローカルの値はルートの `.env` ファイル 1 つにまとめます。
 
 ```ini
 DATABASE_URL=postgres://localhost/my-app
@@ -39,48 +39,48 @@ STRIPE_KEY=sk_test_example
 VITE_API_ORIGIN=http://localhost:5173
 ```
 
-An unquoted value ends at `#`, which starts a comment. Quote a value that contains `#`, such as `DATABASE_URL="postgres://user:p#ss@localhost/my-app"`.
+引用符なしの値は、コメントの開始を表す `#` で終わります。`DATABASE_URL="postgres://user:p#ss@localhost/my-app"` のように、`#` を含む値は引用符で囲んでください。
 
-Keep `.env` out of Git. Other dotenv files, including `.env.local`, `.env.production`, `.env.example`, and Wrangler’s `.dev.vars*`, are not supported.
+`.env` は Git の管理対象から外してください。`.env.local`、`.env.production`、`.env.example`、Wrangler の `.dev.vars*` を含む他の dotenv ファイルはサポートされていません。
 
-Names starting with `__VOID_` are reserved for Void. Void stops with an error if `.env` or `env.ts` defines one.
+`__VOID_` で始まる名前は Void 用に予約されています。`.env` または `env.ts` がそのような名前を定義すると、Void はエラーで停止します。
 
-Run the local check at any time:
+ローカルのチェックはいつでも実行できます。
 
 ```sh
 void env check
 ```
 
-Local database, migration, auth, and dev-server tooling all read the same `.env` file. Shell values override it.
+ローカルのデータベース、マイグレーション、認証、開発サーバーのツールはすべて同じ `.env` ファイルを読み込みます。シェルの値が優先されます。
 
-## Production server values
+## 本番のサーバー値 {#production-server-values}
 
-Every schema key that is not client-prefixed is a server value. Set it remotely:
+クライアント用プレフィックスが付いていないスキーマのキーはすべてサーバー値です。リモートに設定します。
 
 ```sh
 void secret put DATABASE_URL
 void secret put STRIPE_KEY
 ```
 
-For bulk upload, prepare a dotenv-formatted file containing only production server values:
+一括アップロードするには、本番のサーバー値のみを含む dotenv 形式のファイルを用意します。
 
 ```sh
 void secret sync production-secrets.txt
 ```
 
-Secret commands validate values against `env.ts` before upload. Production values are encrypted and validated again at Worker startup.
+シークレットコマンドは、アップロード前に値を `env.ts` に照らして検証します。本番の値は暗号化され、Worker の起動時に再度検証されます。
 
-Client-prefixed keys are rejected by secret commands. Keep local development credentials and `VITE_*` values out of the production secrets file.
+クライアント用プレフィックスが付いたキーは、シークレットコマンドで拒否されます。ローカル開発用の認証情報と `VITE_*` の値は、本番のシークレットファイルに含めないでください。
 
-`void deploy` requires every required server key to exist remotely. It never uploads `.env` values.
+`void deploy` は、必須のサーバーキーがすべてリモートに存在することを要求します。`.env` の値がアップロードされることはありません。
 
-The same secret commands work for direct Cloudflare deployments. Schema-declared server values must be Worker secrets, not plaintext `vars`.
+同じシークレットコマンドは、Cloudflare への直接デプロイでも使用できます。スキーマで宣言されたサーバー値は、平文の `vars` ではなく Worker のシークレットにする必要があります。
 
-## Client values
+## クライアント値 {#client-values}
 
-Keys beginning with `VITE_` are client values, even if your framework customizes Vite's `envPrefix`.
+フレームワークが Vite の `envPrefix` をカスタマイズしている場合でも、`VITE_` で始まるキーはクライアント値です。
 
-Client values are embedded in browser JavaScript and are never secrets. Supply them through the build shell or use a schema default:
+クライアント値はブラウザの JavaScript に埋め込まれるため、シークレットにはなりません。ビルド時のシェルから渡すか、スキーマのデフォルト値を使用してください。
 
 ```sh
 VITE_API_ORIGIN=https://api.example.com void deploy
@@ -92,20 +92,20 @@ export default defineEnv({
 });
 ```
 
-Builds ignore client values from `.env`; this prevents a developer's local value from silently becoming production configuration.
+ビルドでは `.env` のクライアント値は無視されます。これにより、開発者のローカルの値が知らないうちに本番の設定になることを防ぎます。
 
-Server rendering uses the same public build values as the browser.
+サーバーレンダリングでは、ブラウザと同じ公開ビルド値が使用されます。
 
-## Validation and redaction
+## 検証とマスキング {#validation-and-redaction}
 
 ```sh
-void env check           # validate .env + shell for local development
-void env check --remote  # validate build-time client values and remote server names
-void env types           # regenerate .void/env.d.ts
+void env check           # ローカル開発用に .env とシェルを検証
+void env check --remote  # ビルド時のクライアント値とリモートのサーバー名を検証
+void env types           # .void/env.d.ts を再生成
 ```
 
-Invalid-value diagnostics redact the supplied value by default. Set `VOID_ENV_UNMASK=1` only for deliberate local debugging; Void prints a notice when redaction is disabled.
+不正な値の診断では、指定された値はデフォルトでマスクされます。`VOID_ENV_UNMASK=1` は、意図的なローカルデバッグの場合にのみ設定してください。マスキングが無効な場合、Void は通知を表示します。
 
-## Imports inside `env.ts`
+## `env.ts` 内のインポート {#imports-inside-env-ts}
 
-Use relative imports or package names inside `env.ts`. TypeScript path aliases and imports that need Vite transforms are not supported.
+`env.ts` 内では、相対インポートまたはパッケージ名を使用してください。TypeScript のパスエイリアスや、Vite の変換を必要とするインポートはサポートされていません。

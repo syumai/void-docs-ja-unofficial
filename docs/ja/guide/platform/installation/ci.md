@@ -2,42 +2,42 @@
 outline: deep
 ---
 
-# Install from CI
+# CI からインストールする {#install-from-ci}
 
-For your first installation, follow the [interactive setup](/guide/platform/installation/setup). Use this page when automating a configured installation.
+初回のインストールでは、[対話式セットアップ](/ja/guide/platform/installation/setup)に従ってください。このページは、設定済みのインストールを自動化する場合に使用します。
 
-::: details Non-interactive inputs
+::: details 非対話式の入力
 
-Inject the following values from protected CI secrets. Do not commit them in a workflow or a plaintext secrets file.
+次の値は、保護された CI シークレットから注入してください。ワークフローやプレーンテキストのシークレットファイルにコミットしないでください。
 
-| Environment variable                         | Value from the interactive setup                                                            |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`                       | Management API token                                                                        |
-| `VOID_PLATFORM_RUNTIME_CLOUDFLARE_API_TOKEN` | Runtime API token                                                                           |
-| `VOID_PLATFORM_DATABASE_URL`                 | Dedicated PostgreSQL URL                                                                    |
-| `VOID_PLATFORM_HYPERDRIVE_ID`                | Existing externally managed Hyperdrive ID, when applicable                                  |
-| `VOID_PLATFORM_HYPERDRIVE_ORIGIN_HOST`       | Origin host of that Hyperdrive; set with its ID and user                                    |
-| `VOID_PLATFORM_HYPERDRIVE_ORIGIN_USER`       | Runtime database user of that Hyperdrive; set with its ID and host                          |
-| `VOID_PLATFORM_R2_ACCESS_KEY_ID`             | R2 Access Key ID                                                                            |
-| `VOID_PLATFORM_R2_SECRET_ACCESS_KEY`         | R2 Secret Access Key                                                                        |
-| `VOID_PLATFORM_JWT_SECRET`                   | Original JWT signing secret                                                                 |
-| `VOID_PLATFORM_EMAIL_SIGNING_SECRET`         | Dedicated email signing secret when email is enabled                                        |
-| `VOID_PLATFORM_PROJECT_SECRET_KEY`           | Original base64-encoded project-encryption key                                              |
-| `VOID_PLATFORM_RECOVERY_KEY`                 | Base64-encoded 32-byte key for local encrypted recovery state when no keychain is available |
-| `VOID_EMAIL_SENDER_DOMAIN`                   | Optional shared mail domain; requires `VOID_EMAIL_SHARED_ZONE_ID`                           |
-| `VOID_EMAIL_SHARED_ZONE_ID`                  | Cloudflare zone ID for that mail domain; requires `VOID_EMAIL_SENDER_DOMAIN`                |
+| 環境変数                                     | 対話式セットアップでの値                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`                       | 管理用 API トークン                                                                                  |
+| `VOID_PLATFORM_RUNTIME_CLOUDFLARE_API_TOKEN` | ランタイム用 API トークン                                                                            |
+| `VOID_PLATFORM_DATABASE_URL`                 | 専用の PostgreSQL URL                                                                                |
+| `VOID_PLATFORM_HYPERDRIVE_ID`                | 外部で管理されている既存の Hyperdrive ID(該当する場合)                                               |
+| `VOID_PLATFORM_HYPERDRIVE_ORIGIN_HOST`       | その Hyperdrive のオリジンホスト。ID およびユーザーと併せて設定します                                |
+| `VOID_PLATFORM_HYPERDRIVE_ORIGIN_USER`       | その Hyperdrive のランタイム用データベースユーザー。ID およびホストと併せて設定します                |
+| `VOID_PLATFORM_R2_ACCESS_KEY_ID`             | R2 アクセスキー ID                                                                                   |
+| `VOID_PLATFORM_R2_SECRET_ACCESS_KEY`         | R2 シークレットアクセスキー                                                                          |
+| `VOID_PLATFORM_JWT_SECRET`                   | 元の JWT 署名シークレット                                                                            |
+| `VOID_PLATFORM_EMAIL_SIGNING_SECRET`         | メールを有効にする場合の、専用のメール署名シークレット                                               |
+| `VOID_PLATFORM_PROJECT_SECRET_KEY`           | 元の Base64 エンコードされたプロジェクト暗号化キー                                                   |
+| `VOID_PLATFORM_RECOVERY_KEY`                 | キーチェーンが使えない場合に、ローカルの暗号化された復旧状態に使う Base64 エンコードの 32 バイトキー |
+| `VOID_EMAIL_SENDER_DOMAIN`                   | 任意の共有メールドメイン。`VOID_EMAIL_SHARED_ZONE_ID` が必要です                                     |
+| `VOID_EMAIL_SHARED_ZONE_ID`                  | そのメールドメインの Cloudflare ゾーン ID。`VOID_EMAIL_SENDER_DOMAIN` が必要です                     |
 
-For the default GitHub-only login, also set `VOID_PLATFORM_GITHUB_CLIENT_ID`,
-`VOID_PLATFORM_GITHUB_CLIENT_SECRET`, and `VOID_PLATFORM_ADMIN_GITHUB_LOGIN`.
-For Google, OIDC, or Access login, pass `--auth-config <path>` using the
-[configuration format](/guide/platform/installation/setup#choose-login-methods).
-Inject each `clientSecretEnv` named in that file from your CI secret manager.
-Automatic Access protection may also need `VOID_PLATFORM_ACCESS_SETUP_TOKEN`
-with the [setup permissions](/guide/platform/installation/setup#cloudflare-access).
+デフォルトの GitHub のみのログインでは、`VOID_PLATFORM_GITHUB_CLIENT_ID`、
+`VOID_PLATFORM_GITHUB_CLIENT_SECRET`、`VOID_PLATFORM_ADMIN_GITHUB_LOGIN` も設定してください。
+Google、OIDC、Access によるログインでは、[設定フォーマット](/ja/guide/platform/installation/setup#choose-login-methods)に従って
+`--auth-config <path>` を指定します。
+そのファイルで指定した各 `clientSecretEnv` は、CI のシークレットマネージャーから注入してください。
+Access 保護を自動で行う場合は、[セットアップに必要な権限](/ja/guide/platform/installation/setup#cloudflare-access)を持つ
+`VOID_PLATFORM_ACCESS_SETUP_TOKEN` も必要になることがあります。
 
-Use that installation's saved signing and encryption keys on every resume or repair that needs them. After a keyring rotation, use the [complete keyring recovery inputs](/guide/platform/installation/maintenance#manage-an-installation-from-another-machine). The database claim and tables remain after uninstall; use a fresh database for a different installation.
+再開や修復でそれらが必要になるたびに、そのインストールで保存された署名キーと暗号化キーを使用してください。キーリングをローテーションした後は、[キーリング復旧に必要な入力一式](/ja/guide/platform/installation/maintenance#manage-an-installation-from-another-machine)を使用します。アンインストール後もデータベースのクレームとテーブルは残ります。別のインストールには新しいデータベースを使用してください。
 
-Set both email values to enable email during install or upgrade. Later upgrades reuse the recorded values. If an email-enabled installation has no recorded values, supply both before upgrading.
+インストールまたはアップグレード時にメールを有効にするには、2 つのメール関連の値を両方設定します。以降のアップグレードでは、記録済みの値が再利用されます。メールが有効なインストールに記録済みの値がない場合は、アップグレード前に両方を指定してください。
 
 ```sh
 void platform install \
@@ -49,10 +49,10 @@ void platform install \
   --yes
 ```
 
-Mutations require `--yes` in CI; a read-only `--plan` does not. Custom runtimes also require `--runtime <directory>`. For a new installation, run `--plan` with the same account, name, and domain options as the unattended install. If you use `--auth-config`, pass the same file to both commands. Register `<platform-api-url>/auth/callback` when creating a login provider's OAuth or OIDC client manually; automatic Access setup manages its own application. A custom API hostname is optional.
+CI では、変更を伴う操作に `--yes` が必要です。読み取り専用の `--plan` には必要ありません。カスタムランタイムでは `--runtime <directory>` も必要です。新規インストールの場合は、無人インストールと同じアカウント、名前、ドメインのオプションを指定して `--plan` を実行してください。`--auth-config` を使う場合は、両方のコマンドに同じファイルを渡します。ログインプロバイダーの OAuth または OIDC クライアントを手動で作成する際は、`<platform-api-url>/auth/callback` を登録してください。Access の自動セットアップでは、アプリケーションが自動で管理されます。カスタムの API ホスト名は任意です。
 
 :::
 
-## Customize the Platform
+## プラットフォームをカスタマイズする {#customize-the-platform}
 
-To change the platform's implementation or deploy your own build, follow [Platform Development](/guide/platform-development). It covers local development, source builds, and CI for a fork.
+プラットフォームの実装を変更したり、独自のビルドをデプロイしたりするには、[プラットフォーム開発](/ja/guide/platform-development)に従ってください。ローカル開発、ソースからのビルド、フォーク向けの CI について説明しています。

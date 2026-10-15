@@ -2,81 +2,81 @@
 outline: deep
 ---
 
-# Static Assets Caching
+# 静的アセットのキャッシュ {#static-assets-caching}
 
-Void caches static assets on Cloudflare's edge network. Hashed build files can be reused across deploys, while other files use cache keys tied to the deployment.
+Void は、静的アセットを Cloudflare のエッジネットワークにキャッシュします。ハッシュ付きのビルドファイルはデプロイをまたいで再利用でき、それ以外のファイルにはデプロイに紐づくキャッシュキーが使われます。
 
-## Hashed assets
+## ハッシュ付きアセット {#hashed-assets}
 
-Files in Vite's `build.assetsDir` (default `assets/`) are produced with content hashes in the filename, such as `assets/app-Ab3xK9.js`. These files are immutable because the filename changes whenever the content changes, so they get aggressive caching:
+Vite の `build.assetsDir`（デフォルトは `assets/`）内のファイルは、`assets/app-Ab3xK9.js` のように、ファイル名にコンテンツハッシュが付いて生成されます。これらのファイルは、内容が変わるたびにファイル名も変わるためイミュータブルであり、積極的にキャッシュされます。
 
 ```
 Cache-Control: public, max-age=31536000, immutable
 ```
 
-Browsers and the edge can cache these files for one year and reuse them across deploys.
+ブラウザとエッジは、これらのファイルを 1 年間キャッシュし、デプロイをまたいで再利用できます。
 
-If your Vite config customizes `build.assetsDir`, Void automatically detects this and applies the immutable optimization to the configured directory:
+Vite の設定で `build.assetsDir` をカスタマイズしている場合、Void はそれを自動的に検出し、設定されたディレクトリにイミュータブルの最適化を適用します。
 
 ```ts
 // vite.config.ts
 export default defineConfig({
   build: {
-    assetsDir: 'static', // hashed assets go to dist/client/static/
+    assetsDir: 'static', // ハッシュ付きアセットは dist/client/static/ に出力されます
   },
 });
 ```
 
-If `build.assetsDir` is set to `""`, meaning hashed files live at the root, the optimization is skipped because there is no directory-based way to distinguish hashed from non-hashed files.
+`build.assetsDir` を `""` に設定した場合、つまりハッシュ付きファイルがルートに置かれる場合は、ディレクトリによってハッシュ付きファイルとそうでないファイルを区別する方法がないため、この最適化は行われません。
 
-Supported meta-frameworks use their own asset directories automatically.
+サポートされているメタフレームワークは、それぞれ独自のアセットディレクトリを自動的に使用します。
 
-### Native Cloudflare deployments
+### Cloudflare へのネイティブデプロイ {#native-cloudflare-deployments}
 
-With `void deploy --platform cloudflare`, generated JavaScript bundles with content fingerprints receive immutable caching. Files copied from `public/` and custom build outputs with stable filenames keep normal revalidation, even when they live in the assets directory. CSS and other assets keep Cloudflare's default or your configured `Cache-Control`.
+`void deploy --platform cloudflare` では、コンテンツのフィンガープリントを持つ生成済みの JavaScript バンドルに、イミュータブルのキャッシュが適用されます。`public/` からコピーされたファイルや、ファイル名が固定されたカスタムのビルド出力は、アセットディレクトリにある場合でも通常の再検証が行われます。CSS やその他のアセットには、Cloudflare のデフォルト、または設定した `Cache-Control` が使われます。
 
-Use [Custom Headers](./headers) to choose a cache policy for other files. Apply immutable caching only to URLs that change whenever their content changes.
+その他のファイルのキャッシュポリシーを選ぶには、[カスタムヘッダー](./headers)を使います。イミュータブルのキャッシュは、内容が変わるたびに変わる URL にのみ適用してください。
 
-## Non-hashed assets
+## ハッシュなしのアセット {#non-hashed-assets}
 
-Other static files, such as `index.html` and `favicon.ico`, are cached until the next deploy. You do not need to purge them manually.
+`index.html` や `favicon.ico` などのその他の静的ファイルは、次のデプロイまでキャッシュされます。手動でパージする必要はありません。
 
 ```
 Cache-Control: public, s-maxage=31536000, max-age=0, must-revalidate
 ```
 
-Browsers revalidate these files on each request.
+ブラウザは、これらのファイルをリクエストのたびに再検証します。
 
-**What gets cached:**
+**キャッシュされるもの:**
 
-- All `GET` requests for non-SSR projects such as SPAs and static sites
-- GET requests with file extensions (`.ico`, `.png`, `.css`, etc.) in SSR projects
+- SPA や静的サイトなど、非 SSR プロジェクトのすべての `GET` リクエスト
+- SSR プロジェクトでの、ファイル拡張子（`.ico`、`.png`、`.css` など）を持つ GET リクエスト
 
-**What does NOT get cached:**
+**キャッシュされないもの:**
 
-- `/api/*` routes, which always hit the worker
-- SSR-rendered pages (paths without file extensions in SSR projects)
-- Non-GET requests
-- Requests carrying `Cookie`, `Authorization`, or `Cf-Access-Jwt-Assertion` credentials
-- Responses other than a complete `200`
+- `/api/*` ルート（常に Worker に到達します）
+- SSR でレンダリングされるページ（SSR プロジェクトでの、ファイル拡張子のないパス）
+- GET 以外のリクエスト
+- `Cookie`、`Authorization`、または `Cf-Access-Jwt-Assertion` の認証情報を含むリクエスト
+- 完全な `200` 以外のレスポンス
 
-### Opting out
+### キャッシュを無効にする {#opting-out}
 
-If your worker serves dynamic content at a URL that looks static (e.g., a dynamically generated image at `/avatar.jpg`), you can prevent caching by setting `Cache-Control: private` or `Cache-Control: no-store` in your response headers. Any response with `Cache-Control` containing `private`, `no-store`, or `no-cache`, or with a `Set-Cookie` header, bypasses the edge cache.
+Worker が、静的に見える URL（たとえば `/avatar.jpg` で動的に生成される画像）で動的なコンテンツを配信する場合は、レスポンスヘッダーに `Cache-Control: private` または `Cache-Control: no-store` を設定することで、キャッシュを防げます。`Cache-Control` に `private`、`no-store`、`no-cache` のいずれかが含まれているレスポンス、または `Set-Cookie` ヘッダーを持つレスポンスは、エッジキャッシュをバイパスします。
 
-## ETags and 304 Not Modified
+## ETag と 304 Not Modified {#etags-and-304-not-modified}
 
-Static assets include an `ETag` header. When a browser revalidates an unchanged file, Void returns `304 Not Modified` without downloading it again. No configuration is needed.
+静的アセットには `ETag` ヘッダーが含まれます。ブラウザが変更のないファイルを再検証すると、Void はファイルを再ダウンロードさせずに `304 Not Modified` を返します。設定は不要です。
 
-## Custom headers
+## カスタムヘッダー {#custom-headers}
 
-You can override caching headers or add your own for any static asset path using [Custom Headers](./headers).
+[カスタムヘッダー](./headers)を使って、任意の静的アセットのパスに対して、キャッシュヘッダーを上書きしたり、独自のヘッダーを追加したりできます。
 
-## Navigation and middleware
+## ナビゲーションとミドルウェア {#navigation-and-middleware}
 
-Void serves static files directly unless application code needs to handle the request first. API requests reach your Worker. Apps with middleware, routes outside `/api`, Pages, or SSR run application code before serving fallback HTML.
+Void は、アプリケーションコードが先にリクエストを処理する必要がない限り、静的ファイルを直接配信します。API リクエストは Worker に到達します。ミドルウェア、`/api` 以外のルート、Pages、または SSR を持つアプリは、フォールバックの HTML を配信する前にアプリケーションコードを実行します。
 
-SPAs serve `index.html` for unmatched HTML navigation so client-side routing works. For a static site with a `404.html` page, set [`routing.notFound`](../../reference/config.md#routing-notfound):
+SPA では、一致しない HTML ナビゲーションに `index.html` を配信するため、クライアントサイドルーティングが機能します。`404.html` ページを持つ静的サイトでは、[`routing.notFound`](../../reference/config.md#routing-notfound) を設定します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -86,10 +86,10 @@ export default defineConfig({
 });
 ```
 
-Choose `single-page-application`, `404-page`, or `none`. These settings preserve which requests reach middleware and API handlers. Intentional API `404` responses keep their status and body.
+`single-page-application`、`404-page`、`none` のいずれかを選択します。これらの設定は、どのリクエストがミドルウェアや API ハンドラーに到達するかを保持します。意図的な API の `404` レスポンスは、ステータスとボディがそのまま維持されます。
 
-SvelteKit, Nuxt, Analog, and Astro handle their own error pages and ignore `routing.notFound`. For direct Cloudflare deployment with TanStack Start, React Router, or vinext, configure the asset binding, directory, and routing policy through the framework's Cloudflare config.
+SvelteKit、Nuxt、Analog、Astro は独自のエラーページを処理し、`routing.notFound` を無視します。TanStack Start、React Router、vinext を Cloudflare に直接デプロイする場合は、フレームワークの Cloudflare 設定を通じて、アセットバインディング、ディレクトリ、ルーティングポリシーを設定してください。
 
-## API routes and SSR pages
+## API ルートと SSR ページ {#api-routes-and-ssr-pages}
 
-API responses and SSR pages are not cached as static assets. Use [Revalidation](./revalidation) to cache public rendered pages.
+API レスポンスと SSR ページは、静的アセットとしてはキャッシュされません。公開されたレンダリング済みのページをキャッシュするには、[再検証](./revalidation)を使います。

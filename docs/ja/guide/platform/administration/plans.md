@@ -2,48 +2,48 @@
 outline: deep
 ---
 
-# Plans and Limits
+# プランと制限 {#plans-and-limits}
 
-Plans define the resource limits you assign to accounts on your platform. They do not bill users or purchase Cloudflare services. Sign in with an administrator account and open **Plans** in the administration dashboard, or use the CLI:
+プランは、プラットフォーム上のアカウントに割り当てるリソース制限を定義します。ユーザーへの課金や Cloudflare サービスの購入は行いません。管理者アカウントでサインインして管理ダッシュボードの **Plans** を開くか、CLI を使用します。
 
 ```sh
 void platform auth login
 void platform config plans
 ```
 
-Choose a plan to inspect or edit it, copy one into a new plan, or choose the default for new accounts. Changes require no app or platform redeploy.
+プランを選択して内容の確認や編集を行ったり、既存のプランを新しいプランにコピーしたり、新規アカウントのデフォルトを選択したりできます。変更にあたって、アプリやプラットフォームの再デプロイは不要です。
 
-## Use the Dashboard
+## ダッシュボードを使用する {#use-the-dashboard}
 
-Open **Plans** to see each plan's stable ID, account count, and signup default. Choose **Add plan** to copy an existing plan, or **Edit** to change its display name, limits, build size, and permission to use short project slugs.
+**Plans** を開くと、各プランの固定 ID、アカウント数、サインアップ時のデフォルトを確認できます。**Add plan** を選択すると既存のプランをコピーできます。**Edit** を選択すると、表示名、制限、ビルドサイズ、短いプロジェクトスラッグの使用許可を変更できます。
 
-Choose **Review changes** to compare the current and proposed settings and see how many accounts are affected. Review any quota warnings, then choose **Apply changes**. If someone changed the catalog while you were reviewing, open the plan again and create a fresh review.
+**Review changes** を選択すると、現在の設定と変更後の設定を比較し、影響を受けるアカウント数を確認できます。クォータに関する警告を確認してから、**Apply changes** を選択します。確認している間に他の誰かがカタログを変更した場合は、プランをもう一度開いて、新しい確認を作成してください。
 
-The edit page also lets you choose the signup default, archive or restore assignments, reset a built-in plan, or remove a plan with an active replacement. Every action has a review step.
+編集ページでは、サインアップ時のデフォルトの選択、割り当てのアーカイブや復元、組み込みプランのリセット、有効な代替プランを指定したプランの削除も行えます。どの操作にも確認のステップがあります。
 
-Account updates continue automatically on the result page. If you leave the page or an update pauses, open **Plans** and choose **Continue account updates**. Finish pending account updates before changing plans again. Recorded usage and billing periods are preserved.
+アカウントの更新は、結果ページで自動的に続行されます。ページを離れた場合や更新が一時停止した場合は、**Plans** を開いて **Continue account updates** を選択してください。再びプランを変更する前に、保留中のアカウント更新を完了させてください。記録された使用量と課金期間は保持されます。
 
-## Add a Plan
+## プランを追加する {#add-a-plan}
 
-Each plan has a stable ID and an editable display name. Copying a plan copies its limits, build instance size, and permission to use short project slugs:
+各プランには、固定 ID と編集可能な表示名があります。プランをコピーすると、制限、ビルドインスタンスのサイズ、短いプロジェクトスラッグの使用許可がコピーされます。
 
 ```sh
 void platform config plans add team --copy pro --name "Team" --plan
 void platform config plans add team --copy pro --name "Team" --yes
 ```
 
-Assign it to an existing account or make it the default for new accounts:
+既存のアカウントに割り当てるか、新規アカウントのデフォルトにします。
 
 ```sh
 void platform user plan <user-id> team --yes
 void platform config plans default team --yes
 ```
 
-Changing the default does not move existing accounts. Renaming a plan does not change its ID or assignments.
+デフォルトを変更しても、既存のアカウントは移動しません。プランの名前を変更しても、その ID や割り当ては変わりません。
 
-## Edit Limits
+## 制限を編集する {#edit-limits}
 
-The interactive menu lets you change one limit at a time. For scripts or several changes, create a JSON file:
+インタラクティブメニューでは、一度に 1 つの制限を変更できます。スクリプトや複数の変更を行う場合は、JSON ファイルを作成します。
 
 ```json
 {
@@ -57,66 +57,66 @@ The interactive menu lets you change one limit at a time. For scripts or several
 }
 ```
 
-Omitted settings keep their current values. Preview, then apply:
+省略した設定は現在の値が維持されます。プレビューしてから適用します。
 
 ```sh
 void platform config plans set team --file team-plan.json --plan
 void platform config plans set team --file team-plan.json --yes
 ```
 
-Limits are nonnegative whole numbers; `0` means unlimited by the plan. Build timeouts always have a platform maximum of 60 minutes; `0` uses that maximum. You can configure:
+制限は 0 以上の整数で、`0` はプランによる制限なし（無制限）を意味します。ビルドタイムアウトにはプラットフォームの上限として常に 60 分があり、`0` はその上限を使用します。次の項目を設定できます。
 
-| Setting                         | Limit                                             |
-| ------------------------------- | ------------------------------------------------- |
-| `requestsPerMonth`              | Application requests per account billing month    |
-| `cpuMsPerRequest`               | Default CPU milliseconds per application request  |
-| `maxCpuMsPerRequest`            | Highest CPU limit an application can request      |
-| `subRequestsPerInvocation`      | Subrequests per invocation                        |
-| `deploysPerDay`                 | Deployments per day                               |
-| `aiNeuronsPerMonth`             | AI neurons per account billing month              |
-| `retainedDeployments`           | Retained Worker deployments                       |
-| `sandboxRuntimeSecondsPerMonth` | Sandbox runtime seconds per account billing month |
-| `sandboxMaxConcurrentInstances` | Simultaneous Sandbox instances                    |
-| `concurrentBuilds`              | Simultaneous builds                               |
-| `buildTimeoutMinutes`           | Build timeout in minutes                          |
+| 設定                            | 制限                                                      |
+| ------------------------------- | --------------------------------------------------------- |
+| `requestsPerMonth`              | アカウントの課金月あたりのアプリケーションリクエスト数    |
+| `cpuMsPerRequest`               | アプリケーションリクエストあたりのデフォルトの CPU ミリ秒 |
+| `maxCpuMsPerRequest`            | アプリケーションが要求できる CPU 制限の最大値             |
+| `subRequestsPerInvocation`      | 1 回の呼び出しあたりのサブリクエスト数                    |
+| `deploysPerDay`                 | 1 日あたりのデプロイ数                                    |
+| `aiNeuronsPerMonth`             | アカウントの課金月あたりの AI ニューロン数                |
+| `retainedDeployments`           | 保持される Worker デプロイ数                              |
+| `sandboxRuntimeSecondsPerMonth` | アカウントの課金月あたりの Sandbox ランタイム秒数         |
+| `sandboxMaxConcurrentInstances` | 同時に実行できる Sandbox インスタンス数                   |
+| `concurrentBuilds`              | 同時に実行できるビルド数                                  |
+| `buildTimeoutMinutes`           | ビルドタイムアウト（分）                                  |
 
-`cpuMsPerRequest` cannot exceed `maxCpuMsPerRequest`. An unlimited default CPU limit requires an unlimited ceiling. Build instance sizes are `standard-3` (2 vCPU, 8 GiB) and `standard-4` (4 vCPU, 12 GiB). New builds use the new size and timeout; running builds keep their recorded settings.
+`cpuMsPerRequest` は `maxCpuMsPerRequest` を超えることはできません。デフォルトの CPU 制限を無制限にするには、上限も無制限にする必要があります。ビルドインスタンスのサイズは `standard-3`（2 vCPU、8 GiB）と `standard-4`（4 vCPU、12 GiB）です。新しいビルドには新しいサイズとタイムアウトが使用され、実行中のビルドは記録された設定を維持します。
 
-Advanced files can also set `"allowShortSlugs": true` to permit project slugs of five characters or fewer, or `false` to require longer slugs for future changes. Existing project URLs are preserved. Copying a plan inherits this setting; the built-in `free` plan disables it and the other built-in plans enable it.
+高度な設定ファイルでは、`"allowShortSlugs": true` を指定して 5 文字以下のプロジェクトスラッグを許可したり、`false` を指定して今後の変更でより長いスラッグを必須にしたりすることもできます。既存のプロジェクト URL は保持されます。プランをコピーすると、この設定が引き継がれます。組み込みの `free` プランでは無効、それ以外の組み込みプランでは有効です。
 
-Storage figures shown for D1, R2, and KV are informational and cannot be edited as enforced quotas. Static deployments keep their existing retention policy.
+D1、R2、KV について表示されるストレージの数値は参考情報であり、強制されるクォータとして編集することはできません。静的デプロイは、既存の保持ポリシーを維持します。
 
-The preview shows the affected account count and checks a sample for accounts already above a proposed quota. Lowering a quota can restrict existing apps, including accounts outside that sample. Usage history and billing periods are preserved, so a plan change does not reset usage. Manual administrator suspensions remain in effect.
+プレビューでは、影響を受けるアカウント数が表示され、変更後のクォータをすでに超えているアカウントがないかをサンプルで確認します。クォータを下げると、サンプル外のアカウントを含め、既存のアプリが制限される場合があります。使用量の履歴と課金期間は保持されるため、プランを変更しても使用量はリセットされません。管理者による手動の停止はそのまま維持されます。
 
-## Archive or Remove a Plan
+## プランをアーカイブまたは削除する {#archive-or-remove-a-plan}
 
-Archive a plan to stop assigning it to new accounts while preserving its current accounts:
+プランをアーカイブすると、現在のアカウントを維持したまま、新しいアカウントへの割り当てを停止できます。
 
 ```sh
 void platform config plans archive team --yes
 void platform config plans restore team --yes
 ```
 
-Choose another default before archiving the current default. To remove a plan with accounts, choose a replacement and review the changes first:
+現在のデフォルトをアーカイブする前に、別のデフォルトを選択してください。アカウントがあるプランを削除するには、代替プランを選択し、先に変更内容を確認します。
 
 ```sh
 void platform config plans remove team --replacement pro --plan
 void platform config plans remove team --replacement pro --yes
 ```
 
-Removing the default also requires a replacement. An unused plan that is not the default can be removed without one. Accounts keep their usage when moved to a replacement plan. Restore the original limits and build size of a built-in plan with `void platform config plans reset <plan-id>`; custom plans have no built-in reset values.
+デフォルトのプランを削除する場合も、代替プランが必要です。使用されておらずデフォルトでもないプランは、代替プランなしで削除できます。アカウントを代替プランに移動しても、使用量は保持されます。組み込みプランの元の制限とビルドサイズに戻すには、`void platform config plans reset <plan-id>` を使用します。カスタムプランには、組み込みのリセット値はありません。
 
-The removal review shows the replacement plan and any changes to its limits, build size, and short-slug permission before you confirm.
+削除の確認画面には、代替プランと、その制限、ビルドサイズ、短いスラッグの使用許可に対する変更が、確定前に表示されます。
 
-## Complete Pending Updates
+## 保留中の更新を完了する {#complete-pending-updates}
 
-After applying a change, the CLI continues account updates until complete. If an update fails or stops making progress, the configuration remains saved, the result reports pending work, and the command exits with a nonzero status. Inspect the catalog, then continue:
+変更を適用した後、CLI はアカウントの更新が完了するまで続行します。更新が失敗した場合や進行しなくなった場合でも、設定は保存されたままです。結果には保留中の作業が報告され、コマンドは 0 以外のステータスで終了します。カタログを確認してから、続行します。
 
 ```sh
 void platform config plans show
 void platform config plans sync --yes
 ```
 
-`sync` continues the saved policy's account updates until completion. Finish pending updates before editing the catalog again. If a request loses its connection, inspect the catalog and [operator events](/guide/platform/administration/operations) before retrying it.
+`sync` は、保存されたポリシーのアカウント更新を完了するまで続行します。再びカタログを編集する前に、保留中の更新を完了させてください。リクエストの接続が切れた場合は、再試行する前にカタログと[オペレーターイベント](/ja/guide/platform/administration/operations)を確認してください。
 
-All commands accept `--connection <registered-id-or-url>` and `--json`. Scripted changes require `--yes`; use `--plan` for a read-only preview.
+すべてのコマンドは `--connection <registered-id-or-url>` と `--json` を受け付けます。スクリプトによる変更には `--yes` が必要です。読み取り専用のプレビューには `--plan` を使用します。

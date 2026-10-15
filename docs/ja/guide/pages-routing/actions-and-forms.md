@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Actions & Forms
+# アクションとフォーム {#actions-forms}
 
-Use an action to change server data from a form or button. Define it in the page's `.server.ts` file with `defineHandler`, just like a [loader](./loaders) or [server route](../server-routing.md). Actions handle `POST`, `PUT`, `PATCH`, and `DELETE` requests.
+フォームやボタンからサーバーのデータを変更するには、アクションを使用します。[ローダー](./loaders)や[サーバールート](../server-routing.md)と同じように、ページの `.server.ts` ファイルで `defineHandler` を使って定義します。アクションは `POST`、`PUT`、`PATCH`、`DELETE` リクエストを処理します。
 
-## Defining an Action
+## アクションを定義する {#defining-an-action}
 
-Export `action` from a `.server.ts` file. Use `withValidator()` with a [schema-derived validator](../database.md#schema-derived-validators) to validate the request body:
+`.server.ts` ファイルから `action` をエクスポートします。リクエストボディを検証するには、[スキーマから導出したバリデーター](../database.md#schema-derived-validators)とともに `withValidator()` を使用します。
 
 ```ts
 import { users, insertUserSchema } from '@schema';
@@ -20,26 +20,26 @@ export const action = defineHandler.withValidator({
   body: insertUserSchema,
 })(async (c, { body }) => {
   await db.insert(users).values(body);
-  // No return → re-runs loader, page re-renders with fresh data
+  // 戻り値なし → ローダーが再実行され、ページが最新のデータで再レンダリングされる
 });
 ```
 
-| Action returns        | Behavior                                              |
-| --------------------- | ----------------------------------------------------- |
-| Nothing (void)        | Re-runs the loader, page re-renders with fresh props. |
-| `c.redirect('/path')` | Navigates to another page.                            |
+| アクションの戻り値    | 動作                                                                  |
+| --------------------- | --------------------------------------------------------------------- |
+| なし (void)           | ローダーが再実行され、ページが最新の props で再レンダリングされます。 |
+| `c.redirect('/path')` | 別のページに移動します。                                              |
 
-## Form
+## Form {#form}
 
-Pair `Form` with `useForm` to submit values and display validation and action errors. Inputs stay editable when a submission fails.
+値を送信し、バリデーションエラーとアクションエラーを表示するには、`Form` を `useForm` と組み合わせます。送信に失敗しても、入力欄は編集可能なままです。
 
-Import `Form` from your adapter. Pass `form` and, optionally, `method="put"`, `"patch"`, or `"delete"`; the default is `"post"`. Use `renderError` for a custom action-error renderer (a snippet in Svelte).
+`Form` はお使いのアダプターからインポートします。`form` を渡し、必要に応じて `method="put"`、`"patch"`、`"delete"` を指定します。デフォルトは `"post"` です。アクションエラーをカスタムレンダリングするには `renderError` を使用します (Svelte ではスニペットです)。
 
-## `useForm`
+## `useForm` {#useform}
 
-`useForm` handles submissions, loading state, and validation errors. URLs, form values, and error fields are typed from your action.
+`useForm` は、送信、ローディング状態、バリデーションエラーを処理します。URL、フォームの値、エラーのフィールドは、アクションから型付けされます。
 
-Submit to the `/users` action defined above:
+上で定義した `/users` アクションに送信します。
 
 ::: code-group
 
@@ -141,39 +141,39 @@ export default function CreateUser() {
 
 :::
 
-The types are inferred from your action's `withValidator()` schema in the companion `.server.ts` file. If no validator is defined, the body type falls back to `Record<string, unknown>`, and you still get URL autocomplete.
+型は、対応する `.server.ts` ファイル内のアクションの `withValidator()` スキーマから推論されます。バリデーターが定義されていない場合、ボディの型は `Record<string, unknown>` にフォールバックしますが、URL の自動補完は引き続き利用できます。
 
-### `useForm` API
+### `useForm` API {#useform-api}
 
-`useForm` returns a reactive object with:
+`useForm` は、次のものを持つリアクティブなオブジェクトを返します。
 
-| Property / Method                | Purpose                                                                            |
-| -------------------------------- | ---------------------------------------------------------------------------------- |
-| `data` / `setData`               | Current form values, typed to match the action's body schema.                      |
-| `errors`                         | Field-level validation errors, keys typed to body field names.                     |
-| `error`                          | Action error, or `null`.                                                           |
-| `post`, `put`, `patch`, `delete` | Submit the form with that method. In React these are native form action callbacks. |
-| `pending`                        | `true` while the submission is in flight.                                          |
-| `hasChanges`                     | `true` if form data differs from initial values.                                   |
-| `wasSuccessful`                  | `true` after a successful submission. Stays `true` until the next submission.      |
-| `recentlySuccessful`             | `true` for 2 seconds after a successful submission. Useful for flash messages.     |
-| `reset(...fields)`               | Reset form data to initial values. Field names autocomplete.                       |
-| `clearErrors(...fields)`         | Clear validation errors. Field names autocomplete.                                 |
-| `clearError()`                   | Clear `error`.                                                                     |
+| プロパティ / メソッド            | 用途                                                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `data` / `setData`               | 現在のフォームの値。アクションのボディスキーマに一致するよう型付けされます。                               |
+| `errors`                         | フィールドレベルのバリデーションエラー。キーはボディのフィールド名として型付けされます。                   |
+| `error`                          | アクションエラー、または `null`。                                                                          |
+| `post`, `put`, `patch`, `delete` | そのメソッドでフォームを送信します。React では、これらはネイティブのフォームアクションのコールバックです。 |
+| `pending`                        | 送信中は `true` です。                                                                                     |
+| `hasChanges`                     | フォームのデータが初期値と異なる場合は `true` です。                                                       |
+| `wasSuccessful`                  | 送信が成功した後は `true` です。次の送信まで `true` のままです。                                           |
+| `recentlySuccessful`             | 送信が成功してから 2 秒間は `true` です。フラッシュメッセージに便利です。                                  |
+| `reset(...fields)`               | フォームのデータを初期値に戻します。フィールド名は自動補完されます。                                       |
+| `clearErrors(...fields)`         | バリデーションエラーをクリアします。フィールド名は自動補完されます。                                       |
+| `clearError()`                   | `error` をクリアします。                                                                                   |
 
-For a native React form, use `form.post`, `form.put`, `form.patch`, or `form.delete` as a native form action. For an awaitable mutation, use `action()`. In Vue, Svelte, and Solid, form submissions return `Promise<void>`; catch thrown errors or use your framework's error handling.
+ネイティブの React フォームでは、`form.post`、`form.put`、`form.patch`、`form.delete` をネイティブのフォームアクションとして使用します。await 可能なミューテーションには `action()` を使用します。Vue、Svelte、Solid では、フォームの送信は `Promise<void>` を返します。スローされたエラーをキャッチするか、フレームワークのエラー処理を使用してください。
 
-For dynamic routes, pass `params` in the options:
+動的ルートでは、オプションで `params` を渡します。
 
 ```ts
-// pages/users/[id].server.ts has an action
+// pages/users/[id].server.ts にアクションがある
 const form = useForm('/users/:id', { name: '' }, { params: { id: '42' } });
-<Form form={form} method="put">{/* submits to /users/42 */}</Form>
+<Form form={form} method="put">{/* /users/42 に送信される */}</Form>
 ```
 
-## Named Actions
+## 名前付きアクション {#named-actions}
 
-When a page needs multiple mutations, such as updating and deleting a user on the same page, export `actions` (plural) instead of `action`:
+同じページでユーザーの更新と削除を行うなど、ページに複数のミューテーションが必要な場合は、`action` の代わりに `actions` (複数形) をエクスポートします。
 
 ```ts
 import { users, updateUserSchema } from '@schema';
@@ -197,40 +197,40 @@ export const actions = {
 };
 ```
 
-Named actions are dispatched via a `?actionName` suffix on the URL (e.g. `/users/42?update`). The client primitives `useForm` and `action()` handle this automatically.
+名前付きアクションは、URL の `?actionName` サフィックス (例: `/users/42?update`) によってディスパッチされます。クライアントのプリミティブである `useForm` と `action()` が、これを自動的に処理します。
 
-Use `action` or `actions` in a file, not both.
+1 つのファイルでは、`action` と `actions` のどちらか一方のみを使用してください。
 
-You can also define an `actions.default` key for the action that runs when no name is specified (i.e. a bare POST to the page URL):
+名前が指定されなかった場合 (つまり、ページの URL への単純な POST) に実行されるアクションとして、`actions.default` キーを定義することもできます。
 
 ```ts
 export const actions = {
   default: defineHandler(async (c) => {
-    // runs on POST /users/edit (no ?suffix)
+    // POST /users/edit (サフィックスなし) で実行される
   }),
   delete: defineHandler(async (c) => {
-    // runs on POST /users/edit?delete
+    // POST /users/edit?delete で実行される
   }),
 };
 ```
 
-### Named Actions with `useForm`
+### `useForm` での名前付きアクション {#named-actions-with-useform}
 
-When a page exports named actions, append `?actionName` to the URL:
+ページが名前付きアクションをエクスポートしている場合は、URL に `?actionName` を付加します。
 
 ```ts
 const form = useForm('/users/:id?update', { name: '' }, { params: { id } });
-<Form form={form} method="put">{/* submits to /users/42?update */}</Form>
+<Form form={form} method="put">{/* /users/42?update に送信される */}</Form>
 ```
 
-Each named action has its own validator schema, which supplies types for its URL, body, and error keys. See [Type Safety](../type-safety#action-%E2%86%92-useform) for an example.
+各名前付きアクションは独自のバリデータースキーマを持ち、それが URL、ボディ、エラーキーの型を提供します。例については、[型安全性](../type-safety#action-%E2%86%92-useform)を参照してください。
 
-## `action()` Helper
+## `action()` ヘルパー {#action-helper}
 
-Use `action()` for a button or other mutation that does not need form state. It updates the page after a successful request:
+フォームの状態を必要としないボタンやその他のミューテーションには、`action()` を使用します。リクエストが成功すると、ページが更新されます。
 
 ```ts
-import { action } from '@void/react'; // or "@void/vue", "@void/svelte", "@void/solid"
+import { action } from '@void/react'; // または "@void/vue"、"@void/svelte"、"@void/solid"
 
 const result = await action('/users/:id?delete', {
   params: { id: '42' },
@@ -241,19 +241,19 @@ if (!result.ok) {
 }
 ```
 
-`action()` defaults to `POST`. Pass `data`, `params`, and `method` to set the body, route parameters, or HTTP method.
+`action()` のデフォルトは `POST` です。ボディ、ルートパラメーター、HTTP メソッドを設定するには、`data`、`params`、`method` を渡します。
 
-A successful call returns `{ ok: true, pageData }`. Expected errors, such as validation failures or conflicts, return `{ ok: false, error }`.
+呼び出しが成功すると `{ ok: true, pageData }` が返されます。バリデーションの失敗や競合など、想定されるエラーは `{ ok: false, error }` を返します。
 
-## Validation Errors
+## バリデーションエラー {#validation-errors}
 
-`withValidator()` and `ValidationError` populate `form.errors` automatically.
+`withValidator()` と `ValidationError` は、`form.errors` を自動的に設定します。
 
-Expected errors such as `400`, `404`, `409`, `422`, and `429` stay with the form or action call. `useForm` stores them in `form.errors` or `form.error`; `action()` returns `{ ok: false, error }`.
+`400`、`404`、`409`、`422`、`429` などの想定されるエラーは、フォームまたはアクションの呼び出しの中で扱われます。`useForm` はそれらを `form.errors` または `form.error` に格納し、`action()` は `{ ok: false, error }` を返します。
 
-Authentication errors (`401`, `403`), server errors (`500`, `502`), and unexpected failures are thrown. Handle them with your framework's error boundary or error handling.
+認証エラー (`401`、`403`)、サーバーエラー (`500`、`502`)、想定外の失敗はスローされます。フレームワークのエラーバウンダリまたはエラー処理で対応してください。
 
-Actions can throw `ValidationError` for custom validation logic:
+アクションは、独自のバリデーションロジックのために `ValidationError` をスローできます。
 
 ```ts
 import { defineHandler, ValidationError } from 'void/handler';
@@ -267,17 +267,17 @@ export const action = defineHandler(async (c) => {
 });
 ```
 
-### Usage limits
+### 利用制限 {#usage-limits}
 
-For [AI](../ai.md#usage-limits) and [Sandbox](../sandboxes.md#usage-limits) actions, an uncaught `UsageLimit` automatically produces a structured HTTP 429. To customize the message, catch the error with `instanceof UsageLimit` and return `error.response({ message: 'Try again shortly. Your draft is still editable.' })`. `Form` displays the message and waits until a known retry deadline before allowing resubmission. It keeps the fields editable and never retries automatically.
+[AI](../ai.md#usage-limits) と [Sandbox](../sandboxes.md#usage-limits) のアクションでは、キャッチされなかった `UsageLimit` は、構造化された HTTP 429 を自動的に生成します。メッセージをカスタマイズするには、`instanceof UsageLimit` でエラーをキャッチし、`error.response({ message: 'Try again shortly. Your draft is still editable.' })` を返します。`Form` はメッセージを表示し、再試行の期限がわかっている場合はその時刻まで再送信を待ちます。フィールドは編集可能なままで、自動的に再試行されることはありません。
 
-## Authentication and origin checks
+## 認証とオリジンのチェック {#authentication-and-origin-checks}
 
-Browser submissions must come from the same origin as the page, including its scheme, hostname, and port. Void rejects cross-origin page actions with `403 Forbidden`. Server clients can call actions without browser origin headers; actions still need authentication and authorization for protected data.
+ブラウザからの送信は、スキーム、ホスト名、ポートを含め、ページと同じオリジンから行われる必要があります。Void は、クロスオリジンのページアクションを `403 Forbidden` で拒否します。サーバークライアントは、ブラウザのオリジンヘッダーなしでアクションを呼び出せます。保護されたデータについては、アクションにも引き続き認証と認可が必要です。
 
-## File Uploads
+## ファイルアップロード {#file-uploads}
 
-Set a `File`, `Blob`, or `FileList` in form data and submit. `useForm` sends it as `multipart/form-data`:
+フォームデータに `File`、`Blob`、または `FileList` を設定して送信します。`useForm` はそれを `multipart/form-data` として送信します。
 
 ::: code-group
 
@@ -351,14 +351,14 @@ export default function Upload() {
 
 :::
 
-On the server, use `c.req.parseBody()` to access the uploaded file:
+サーバーでは、`c.req.parseBody()` を使用してアップロードされたファイルにアクセスします。
 
 ```ts
 // pages/photos.server.ts
 import { defineHandler, ValidationError } from 'void/handler';
 import { storage } from 'void/storage';
 
-// file.name and file.type come from the browser. Don't use them as the key or trust the type.
+// file.name と file.type はブラウザから送られる値です。キーとして使用したり、型を信頼したりしないでください。
 const imageTypes = new Map([
   ['image/jpeg', 'jpg'],
   ['image/png', 'png'],
@@ -379,12 +379,12 @@ export const action = defineHandler(async (c) => {
 });
 ```
 
-Pick the storage key on the server and allow only the file types you expect. See [Serving Files](../storage.md#serving-files) to send them back safely.
+ストレージキーはサーバー側で決定し、想定しているファイル形式のみを許可してください。ファイルを安全に返す方法については、[ファイルの配信](../storage.md#serving-files)を参照してください。
 
-## Choosing a Primitive
+## プリミティブの選び方 {#choosing-a-primitive}
 
-| Primitive        | Page update | Form state                 | Framework-specific |
-| ---------------- | ----------- | -------------------------- | ------------------ |
-| `useForm`        | Yes         | Yes (errors, dirty, reset) | Yes                |
-| `action()`       | Yes         | No                         | Yes                |
-| Native `fetch()` | No          | No                         | No                 |
+| プリミティブ           | ページの更新 | フォームの状態                    | フレームワーク固有 |
+| ---------------------- | ------------ | --------------------------------- | ------------------ |
+| `useForm`              | あり         | あり (エラー、変更有無、リセット) | あり               |
+| `action()`             | あり         | なし                              | あり               |
+| ネイティブの `fetch()` | なし         | なし                              | なし               |

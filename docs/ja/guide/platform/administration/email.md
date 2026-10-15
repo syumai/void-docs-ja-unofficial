@@ -2,34 +2,26 @@
 outline: deep
 ---
 
-# Email
+# メール {#email}
 
-## Managing Email
+## メールの管理 {#managing-email}
 
-These commands apply to a platform that enables email. Every project can send from `<slug>+tag@<mail domain>` on the platform’s shared mail domain. Deploying an app with `email/` handlers sets up receiving at that address once its recipient rule is ready; the [email guide](/guide/email) describes what applications do with that.
+これらのコマンドは、メールを有効にしているプラットフォームに適用されます。すべてのプロジェクトは、プラットフォームの共有メールドメイン上の `<slug>+tag@<mail domain>` から送信できます。`email/` ハンドラーを持つアプリをデプロイすると、受信ルールの準備ができた時点で、そのアドレスでの受信が設定されます。アプリケーションがそれをどう扱うかについては、[メールガイド](/ja/guide/email)を参照してください。
 
-Shared inbound mail uses one exact routing rule per receiving project and enables Cloudflare’s per-zone plus addressing. Creating a project or deploying an app that only sends mail consumes no inbound rule. Existing rules and the apex catch-all remain in place. Cloudflare normally allows [200 routing rules per domain](https://developers.cloudflare.com/email-service/platform/limits/); remove unused rules or request a higher limit if the shared domain reaches capacity. An unrelated rule for a project’s base address or a plus address blocks its setup until that conflict is removed.
+共有の受信メールでは、受信するプロジェクトごとに 1 つの完全一致ルーティングルールを使用し、Cloudflare のゾーン単位のプラスアドレス指定を有効にします。プロジェクトの作成や、メール送信のみを行うアプリのデプロイでは、受信ルールは消費されません。既存のルールとアペックスのキャッチオールはそのまま残ります。Cloudflare は通常、[ドメインあたり 200 件のルーティングルール](https://developers.cloudflare.com/email-service/platform/limits/)を許可しています。共有ドメインが上限に達した場合は、未使用のルールを削除するか、より高い上限を申請してください。プロジェクトのベースアドレスまたはプラスアドレスに対する無関係なルールがあると、その競合が取り除かれるまでセットアップはブロックされます。
 
-If recipient creation is interrupted, inspect its retained intent:
+受信者の作成が中断された場合は、保持されている意図を確認します。
 
 ```sh
 void platform email shared-recipients --project my-app
 void platform email shared-recipient-resolve <recipient-id> --ended --outcome not-applied --reason "Provider audit confirms the request did not create a rule" --plan
 ```
 
-Wait until the reported recovery time, confirm the original execution ended,
-and inspect the exact provider resource shown in the plan. Use `applied` when
-the exact owned rule exists, or `not-applied` only when the provider audit
-establishes that creation did not occur. Absence alone does not establish the
-outcome. Run the same command with `--yes` after inspection. Recovery records
-the decision in platform events without creating or deleting rules. Normal
-reconciliation verifies delivery afterward; a deleting project stays closed
-and its deletion can be retried. See [operator email commands](../../../reference/cli/platform-email.md#operator-email)
-for the recovery requirements.
+報告された復旧時刻まで待ち、元の実行が終了したことを確認し、プランに表示された正確なプロバイダーリソースを確認します。所有する正確なルールが存在する場合は `applied` を使用します。プロバイダーの監査によって作成が行われなかったことが確認できる場合にのみ、`not-applied` を使用します。存在しないことだけでは、結果を確定できません。確認後、同じコマンドを `--yes` を付けて実行します。復旧では、ルールの作成や削除を行わずに、判断をプラットフォームイベントに記録します。その後、通常の整合処理によって配信が検証されます。削除中のプロジェクトは閉じたままで、その削除は再試行できます。復旧の要件については、[オペレーターのメールコマンド](../../../reference/cli/platform-email.md#operator-email)を参照してください。
 
-### Deciding who mail may reach
+### メールの到達先を決める {#deciding-who-mail-may-reach}
 
-By default, mail from the shared sender reaches only the recipients each project has verified. For a team whose applications mainly mail colleagues, widen that once for the whole installation:
+既定では、共有送信元からのメールは、各プロジェクトが検証した受信者にのみ届きます。アプリケーションが主に同僚にメールを送るチームでは、インストール全体に対して 1 度だけこれを広げられます。
 
 ```sh
 void platform email policy
@@ -38,68 +30,60 @@ void platform email policy-set any
 void platform email policy-set verified
 ```
 
-Choose a policy in the admin UI's **Email** page or with the commands above:
+ポリシーは、管理 UI の **Email** ページまたは上記のコマンドで選択します。
 
-- `verified`: only each project's verified recipients.
-- `domains`: verified recipients plus any address on the listed domains.
-- `any`: any recipient.
+- `verified`: 各プロジェクトの検証済み受信者のみ。
+- `domains`: 検証済み受信者に加えて、リストされたドメイン上の任意のアドレス。
+- `any`: 任意の受信者。
 
-Unverified recipients still require Cloudflare Email Sending onboarding and [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans). Otherwise those sends return `UNVERIFIED_DESTINATION`. Mail from a project's custom domain, and mail to the platform's own mail domain, always requires recipient verification.
+未検証の受信者に送信するには、引き続き Cloudflare Email Sending のオンボーディングと [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) が必要です。そうでない場合、それらの送信は `UNVERIFIED_DESTINATION` を返します。プロジェクトのカスタムドメインからのメールと、プラットフォーム自身のメールドメイン宛てのメールには、常に受信者の検証が必要です。
 
-Policy changes apply to new sends; admitted attempts may finish.
+ポリシーの変更は新規の送信に適用されます。すでに受け付けられた試行は完了することがあります。
 
-### Project caps
+### プロジェクトの上限 {#project-caps}
 
-Each project has 200 recipient submissions per UTC calendar month and 10 in a rolling 60-second window by default. An attempt stays charged once it starts, including a failed or uncertain outcome. Raise or lower a project's caps by id or slug:
+各プロジェクトには、既定で UTC の暦月あたり 200 件、直近 60 秒間で 10 件の受信者への送信が許可されています。試行は開始された時点で課金済みとなり、失敗した場合や結果が不明な場合も同様です。プロジェクトの上限は、ID またはスラッグを指定して引き上げたり引き下げたりできます。
 
 ```sh
 void platform email limit hr-portal --monthly 2000 --burst 30
 ```
 
-The project's page in the admin UI shows the current values and clears an override.
+管理 UI のプロジェクトページには現在の値が表示され、そこから上書きをクリアできます。
 
-### Recovering an interrupted send
+### 中断された送信からの復旧 {#recovering-an-interrupted-send}
 
-If a sender stops after beginning a provider call, its unresolved attempt blocks
-removal of the project or sender domain. Inspect the attempt ID and start time:
+送信側がプロバイダーの呼び出しを開始した後に停止すると、未解決の試行によって、プロジェクトまたは送信ドメインの削除がブロックされます。試行の ID と開始時刻を確認します。
 
 ```sh
 void platform email attempts --project hr-portal
 ```
 
-First confirm that the original execution has ended through your Worker logs or
-incident records. Once the attempt is at least 24 hours old, resolve it with an
-audit reason that contains no recipient address or message content:
+まず、Worker のログまたはインシデント記録を通じて、元の実行が終了したことを確認します。試行から 24 時間以上が経過したら、受信者のアドレスやメッセージ内容を含まない監査理由を付けて解決します。
 
 ```sh
 void platform email attempt-resolve <attempt-id> --ended --reason "Original Worker execution ended; provider outcome could not be verified" --plan
 void platform email attempt-resolve <attempt-id> --ended --reason "Original Worker execution ended; provider outcome could not be verified"
 ```
 
-This records the send as `outcome_unknown` and releases its cleanup fence. The
-attempt remains charged and is never retried. If its 30-day delivery record has
-expired, only its recipient-free fence is removed. Do not resolve an attempt
-while its original execution may still be active.
+これにより、その送信は `outcome_unknown` として記録され、クリーンアップフェンスが解放されます。試行は課金済みのままで、再試行されることはありません。30 日間の配信記録がすでに期限切れの場合は、受信者情報を含まないフェンスのみが削除されます。元の実行がまだ動作している可能性がある間は、試行を解決しないでください。
 
-Inspect a project's retained receipt and recipient outcomes with:
+プロジェクトの保持されている受領記録と受信者ごとの結果は、次のコマンドで確認できます。
 
 ```sh
 void platform email logs hr-portal --page 1 --limit 50 --json
 ```
 
-Logs include operation IDs, recorded outcomes, provider references, and error codes.
-After project deletion, use its project ID until the 30-day metadata retention
-period expires. Message bodies, subjects, attachments, and credentials are not logged.
+ログには、操作 ID、記録された結果、プロバイダーの参照、エラーコードが含まれます。プロジェクトの削除後は、30 日間のメタデータ保持期間が終了するまで、そのプロジェクト ID を使用します。メッセージ本文、件名、添付ファイル、認証情報はログに記録されません。
 
-### Registering email domains for projects
+### プロジェクトのメールドメインを登録する {#registering-email-domains-for-projects}
 
-Your users may hold no Cloudflare account. Tell the platform that administrators register email domains, so `void email domain add` prints the command to ask you for instead of opening a token-creation page:
+ユーザーが Cloudflare アカウントを持っていない場合があります。管理者がメールドメインを登録することをプラットフォームに設定すると、`void email domain add` はトークン作成ページを開く代わりに、あなたに依頼するためのコマンドを表示します。
 
 ```sh
 void platform email settings-set --domains admin
 ```
 
-Then register a domain for a project. The zone must be in the platform's Cloudflare account; the platform's own credential does the setup, and no Cloudflare credential is stored per domain:
+その後、プロジェクトのドメインを登録します。ゾーンはプラットフォームの Cloudflare アカウント内にある必要があります。セットアップにはプラットフォーム自身の認証情報が使用され、ドメインごとの Cloudflare 認証情報は保存されません。
 
 ```sh
 void platform email domain-add example.com --project hr-portal
@@ -108,39 +92,25 @@ void platform email domain-rotate-secret example.com
 void platform email domains
 ```
 
-Use the apex of the selected Cloudflare zone. Platform-managed custom inbound email uses its catch-all, which does not cover subdomains; choose an apex without another mail provider or use the platform’s shared mail address. `domain-status` reports inbound, outbound, and management readiness separately. Follow any required DNS or Cloudflare dashboard step, then use `domain-sync` to reconcile. Use `domain-rotate-secret` when you need to replace the zone ingress credential explicitly. Email Sending onboarding needs Workers Paid; after upgrading, `domain-sync` re-attempts it. For a zone in another Cloudflare account, pipe an API token for that account on standard input:
+選択した Cloudflare ゾーンのアペックスを使用してください。プラットフォーム管理のカスタム受信メールはキャッチオールを使用しますが、これはサブドメインをカバーしません。他のメールプロバイダーを使用していないアペックスを選ぶか、プラットフォームの共有メールアドレスを使用してください。`domain-status` は、受信、送信、管理の準備状況を個別に報告します。必要な DNS または Cloudflare ダッシュボードの手順を実施してから、`domain-sync` で整合させます。ゾーンの ingress 認証情報を明示的に置き換える必要がある場合は、`domain-rotate-secret` を使用します。Email Sending のオンボーディングには Workers Paid が必要です。アップグレード後に `domain-sync` を実行すると、再度試行されます。別の Cloudflare アカウントのゾーンの場合は、そのアカウントの API トークンを標準入力から渡します。
 
 ```sh
 void platform email domain-add other.example --project hr-portal --token-stdin --yes < token.txt
 ```
 
-Project owners see administrator-registered domains in `void email domain list` and `status`; `status` names the `void platform email` command for any step they cannot take themselves, and `sync` and `remove` point them at `domain-sync` and `domain-remove`. A domain an owner registered before you switched to `admin` stays theirs to renew, sync and remove. The runtime token needs the email permissions listed in the [self-hosting guide](/guide/platform/installation/credentials#runtime-token-permissions) for this to work.
+プロジェクトオーナーは、管理者が登録したドメインを `void email domain list` と `status` で確認できます。`status` は、自分では実行できない手順について `void platform email` コマンドを案内し、`sync` と `remove` は `domain-sync` と `domain-remove` を案内します。`admin` に切り替える前にオーナーが登録したドメインは、引き続きオーナー自身が更新、同期、削除できます。これを機能させるには、ランタイムトークンに[セルフホスティングガイド](/ja/guide/platform/installation/credentials#runtime-token-permissions)に記載されているメール権限が必要です。
 
-A permission refusal leaves setup blocked. After correcting it, run `domain-sync`
-to resume that same setup operation; repeat `domain-rotate-secret` to resume a
-blocked rotation without replacing its staged secret. If project deletion leaves
-a blocked domain cleanup, correct the permission and run `domain-remove <domain>`
-to finish the retained cleanup. If its token has expired or been revoked, provide
-a replacement scoped to the same account and zone:
+権限の拒否によって、セットアップはブロックされたままになります。修正後に `domain-sync` を実行すると、同じセットアップ操作が再開されます。ブロックされたローテーションを、ステージ済みのシークレットを置き換えずに再開するには、`domain-rotate-secret` を再度実行します。プロジェクトの削除によってドメインのクリーンアップがブロックされた場合は、権限を修正してから `domain-remove <domain>` を実行し、保持されているクリーンアップを完了させます。そのトークンが期限切れまたは失効している場合は、同じアカウントとゾーンにスコープされた代替トークンを渡します。
 
 ```sh
 void platform email domain-remove other.example --token-stdin --yes < token.txt
 ```
 
-This recovery is available only after project deletion has begun and no other
-project uses the connection. For a live project, renew its token through
-`domain-add`. A timed-out Cloudflare
-mutation stays stopped because replay may duplicate a provider write. After
-confirming the original execution ended, wait 24 hours, inspect the exact
-routing, Worker, secret, catch-all, or Sending resource named by the preview,
-and use its recovery fence:
+この復旧は、プロジェクトの削除が開始されており、他のプロジェクトがその接続を使用していない場合にのみ利用できます。稼働中のプロジェクトでは、`domain-add` を通じてトークンを更新します。タイムアウトした Cloudflare の変更は、再実行するとプロバイダーへの書き込みが重複する可能性があるため、停止したままになります。元の実行が終了したことを確認したら、24 時間待ち、プレビューに示された正確なルーティング、Worker、シークレット、キャッチオール、または Sending のリソースを確認し、その復旧フェンスを使用します。
 
 ```sh
 void platform email operation-resolve <operation-id> --ended --outcome <applied|not-applied> --reason "Provider state verified" --plan
 void platform email operation-resolve <operation-id> --ended --outcome <applied|not-applied> --reason "Provider state verified"
 ```
 
-Run recovery with the same platform version that created the persisted intent.
-`applied` continues without replaying the write; `not-applied` permits that exact
-step to retry. Secret rotation keeps its staged generation, and removal resumes
-from the unresolved cleanup step. Age alone never authorizes a retry.
+復旧は、保存された意図を作成したものと同じプラットフォームバージョンで実行してください。`applied` は書き込みを再実行せずに続行し、`not-applied` はその正確なステップの再試行を許可します。シークレットのローテーションはステージ済みの世代を保持し、削除は未解決のクリーンアップステップから再開されます。時間の経過だけでは、再試行は許可されません。

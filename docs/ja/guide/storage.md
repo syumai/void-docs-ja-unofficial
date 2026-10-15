@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Object Storage
+# オブジェクトストレージ {#object-storage}
 
-Store files in [Cloudflare R2](https://developers.cloudflare.com/r2/) with `storage` from `void/storage`. It gives you the typed R2 API for uploads, downloads, and metadata.
+`void/storage` の `storage` を使って、[Cloudflare R2](https://developers.cloudflare.com/r2/) にファイルを保存します。アップロード、ダウンロード、メタデータを扱うための型付きの R2 API が使用できます。
 
-## Basic Operations
+## 基本操作 {#basic-operations}
 
 ```ts
 import { storage } from 'void/storage';
@@ -35,11 +35,11 @@ for (const obj of listed.objects) {
 const head = await storage.head('uploads/photo.jpg');
 ```
 
-`storage` supports the full [R2Bucket API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/).
+`storage` は、[R2Bucket API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/) をすべてサポートしています。
 
-## Serving Files
+## ファイルを配信する {#serving-files}
 
-A common pattern is serving uploaded files from an API route:
+よくあるパターンは、API ルートからアップロードされたファイルを配信することです。
 
 ```ts
 // routes/files/[key].ts
@@ -64,11 +64,11 @@ export const GET = defineHandler(async (c) => {
 });
 ```
 
-Files your users upload can contain HTML or scripts. Store them under keys your server picks, and serve them with `nosniff` and `Content-Disposition: attachment`. `<img>` and `<video>` tags still display them; opening the URL directly downloads the file.
+ユーザーがアップロードしたファイルには、HTML やスクリプトが含まれている可能性があります。サーバーが決めたキーで保存し、`nosniff` と `Content-Disposition: attachment` を付けて配信してください。`<img>` タグや `<video>` タグでは引き続き表示されますが、URL を直接開くとファイルがダウンロードされます。
 
-## Custom bindings
+## カスタムバインディング {#custom-bindings}
 
-Use `createStorage(bucket)` with your own R2 binding, or in tests:
+独自の R2 バインディングを使用する場合やテストでは、`createStorage(bucket)` を使用します。
 
 ```ts
 import { createStorage } from 'void/storage';

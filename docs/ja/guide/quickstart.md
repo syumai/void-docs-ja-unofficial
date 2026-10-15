@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Quickstart
+# クイックスタート {#quickstart}
 
-Create a Void app, run it locally, and deploy it. You can also [add Void to an existing Vite app](#adding-to-an-existing-vite-app).
+Void アプリを作成し、ローカルで実行して、デプロイします。[既存の Vite アプリに Void を追加する](#adding-to-an-existing-vite-app)こともできます。
 
-## Create an app
+## アプリを作成する {#create-an-app}
 
-In an empty directory, install Void and run setup:
+空のディレクトリで、Void をインストールしてセットアップを実行します。
 
 ::: code-group
 
@@ -34,23 +34,23 @@ bunx void init
 
 :::
 
-Choose your UI framework, a starter, and a deployment target. Vite+ is the default build tool. D1 is a good first database: it runs locally without a separate database server. Choose Cloudflare to deploy to your own account, or skip deployment setup for now.
+UI フレームワーク、スターター、デプロイ先を選択します。ビルドツールの既定は Vite+ です。D1 は、別途データベースサーバーを用意せずにローカルで動作するため、最初のデータベースとして適しています。自分のアカウントにデプロイするには Cloudflare を選択します。デプロイの設定は、今はスキップすることもできます。
 
-You do not need to install Vite+ globally. Setup preserves your existing package-manager versions and lockfiles.
+Vite+ をグローバルにインストールする必要はありません。セットアップは、既存のパッケージマネージャーのバージョンとロックファイルを維持します。
 
-With pnpm, `pnpm create void my-app` also creates the project directory and configures native build permissions for you.
+pnpm では、`pnpm create void my-app` でプロジェクトディレクトリも作成され、ネイティブビルドの権限も設定されます。
 
-## Run locally
+## ローカルで実行する {#run-locally}
 
 ```sh
 npm run dev
 ```
 
-Open `http://localhost:5173`. In a Pages starter, `pages/` contains your UI and companion `.server.ts` files contain its server loaders and actions. Loaders return data to page components as typed props.
+`http://localhost:5173` を開きます。Pages スターターでは、`pages/` に UI が、コンパニオンの `.server.ts` ファイルにサーバーのローダーとアクションが置かれます。ローダーは、型付きの props としてページコンポーネントにデータを返します。
 
-## Call a server route
+## サーバールートを呼び出す {#call-a-server-route}
 
-Edit `routes/api/hello.ts`, or create it if your starter doesn't include it:
+`routes/api/hello.ts` を編集します。スターターに含まれていない場合は作成してください。
 
 ```ts
 import { defineHandler } from 'void';
@@ -60,7 +60,7 @@ export const GET = defineHandler(() => {
 });
 ```
 
-Visit `http://localhost:5173/api/hello` to see the response. From your client code, call it with Void's typed fetch:
+`http://localhost:5173/api/hello` にアクセスすると、レスポンスを確認できます。クライアントコードからは、Void の型付き fetch で呼び出せます。
 
 ```ts
 import { fetch } from 'void/client';
@@ -68,38 +68,38 @@ import { fetch } from 'void/client';
 const { message } = await fetch('/api/hello');
 ```
 
-The file path defines the URL, and the handler defines the response type. Change `message` in the handler and TypeScript checks the client against the new shape.
+ファイルパスが URL を定義し、ハンドラーがレスポンスの型を定義します。ハンドラー内の `message` を変更すると、TypeScript が新しい形に対してクライアントをチェックします。
 
-Database starters also include `db/schema.ts`. Its Drizzle schema defines your tables and query types; Void runs a local database and provisions one when you deploy.
+データベーススターターには `db/schema.ts` も含まれます。この Drizzle スキーマがテーブルとクエリの型を定義します。Void はローカルデータベースを実行し、デプロイ時に本番用のデータベースをプロビジョニングします。
 
-## Deploy
+## デプロイする {#deploy}
 
-If you chose a target during setup:
+セットアップ中にデプロイ先を選択した場合は、次のとおりです。
 
 ```sh
 npx void deploy
 ```
 
-If you skipped setup, select your Cloudflare account:
+セットアップをスキップした場合は、Cloudflare アカウントを選択します。
 
 ```sh
 npx void deploy --platform cloudflare
 ```
 
-Void opens your browser to sign in when needed, builds the app, provisions resources, applies migrations, and prints the deployed URL. Later deploys use the saved target. See [Deployment](./deployment.md) for team platforms, CI, and rollback.
+Void は、必要に応じてブラウザーを開いてサインインを求め、アプリをビルドし、リソースをプロビジョニングし、マイグレーションを適用して、デプロイされた URL を表示します。以降のデプロイでは、保存されたデプロイ先が使用されます。チームのプラットフォーム、CI、ロールバックについては、[デプロイ](./deployment.md)を参照してください。
 
-## Adding to an existing Vite app
+## 既存の Vite アプリに追加する {#adding-to-an-existing-vite-app}
 
-Install Void and run `void init` with your package manager as shown [above](#create-an-app). Setup adds `voidPlugin()` to your Vite config and creates the remaining project files. If the config needs a manual edit, the CLI shows the change to make.
+[上記](#create-an-app)のとおり、パッケージマネージャーで Void をインストールし、`void init` を実行します。セットアップは Vite の設定に `voidPlugin()` を追加し、残りのプロジェクトファイルを作成します。設定の手動編集が必要な場合は、CLI が行うべき変更を表示します。
 
-For a meta framework such as TanStack Start, React Router, or SvelteKit, follow its [integration guide](../integrations/frameworks/overview.md).
+TanStack Start、React Router、SvelteKit などのメタフレームワークでは、その[統合ガイド](../integrations/frameworks/overview.md)に従ってください。
 
-## Next steps
+## 次のステップ {#next-steps}
 
-- [Pages Routing](./pages-routing/overview.md): loaders, layouts, and forms
-- [Server Routing](./server-routing.md): params, middleware, and validation
-- [Database](./database.md): queries and migrations
-- [Environment Variables](./env-vars.md): local values and production secrets
-- [Coding Agents](../integrations/agents.md): use Void's bundled docs and skills
+- [Pages ルーティング](./pages-routing/overview.md): ローダー、レイアウト、フォーム
+- [サーバールーティング](./server-routing.md): パラメーター、ミドルウェア、バリデーション
+- [データベース](./database.md): クエリとマイグレーション
+- [環境変数](./env-vars.md): ローカルの値と本番のシークレット
+- [コーディングエージェント](../integrations/agents.md): Void に同梱のドキュメントとスキルを使用する
 
-If a manual pnpm install reports blocked build scripts, run `pnpm approve-builds` for `esbuild`, `sharp`, and `workerd`. Set `better-sqlite3: false` in `pnpm-workspace.yaml`'s `allowBuilds`; Void uses its bundled binaries.
+手動で行った pnpm のインストールでブロックされたビルドスクリプトが報告された場合は、`esbuild`、`sharp`、`workerd` に対して `pnpm approve-builds` を実行してください。`pnpm-workspace.yaml` の `allowBuilds` で `better-sqlite3: false` を設定します。Void は同梱のバイナリーを使用します。

@@ -2,87 +2,69 @@
 outline: deep
 ---
 
-# Platform Installation {#void-platform-install}
+# プラットフォームのインストール {#void-platform-install}
 
 ```sh
 void platform install [options] [--yes]
 ```
 
-| Option                                    | Purpose                                                                              |
-| ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| `--name <slug>`                           | Installation name used in `void-<name>-<role>` resource names; choose an unused name |
-| `--display-name <name>`                   | Human-readable platform name                                                         |
-| `--account <id>`                          | Cloudflare account id                                                                |
-| `--auth-config <path>`                    | Login methods, signup policy, and environment references for provider secrets        |
-| `--login-methods <methods>`               | Comma-separated `github`, `google`, `oidc`, or `cloudflare-access` login methods     |
-| `--access-protection`                     | Protect the platform UI and APIs with Cloudflare Access                              |
-| `--no-access-protection`                  | Skip Cloudflare Access protection                                                    |
-| `--app-access <public\|platform\|custom>` | Public apps, the platform's Access policy, or separately selected app policies       |
-| `--hyperdrive <create\|id>`               | Create Hyperdrive or use the specified existing configuration                        |
-| `--application-domain <domain>`           | Base domain for deployed apps                                                        |
-| `--workers-dev`                           | Explicit testing mode; add an application domain later                               |
-| `--zone <domain>`                         | Cloudflare zone containing the application domain                                    |
-| `--dedicated-zone`                        | Add zone-wide catch-all routes; valid only when the app domain is the whole zone     |
-| `--no-dedicated-zone`                     | Skip zone-wide application catch-all routes                                          |
-| `--control-plane-domain <domain>`         | Optional API custom hostname; defaults to `workers.dev`                              |
-| `--no-control-plane-domain`               | Use the default `workers.dev` API hostname                                           |
-| `--dashboard-url <origin>`                | HTTPS origin of an optional dashboard deployed separately                            |
-| `--plan`                                  | Preview Cloudflare changes and save installation choices locally                     |
-| `--resume`                                | Continue the matching checkpointed installation                                      |
-| `--runtime <path>`                        | Deploy a locally built, integrity-checked runtime directory                          |
-| `--yes`                                   | Acknowledge Cloudflare changes in non-interactive use                                |
+| オプション                                | 用途                                                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `--name <slug>`                           | `void-<name>-<role>` のリソース名に使用されるインストール名。未使用の名前を選択してください |
+| `--display-name <name>`                   | 人間が読めるプラットフォーム名                                                              |
+| `--account <id>`                          | Cloudflare のアカウント ID                                                                  |
+| `--auth-config <path>`                    | ログイン方法、サインアップポリシー、プロバイダーのシークレットの環境変数参照                |
+| `--login-methods <methods>`               | カンマ区切りの `github`、`google`、`oidc`、`cloudflare-access` のログイン方法               |
+| `--access-protection`                     | プラットフォームの UI と API を Cloudflare Access で保護します                              |
+| `--no-access-protection`                  | Cloudflare Access による保護をスキップします                                                |
+| `--app-access <public\|platform\|custom>` | 公開アプリ、プラットフォームの Access ポリシー、または個別に選択するアプリのポリシー        |
+| `--hyperdrive <create\|id>`               | Hyperdrive を作成するか、指定した既存の構成を使用します                                     |
+| `--application-domain <domain>`           | デプロイされるアプリのベースドメイン                                                        |
+| `--workers-dev`                           | 明示的なテストモード。アプリケーションドメインは後から追加します                            |
+| `--zone <domain>`                         | アプリケーションドメインを含む Cloudflare ゾーン                                            |
+| `--dedicated-zone`                        | ゾーン全体のキャッチオールルートを追加します。アプリのドメインがゾーン全体の場合のみ有効    |
+| `--no-dedicated-zone`                     | ゾーン全体のアプリケーションのキャッチオールルートをスキップします                          |
+| `--control-plane-domain <domain>`         | オプションの API カスタムホスト名。既定は `workers.dev`                                     |
+| `--no-control-plane-domain`               | 既定の `workers.dev` の API ホスト名を使用します                                            |
+| `--dashboard-url <origin>`                | 別途デプロイされるオプションのダッシュボードの HTTPS オリジン                               |
+| `--plan`                                  | Cloudflare の変更をプレビューし、インストールの選択内容をローカルに保存します               |
+| `--resume`                                | 一致するチェックポイント済みのインストールを続行します                                      |
+| `--runtime <path>`                        | ローカルでビルドした、整合性チェック済みのランタイムディレクトリをデプロイします            |
+| `--yes`                                   | 非対話的な利用で、Cloudflare の変更を承諾します                                             |
 
-For a first installation, follow [Install a Void Platform](../../guide/self-hosted-platform.md). The interactive installer recommends using a domain and offers **Use workers.dev for testing** as a visible alternative. Void creates the platform infrastructure and tables. External PostgreSQL and a configured login method are required in either mode. Select all login methods you want to enable; none are selected initially. Non-interactive installation defaults to GitHub when no login configuration is supplied. `--workers-dev` skips zone/DNS/certificate operations and cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
+初回のインストールでは、[Void プラットフォームのインストール](../../guide/self-hosted-platform.md)に従ってください。対話式のインストーラーはドメインの使用を推奨し、目に見える代替手段として **Use workers.dev for testing** を提示します。Void はプラットフォームのインフラストラクチャとテーブルを作成します。どちらのモードでも、外部の PostgreSQL と設定済みのログイン方法が必要です。有効にしたいログイン方法をすべて選択してください。初期状態では何も選択されていません。非対話的なインストールでは、ログインの設定が指定されていない場合、GitHub が既定になります。`--workers-dev` は、ゾーン / DNS / 証明書の操作をスキップし、`--application-domain`、`--zone`、`--dedicated-zone` と組み合わせることはできません。
 
-Read-only plans, workers.dev installations with the default API hostname, and supported lifecycle operations can use Cloudflare browser login and the system keychain. Installation that writes DNS or creates a zone needs a management API token. The interactive installer guides you to create one and paste it into a masked prompt; scripts use `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN`.
+読み取り専用のプラン、既定の API ホスト名を使用する workers.dev のインストール、およびサポートされているライフサイクル操作では、Cloudflare のブラウザーログインとシステムのキーチェーンを使用できます。DNS を書き込む、またはゾーンを作成するインストールには、管理用の API トークンが必要です。対話式のインストーラーがトークンの作成を案内し、マスクされたプロンプトに貼り付けます。スクリプトでは `CLOUDFLARE_API_TOKEN` または `CF_API_TOKEN` を使用します。
 
-The installed platform needs a separate runtime token to provision resources for apps. The interactive installer prompts for it and the other setup values. For non-interactive installs, inject the variables listed in [Install from CI](../../guide/platform/installation/ci.md).
+インストールされたプラットフォームがアプリのリソースをプロビジョニングするには、別のランタイムトークンが必要です。対話式のインストーラーは、それと他のセットアップ値の入力を求めます。非対話的なインストールでは、[CI からのインストール](../../guide/platform/installation/ci.md)に記載されている変数を設定してください。
 
-To enable email during install or upgrade, set both `VOID_EMAIL_SENDER_DOMAIN` and `VOID_EMAIL_SHARED_ZONE_ID`. Void records the pair for later upgrades; supplying only one is an error.
+インストールまたはアップグレード時にメールを有効にするには、`VOID_EMAIL_SENDER_DOMAIN` と `VOID_EMAIL_SHARED_ZONE_ID` の両方を設定します。Void は、後のアップグレードのためにこの組を記録します。片方だけを指定するとエラーになります。
 
-Use `--dashboard-url `[`https://dash.example.com`](https://dash.example.com) when deploying the optional user
-dashboard separately. The URL must be an HTTPS origin without credentials, a
-path, query, or fragment. Void permits that origin's login callbacks and saves
-it for later maintenance; it does not deploy a dashboard Worker. Omission keeps
-an existing installation's saved dashboard origin.
+オプションのユーザーダッシュボードを別途デプロイする場合は、`--dashboard-url `[`https://dash.example.com`](https://dash.example.com) を使用します。URL は、認証情報、パス、クエリ、フラグメントを含まない HTTPS のオリジンでなければなりません。Void はそのオリジンのログインコールバックを許可し、今後のメンテナンスのために保存します。ダッシュボードの Worker はデプロイしません。省略した場合、既存のインストールに保存されているダッシュボードのオリジンが維持されます。
 
-`--plan` previews resource names, login methods, default app access, the login callback URL, database configuration, and credential requirements. An existing Hyperdrive shows its database and configuration name. Setup links are shown during guided credential setup. Completed previews save nonsecret installation choices locally. Rerun `void platform install` to choose a saved plan and review a fresh check of Cloudflare state, or run the install or resume command printed at the end. Started installations use their saved checkpoints; completed installations are excluded from the chooser. For login configuration, use either `--auth-config` or `--login-methods` with the Access protection flags.
+`--plan` は、リソース名、ログイン方法、既定のアプリアクセス、ログインのコールバック URL、データベースの構成、認証情報の要件をプレビューします。既存の Hyperdrive では、そのデータベースと構成名が表示されます。セットアップのリンクは、ガイド付きの認証情報セットアップの間に表示されます。完了したプレビューは、機密ではないインストールの選択内容をローカルに保存します。`void platform install` を再実行して保存済みのプランを選択し、Cloudflare の状態の新しいチェックを確認するか、最後に表示されるインストールまたは再開のコマンドを実行します。開始済みのインストールは保存されたチェックポイントを使用し、完了したインストールは選択肢から除外されます。ログインの設定には、`--auth-config`、または Access の保護フラグと組み合わせた `--login-methods` のどちらかを使用します。
 
-App access is configured before traffic opens. With platform protection enabled,
-the installer recommends reusing its company policy; otherwise it defaults to
-public apps. Use `--app-access custom` to select separate hosting-account policies.
-Public apps in a Default-Deny account receive scoped public Access rules. The
-installer explains and collects the encrypted management credential when needed;
-scripts supply `VOID_PLATFORM_APP_ACCESS_TOKEN` or `appAccess.tokenEnv` in the
-authentication file. Upgrades preserve administrator settings.
+アプリのアクセスは、トラフィックを開く前に設定されます。プラットフォームの保護が有効な場合、インストーラーはその会社のポリシーの再利用を推奨します。そうでない場合は、既定で公開アプリになります。ホスティングアカウントごとに別々のポリシーを選択するには、`--app-access custom` を使用します。Default-Deny のアカウントでの公開アプリには、スコープ付きの公開 Access ルールが付与されます。必要な場合、インストーラーは暗号化された管理用の認証情報について説明し、収集します。スクリプトでは、`VOID_PLATFORM_APP_ACCESS_TOKEN`、または認証ファイルの `appAccess.tokenEnv` を指定します。アップグレードでは、管理者の設定が維持されます。
 
-New resources use `void-<name>-<role>` names; choose an unused installation name. The installer opens setup pages for missing credentials and reuses values already supplied.
+新しいリソースには `void-<name>-<role>` の名前が使われるため、未使用のインストール名を選択してください。インストーラーは、不足している認証情報のセットアップページを開き、すでに指定された値を再利用します。
 
-During Access setup, choose existing company policies or **Create in Cloudflare**
-for manual setup instructions and an account dashboard link. After you save the
-policy and confirm completion, Void reloads the list so you can select it and
-continue in the same run. When Void creates the Access applications, **Allow my
-company’s email domain** creates an Allow policy for the domains you enter and
-selects it. **Refresh list** reloads policies created in another window. Your
-identity-provider choice and still-available policy selections are retained. If a
-selected policy does not restrict sign-in to company identities, Void explains why
-and asks again.
+Access のセットアップでは、既存の会社のポリシーを選択するか、**Create in Cloudflare** を選択して、手動セットアップの手順とアカウントダッシュボードへのリンクを表示します。ポリシーを保存して完了を確認すると、Void が一覧を再読み込みするため、それを選択して同じ実行の中で続行できます。Void が Access のアプリケーションを作成する場合、**Allow my company’s email domain** を選択すると、入力したドメインに対する Allow ポリシーが作成され、選択されます。**Refresh list** は、別のウィンドウで作成したポリシーを再読み込みします。ID プロバイダーの選択と、引き続き利用可能なポリシーの選択は保持されます。選択したポリシーがサインインを会社の ID に制限していない場合、Void はその理由を説明し、再度選択を求めます。
 
-Installation progress and partial credentials are saved encrypted locally. Rerun the installer to continue unfinished setup, or pass `--resume --name <id>`. Use lifecycle commands for completed installations.
+インストールの進行状況と部分的な認証情報は、暗号化されてローカルに保存されます。インストーラーを再実行して未完了のセットアップを続行するか、`--resume --name <id>` を渡します。完了したインストールには、ライフサイクルコマンドを使用してください。
 
-Use an empty PostgreSQL database dedicated to the installation. You can correct a failed initial connection, but after the database is claimed or Hyperdrive is provisioned, commands reject a different URL.
+インストール専用の、空の PostgreSQL データベースを使用してください。最初の接続に失敗した場合は修正できますが、データベースが確保された後、または Hyperdrive がプロビジョニングされた後は、別の URL はコマンドに拒否されます。
 
-Choose whether Void creates Hyperdrive or uses an existing configuration. An existing Hyperdrive must point to the platform database with SQL result caching disabled. Supply a database owner URL for migrations. See [Use an existing Hyperdrive](../../guide/platform/installation/prerequisites.md#use-an-existing-hyperdrive) for setup and [Install from CI](../../guide/platform/installation/ci.md) for unattended inputs.
+Void が Hyperdrive を作成するか、既存の構成を使用するかを選択します。既存の Hyperdrive は、SQL の結果キャッシュを無効にした状態で、プラットフォームのデータベースを指している必要があります。マイグレーション用に、データベースのオーナーの URL を指定してください。セットアップについては[既存の Hyperdrive を使用する](../../guide/platform/installation/prerequisites.md#use-an-existing-hyperdrive)、無人実行の入力については [CI からのインストール](../../guide/platform/installation/ci.md)を参照してください。
 
-Recovery secrets are encrypted using your system keychain. Without one, supply a base64-encoded 32-byte `VOID_PLATFORM_RECOVERY_KEY`. Keep the original credentials in protected CI secrets for recovery.
+復旧用のシークレットは、システムのキーチェーンを使用して暗号化されます。キーチェーンがない場合は、base64 エンコードされた 32 バイトの `VOID_PLATFORM_RECOVERY_KEY` を指定してください。復旧のために、元の認証情報は保護された CI のシークレットに保管してください。
 
-If a newly created zone is waiting for registrar delegation, resume after it becomes active:
+新しく作成されたゾーンがレジストラーの委任を待っている場合は、有効になってから再開します。
 
 ```sh
 void platform install --resume --name <installation-id>
 ```
 
-See [Self-host a Void platform](../../guide/self-hosted-platform.md) for prerequisites, token scope, exact footprint, domain behavior, and an end-to-end walkthrough.
+前提条件、トークンのスコープ、正確な構成要素、ドメインの動作、エンドツーエンドの手順については、[Void プラットフォームのセルフホスト](../../guide/self-hosted-platform.md)を参照してください。
 
 ## `void platform domain set` {#void-platform-domain-set}
 
@@ -90,13 +72,13 @@ See [Self-host a Void platform](../../guide/self-hosted-platform.md) for prerequ
 void platform domain set <domain> [--installation <id>] [--zone <domain>] [--dedicated-zone] [--plan] [--yes]
 ```
 
-Add an application domain to a workers.dev test platform. Domain-based installations remain the recommended default. The command detects the zone when possible, creates missing DNS and routes after confirmation, and checks HTTPS and project Zero Trust protection before making the domain canonical. If DNS, certificates, or protection are pending, rerun the same command to resume. `--plan` is read-only; non-interactive mutations require `--yes`.
+workers.dev のテスト用プラットフォームに、アプリケーションドメインを追加します。ドメインベースのインストールが、引き続き推奨される既定の方法です。このコマンドは、可能な場合にゾーンを検出し、確認後に不足している DNS とルートを作成し、ドメインを正規のものにする前に HTTPS とプロジェクトの Zero Trust による保護を確認します。DNS、証明書、保護が保留中の場合は、同じコマンドを再実行して再開します。`--plan` は読み取り専用です。非対話的な変更には `--yes` が必要です。
 
-Existing workers.dev URLs remain available, and the platform API origin, OAuth callback, projects, and deployments stay unchanged. The command verifies the running runtime token's Cache Purge permission for the new zone. A disabled platform stays disabled. Use the database URL from the original installation when administering from another machine. Replacing an already configured application domain is not supported. See [Adding a Domain](../../guide/platform/installation/domains.md#adding-a-domain).
+既存の workers.dev の URL は引き続き利用でき、プラットフォームの API オリジン、OAuth コールバック、プロジェクト、デプロイは変更されません。このコマンドは、実行中のランタイムトークンが新しいゾーンに対する Cache Purge 権限を持っていることを確認します。無効化されたプラットフォームは、無効のままです。別のマシンから管理する場合は、元のインストールで使用したデータベース URL を使用してください。すでに設定されているアプリケーションドメインの置き換えはサポートされていません。[ドメインの追加](../../guide/platform/installation/domains.md#adding-a-domain)を参照してください。
 
-## Lifecycle commands {#lifecycle-commands}
+## ライフサイクルコマンド {#lifecycle-commands}
 
-Use these commands to recover, update, pause, or remove an installation:
+インストールの復旧、更新、一時停止、削除には、これらのコマンドを使用します。
 
 ```sh
 void platform discover [--account <id>] [--installation <id-or-name>]
@@ -108,49 +90,42 @@ void platform enable [id] [--runtime <path>] [--plan] [--yes]
 void platform uninstall [id] [--plan] [--purge-data | --purge-resources] [--yes]
 ```
 
-`discover --installation` limits recovery and endpoint verification to one installation in a shared Cloudflare account.
+`discover --installation` は、共有の Cloudflare アカウント内で、復旧とエンドポイントの検証を 1 つのインストールに限定します。
 
-Use the installation slug shown beside its name in `void platform list`. Installation IDs and saved connection IDs also work. Lifecycle commands require local installation records; use `discover` to restore them on another machine. Omit `id` when only one installation is configured, or choose from the interactive picker. Non-interactive commands need a slug or ID when several installations exist. Commands that make changes also require `--yes`; `--plan` only previews changes.
+`void platform list` で名前の横に表示されるインストールのスラッグを使用します。インストール ID と保存済みの接続 ID も使用できます。ライフサイクルコマンドにはローカルのインストール記録が必要です。別のマシンで復元するには `discover` を使用してください。インストールが 1 つだけ設定されている場合は `id` を省略するか、対話式の選択画面から選びます。非対話的なコマンドでは、複数のインストールが存在する場合、スラッグまたは ID が必要です。変更を行うコマンドには `--yes` も必要です。`--plan` は変更をプレビューするだけです。
 
-To add or explicitly change a separately deployed dashboard after installation,
-use `repair --dashboard-url <origin>` or `upgrade --dashboard-url <origin>`.
-Preview with `--plan` first. Existing Access protection must cover the configured
-dashboard origin before maintenance can proceed. See [Optional Dashboard](../../guide/platform/installation/domains.md#optional-dashboard).
+インストール後に、別途デプロイされたダッシュボードを追加または明示的に変更するには、`repair --dashboard-url <origin>` または `upgrade --dashboard-url <origin>` を使用します。先に `--plan` でプレビューしてください。メンテナンスを進めるには、既存の Access による保護が、設定されたダッシュボードのオリジンをカバーしている必要があります。[オプションのダッシュボード](../../guide/platform/installation/domains.md#optional-dashboard)を参照してください。
 
-While first administrator setup is pending, `repair --auth-config <path>` replaces
-the login settings from a file in the install format and prints a new setup code.
-Interactive repair offers the same change with the saved values filled in. Login
-methods and Access protection stay as installed. Run it on the computer that
-installed the platform. See [First administrator sign-in fails](../../guide/platform/installation/maintenance.md#first-administrator-sign-in-fails).
+最初の管理者のセットアップが保留中の間、`repair --auth-config <path>` は、インストール時の形式のファイルからログイン設定を置き換え、新しいセットアップコードを表示します。対話式の repair では、保存済みの値が入力された状態で同じ変更を行えます。ログイン方法と Access による保護は、インストール時のままです。プラットフォームをインストールしたコンピューターで実行してください。[最初の管理者のサインインに失敗する](../../guide/platform/installation/maintenance.md#first-administrator-sign-in-fails)を参照してください。
 
-After discovery on another machine, set `VOID_PLATFORM_DATABASE_URL`. See [Manage an installation from another machine](../../guide/platform/installation/maintenance.md#manage-an-installation-from-another-machine) for the secrets needed to recreate a missing Worker.
+別のマシンで検出した後は、`VOID_PLATFORM_DATABASE_URL` を設定してください。失われた Worker を再作成するために必要なシークレットについては、[別のマシンからインストールを管理する](../../guide/platform/installation/maintenance.md#manage-an-installation-from-another-machine)を参照してください。
 
-| Command     | Behavior                                                                                                    |
-| ----------- | ----------------------------------------------------------------------------------------------------------- |
-| `discover`  | Verifies remote ownership and restores local installation records without downloading secrets               |
-| `repair`    | Recreates missing resources owned by the installer                                                          |
-| `upgrade`   | Deploys the selected runtime and supported pending migrations                                               |
-| `rollback`  | Restores a declared-compatible earlier runtime without reversing PostgreSQL migrations                      |
-| `disable`   | Blocks app traffic and the platform API without removing data; only admin status and sign-in stay available |
-| `enable`    | Redeploys and verifies the platform Workers, then restores traffic                                          |
-| `uninstall` | Blocks traffic and removes eligible resources, retaining data by default                                    |
+| コマンド    | 動作                                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `discover`  | リモートの所有関係を検証し、シークレットをダウンロードせずにローカルのインストール記録を復元します                              |
+| `repair`    | インストーラーが所有する、不足しているリソースを再作成します                                                                    |
+| `upgrade`   | 選択したランタイムと、サポートされている保留中のマイグレーションをデプロイします                                                |
+| `rollback`  | PostgreSQL のマイグレーションを元に戻さずに、互換性が宣言されている以前のランタイムを復元します                                 |
+| `disable`   | データを削除せずにアプリのトラフィックとプラットフォームの API をブロックします。管理者のステータスとサインインのみ利用可能です |
+| `enable`    | プラットフォームの Worker を再デプロイして検証し、トラフィックを復元します                                                      |
+| `uninstall` | トラフィックをブロックし、対象となるリソースを削除します。データは既定で保持されます                                            |
 
-Repair and upgrade preserve disabled state. New, resumed, and previously disabled installations block user traffic until all target Workers pass verification; the installer's health probes can still run. Routes and custom domains remain attached.
+repair と upgrade は、無効化された状態を維持します。新規、再開された、および以前に無効化されたインストールは、すべての対象 Worker が検証に合格するまでユーザーのトラフィックをブロックします。インストーラーのヘルスプローブは引き続き実行できます。ルートとカスタムドメインは接続されたままです。
 
-`--runtime` selects a custom platform build. Relative paths resolve from your current directory. Void verifies the build before making changes; see [Platform Development](../../guide/platform/development/runtime.md#deploying-your-runtime) for creating one.
+`--runtime` は、カスタムのプラットフォームビルドを選択します。相対パスは、現在のディレクトリから解決されます。Void は変更を行う前にビルドを検証します。作成方法については、[プラットフォーム開発](../../guide/platform/development/runtime.md#deploying-your-runtime)を参照してください。
 
-Without `--runtime`, the CLI uses its packaged platform version.
+`--runtime` を指定しない場合、CLI はパッケージされたプラットフォームのバージョンを使用します。
 
-Platform migrations only move forward. Void checks compatibility before updating the database and tells you if an intermediate release is needed.
+プラットフォームのマイグレーションは前方にのみ進みます。Void はデータベースを更新する前に互換性を確認し、中間のリリースが必要な場合は通知します。
 
-An upgrade completes after the new Workers pass health checks. If rollout fails, Void attempts to restore the previous Workers. Retrying does not repeat completed migrations.
+アップグレードは、新しい Worker がヘルスチェックに合格した後に完了します。ロールアウトに失敗した場合、Void は以前の Worker の復元を試みます。再試行しても、完了済みのマイグレーションは繰り返されません。
 
-`platform rollback` restores a compatible earlier runtime without reversing database migrations. Pass its files with `--runtime`; if the installed version is custom, also supply that version with `--from-runtime`. Void refuses incompatible targets.
+`platform rollback` は、データベースのマイグレーションを元に戻さずに、互換性のある以前のランタイムを復元します。そのファイルを `--runtime` で渡します。インストール済みのバージョンがカスタムのものである場合は、`--from-runtime` でそのバージョンも指定してください。Void は互換性のないターゲットを拒否します。
 
-If project Zero Trust is on and no platform user exists yet, uninstall turns it off and deletes its Access applications first. Run it on the computer that installed the platform.
+プロジェクトの Zero Trust が有効で、プラットフォームのユーザーがまだ存在しない場合、uninstall は先にそれを無効にし、その Access アプリケーションを削除します。プラットフォームをインストールしたコンピューターで実行してください。
 
-Uninstall verifies remote ownership before removing anything. Data resources are retained unless you pass `--purge-data`. Workers, the Queues they use, R2, AI Gateway, DNS records, routes, custom domains, adopted resources, external PostgreSQL, and zones are retained for manual review. `--keep-zone` is deprecated and has no effect; uninstall always keeps zones.
+uninstall は、何かを削除する前にリモートの所有関係を検証します。データのリソースは、`--purge-data` を渡さない限り保持されます。Worker、それらが使用する Queues、R2、AI Gateway、DNS レコード、ルート、カスタムドメイン、取り込まれたリソース、外部の PostgreSQL、ゾーンは、手動での確認のために保持されます。`--keep-zone` は非推奨で、効果はありません。uninstall は常にゾーンを保持します。
 
-`--purge-resources` includes `--purge-data` and also deletes every other resource the installation created, including Workers, Queues, R2, AI Gateway, the platform DNS record, routes, custom domains, and installer-created Access resources. It removes only the Email Routing rules that send mail to the platform email gateway, and keeps zones, adopted resources, external PostgreSQL, other Email Routing settings, and API tokens. A route, custom domain, DNS record, or Access resource that no longer matches the installation's record is kept and listed. It refuses before any change while projects remain or resource reads are denied. Use the Edit permissions listed by `--plan`; read checks cannot verify them, so a denied deletion can stop uninstall after changes have begun. Rerun the same command to continue after an interruption, or after a plain or `--purge-data` uninstall stopped.
+`--purge-resources` は `--purge-data` を含み、Worker、Queues、R2、AI Gateway、プラットフォームの DNS レコード、ルート、カスタムドメイン、インストーラーが作成した Access リソースなど、インストールが作成した他のすべてのリソースも削除します。プラットフォームのメールゲートウェイにメールを送る Email Routing のルールだけを削除し、ゾーン、取り込まれたリソース、外部の PostgreSQL、その他の Email Routing の設定、API トークンは保持します。インストールの記録と一致しなくなったルート、カスタムドメイン、DNS レコード、Access リソースは保持され、一覧表示されます。プロジェクトが残っている場合や、リソースの読み取りが拒否された場合は、何も変更せずに拒否します。`--plan` に表示される Edit 権限を使用してください。読み取りチェックではそれらを検証できないため、削除が拒否されると、変更が始まった後で uninstall が停止することがあります。中断した後や、通常の uninstall または `--purge-data` の uninstall が停止した後は、同じコマンドを再実行して続行します。
 
-See [Disable and Uninstall](../../guide/platform/installation/uninstall.md#remove-retained-resources) for the full removal policy and the cleanup order.
+完全な削除ポリシーとクリーンアップの順序については、[無効化とアンインストール](../../guide/platform/installation/uninstall.md#remove-retained-resources)を参照してください。

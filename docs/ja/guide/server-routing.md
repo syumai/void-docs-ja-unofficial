@@ -2,21 +2,21 @@
 outline: deep
 ---
 
-# Server Routing
+# サーバールーティング {#server-routing}
 
-Create a file in `routes/` to add an endpoint, and export a handler for each HTTP method you want to support. Void uses [Hono](https://hono.dev) for routing and middleware.
+`routes/` にファイルを作成するとエンドポイントを追加でき、サポートしたい HTTP メソッドごとにハンドラーをエクスポートします。Void は、ルーティングとミドルウェアに [Hono](https://hono.dev) を使用します。
 
-## Route Files
+## ルートファイル {#route-files}
 
-Create route handlers in `routes/**/*.ts`. Each file maps to a URL path based on its location in the filesystem:
+`routes/**/*.ts` にルートハンドラーを作成します。各ファイルは、ファイルシステム上の位置に基づいて URL パスに対応付けられます。
 
 <RoutesFileTree />
 
-Dynamic segments use brackets: `[id]` becomes a route parameter and `[...slug]` becomes a catch-all. Files or directories starting with `_` are ignored. Directories wrapped in parentheses like `(admin)` are route groups. They help organize files without changing the URL.
+動的セグメントには角括弧を使用します。`[id]` はルートパラメーターに、`[...slug]` はキャッチオールになります。`_` で始まるファイルやディレクトリは無視されます。`(admin)` のように括弧で囲まれたディレクトリはルートグループです。URL を変えずにファイルを整理するのに役立ちます。
 
-### Environment-only routes
+### 環境限定のルート {#environment-only-routes}
 
-Add a `.dev` or `.prod` suffix before the extension to include a route in only one environment:
+拡張子の前に `.dev` または `.prod` のサフィックスを付けると、ルートを一方の環境だけに含められます。
 
 ```
 routes/
@@ -25,11 +25,11 @@ routes/
   api/metrics.prod.ts  →  production only
 ```
 
-`.dev` routes run only in development; `.prod` routes run in builds, deployments, and production previews. A resource used only by `.dev` routes is not provisioned for production.
+`.dev` ルートは開発中のみ動作し、`.prod` ルートはビルド、デプロイ、本番プレビューで動作します。`.dev` ルートでのみ使用されるリソースは、本番用にはプロビジョニングされません。
 
-Suffixes apply only in `routes/`, not in `pages/`, `middleware/`, `crons/`, or `queues/`. `void prepare` generates types for both environments.
+サフィックスは `routes/` でのみ有効で、`pages/`、`middleware/`、`crons/`、`queues/` では有効ではありません。`void prepare` は両方の環境の型を生成します。
 
-Each file exports named HTTP method constants to handle specific methods:
+各ファイルは、特定のメソッドを処理するために、名前付きの HTTP メソッド定数をエクスポートします。
 
 ```ts
 // routes/api/hello.ts  →  GET /api/hello
@@ -40,7 +40,7 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-A file can export multiple methods:
+1 つのファイルから複数のメソッドをエクスポートできます。
 
 ```ts
 import { users } from '@schema';
@@ -59,22 +59,22 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-See [Database](./database.md) for queries with D1, PostgreSQL, or MySQL.
+D1、PostgreSQL、MySQL を使ったクエリについては、[データベース](./database.md)を参照してください。
 
-## `defineHandler`
+## `defineHandler` {#definehandler}
 
-The handler receives a Hono `Context` with typed Cloudflare bindings on `c.env` (see [Cloudflare](../integrations/cloudflare.md)). You can use the full Hono API (`c.json()`, `c.text()`, `c.header()`, etc.).
+ハンドラーは、`c.env` に型付きの Cloudflare バインディングを持つ Hono の `Context` を受け取ります([Cloudflare](../integrations/cloudflare.md)を参照)。Hono の API(`c.json()`、`c.text()`、`c.header()` など)をすべて使用できます。
 
-Return values are automatically converted:
+戻り値は自動的に変換されます。
 
-- **object/array/number/boolean** → JSON response
+- **object/array/number/boolean** → JSON レスポンス
 - **`string`** → `text/html; charset=utf-8`
 - **`null`/`undefined`** → `204 No Content`
-- **`Response`** → returned as-is
+- **`Response`** → そのまま返される
 
-## Validation
+## バリデーション {#validation}
 
-`defineHandler.withValidator()` adds input validation for `body`, `query`, and `params`. The recommended approach is to derive validators from your [Drizzle schema](./database.md#schema-derived-validators), which keeps validation in sync with the database.
+`defineHandler.withValidator()` は、`body`、`query`、`params` の入力バリデーションを追加します。推奨される方法は、[Drizzle スキーマ](./database.md#schema-derived-validators)からバリデーターを導出することです。これにより、バリデーションがデータベースと同期されます。
 
 ```ts
 import { users, insertUserSchema } from '@schema';
@@ -90,11 +90,11 @@ export const POST = defineHandler.withValidator({
 });
 ```
 
-See [Database: Schema-Derived Validators](./database.md#schema-derived-validators) for how to set up `createInsertSchema` with column refinements.
+カラムの絞り込みを伴う `createInsertSchema` のセットアップ方法については、[データベース: スキーマから導出されるバリデーター](./database.md#schema-derived-validators)を参照してください。
 
-### Manual validators
+### 手動のバリデーター {#manual-validators}
 
-For endpoints that don't map to a database table, you can write validators by hand using any [Standard Schema](https://standardschema.dev/)-compatible library (Valibot, Zod, ArkType, etc.):
+データベースのテーブルに対応しないエンドポイントでは、[Standard Schema](https://standardschema.dev/) 互換の任意のライブラリー(Valibot、Zod、ArkType など)を使って、バリデーターを手書きできます。
 
 ```ts
 import * as v from 'valibot';
@@ -111,9 +111,9 @@ export const POST = defineHandler.withValidator({
 });
 ```
 
-### Validation errors
+### バリデーションエラー {#validation-errors}
 
-When validation fails, a `400` response is returned with structured error details:
+バリデーションに失敗すると、構造化されたエラーの詳細とともに `400` レスポンスが返されます。
 
 ```json
 {
@@ -127,13 +127,13 @@ When validation fails, a `400` response is returned with structured error detail
 }
 ```
 
-Install your chosen validator library; no separate Standard Schema dependency is needed.
+選択したバリデーターライブラリーをインストールしてください。Standard Schema の別個の依存関係は不要です。
 
-Validator schemas also power the [typed fetch client](./typed-fetch.md), so `body`, `query`, and `params` types are enforced at the call site.
+バリデーターのスキーマは[型付き fetch クライアント](./typed-fetch.md)にも使われるため、`body`、`query`、`params` の型は呼び出し側で強制されます。
 
-## Middleware
+## ミドルウェア {#middleware}
 
-Void uses Hono middleware. `defineMiddleware()` adds types to the usual `(c, next)` function, and `defineHandler()` also accepts Hono middleware directly.
+Void は Hono のミドルウェアを使用します。`defineMiddleware()` は通常の `(c, next)` 関数に型を追加し、`defineHandler()` は Hono のミドルウェアも直接受け付けます。
 
 ```ts
 import { defineMiddleware } from 'void';
@@ -145,7 +145,7 @@ export const addServerTiming = defineMiddleware(async (c, next) => {
 });
 ```
 
-Any `hono/*` built-in middleware, response helpers, or third-party Hono ecosystem packages can be used in Void apps. If you want to import from `hono/*` in your app, make sure to install `hono` in your app first:
+`hono/*` の組み込みミドルウェア、レスポンスヘルパー、サードパーティーの Hono エコシステムのパッケージは、すべて Void アプリで使用できます。アプリで `hono/*` からインポートする場合は、先にアプリに `hono` をインストールしてください。
 
 ```bash
 npm install hono
@@ -157,11 +157,11 @@ import { cors } from 'hono/cors';
 const allowDashboard = cors({ origin: 'https://app.example.com' });
 ```
 
-You can apply middleware globally or per-route.
+ミドルウェアは、グローバルにも、ルートごとにも適用できます。
 
-### Global middleware
+### グローバルミドルウェア {#global-middleware}
 
-Global middleware runs on every request. Place files in `middleware/` and use numeric prefixes for ordering:
+グローバルミドルウェアはすべてのリクエストで実行されます。ファイルを `middleware/` に置き、順序付けには数値のプレフィックスを使用します。
 
 - `middleware/01.logger.ts`
 - `middleware/02.auth.ts`
@@ -175,7 +175,7 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-Use `basicAuth()` for a temporary site gate. Void's reserved `/__void` endpoints remain accessible for deployment and development tooling. Read credentials through callbacks:
+一時的なサイトのゲートには `basicAuth()` を使用します。Void が予約している `/__void` エンドポイントは、デプロイや開発ツールのためにアクセス可能なままです。認証情報はコールバックを通じて読み取ります。
 
 ```ts
 // env.ts
@@ -199,21 +199,21 @@ export default basicAuth({
 });
 ```
 
-Set `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` as local environment variables for development and production secrets before deploy.
+`BASIC_AUTH_USERNAME` と `BASIC_AUTH_PASSWORD` は、開発用にはローカルの環境変数として、本番用にはデプロイ前にシークレットとして設定してください。
 
-For app-specific bypasses such as health checks or public webhooks, compose that logic in your own middleware before calling `basicAuth()`.
+ヘルスチェックや公開 Webhook など、アプリ固有のバイパスが必要な場合は、`basicAuth()` を呼び出す前に、独自のミドルウェアでそのロジックを組み立ててください。
 
-Use `c.set()` to share data with downstream handlers. Augment `CloudContextVariables` for typed access with `c.get()`. See [Context variables](./type-safety.md#context-variables).
+後続のハンドラーとデータを共有するには `c.set()` を使用します。`c.get()` で型付きのアクセスを行うには、`CloudContextVariables` を拡張します。[コンテキスト変数](./type-safety.md#context-variables)を参照してください。
 
-### Per-route middleware
+### ルートごとのミドルウェア {#per-route-middleware}
 
-Pass middleware to `defineHandler` before the final route handler:
+最終的なルートハンドラーの前に、ミドルウェアを `defineHandler` に渡します。
 
 ```ts
 defineHandler(middleware1, middleware2, handler);
 ```
 
-Middleware runs in order. Each can short-circuit (return a response without calling `next()`) or post-process (modify the response after `await next()`). Both `defineMiddleware`-wrapped functions and raw Hono `MiddlewareHandler` functions are accepted.
+ミドルウェアは順番に実行されます。それぞれが、ショートサーキット(`next()` を呼び出さずにレスポンスを返す)することも、後処理(`await next()` の後でレスポンスを変更する)することもできます。`defineMiddleware` でラップされた関数も、素の Hono の `MiddlewareHandler` 関数も受け付けます。
 
 ```ts
 import { cors } from 'hono/cors';
@@ -225,6 +225,6 @@ export const GET = defineHandler(cors({ origin: 'https://app.example.com' }), (c
 }));
 ```
 
-Up to 5 middleware can be passed before the handler, with full type inference for each position.
+ハンドラーの前に最大 5 つのミドルウェアを渡すことができ、各位置で完全な型推論が行われます。
 
-See the [Hono integration guide](../integrations/hono.md) for more examples.
+その他の例については、[Hono 統合ガイド](../integrations/hono.md)を参照してください。

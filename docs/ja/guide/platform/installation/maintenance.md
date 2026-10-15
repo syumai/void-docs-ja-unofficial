@@ -2,213 +2,162 @@
 outline: deep
 ---
 
-# Maintenance and Recovery
+# メンテナンスとリカバリー {#maintenance-and-recovery}
 
-## Resume, repair, recover, and upgrade
+## 再開、修復、リカバリー、アップグレード {#resume-repair-recover-and-upgrade}
 
-Run `void platform list` to find the installation slug beside its name. Lifecycle commands accept this slug, an installation ID, or a saved connection ID. You can omit the selector when only one installation is configured. With several installations, choose one interactively or pass its slug or ID in CI.
+`void platform list` を実行すると、名前の横にインストールのスラッグが表示されます。ライフサイクルコマンドは、このスラッグ、インストール ID、または保存済みの接続 ID を受け付けます。設定済みのインストールが 1 つだけの場合は、セレクターを省略できます。複数のインストールがある場合は、対話的に選択するか、CI ではスラッグまたは ID を渡してください。
 
-### Resume an installation
+### インストールを再開する {#resume-an-installation}
 
-If setup stops or fails, continue from the saved progress:
+セットアップが停止または失敗した場合は、保存された進行状況から再開します。
 
 ```sh
 void platform install --resume --name <id>
 ```
 
-You can correct the database URL if the initial connection failed. Once Void has claimed the database or provisioned Hyperdrive, that database is fixed for the installation. A later command with a different URL stops before making changes.
+最初の接続に失敗した場合は、データベース URL を修正できます。Void がデータベースを確保した後、または Hyperdrive をプロビジョニングした後は、そのデータベースがインストールに固定されます。以降のコマンドで異なる URL を指定すると、変更を行う前に停止します。
 
-### Cloudflare Access blocks the health check {#cloudflare-access}
+### Cloudflare Access がヘルスチェックをブロックする {#cloudflare-access}
 
-If installation reports **Default-Deny (error 1050)**, Cloudflare blocked the HTTP health check before it reached Void. This is separate from the API token used to deploy the Workers.
+インストール時に **Default-Deny (error 1050)** が報告された場合は、HTTP ヘルスチェックが Void に到達する前に Cloudflare によってブロックされています。これは、Worker のデプロイに使用する API トークンとは別の問題です。
 
-Keep the company protection in place. Automatic Access setup saves its scoped
-service credentials with the installation's encrypted recovery material. For an
-existing gate, verify that its service policy admits the installation token and
-that the application covers the printed API and proxy origins. A Cloudflare
-management API token does not authenticate an Access-protected HTTP request.
+会社の保護設定はそのまま維持してください。Access の自動セットアップでは、スコープが限定されたサービス認証情報が、インストールの暗号化されたリカバリー用データとともに保存されます。既存のゲートがある場合は、そのサービスポリシーがインストールトークンを許可していること、およびアプリケーションが表示された API とプロキシのオリジンを対象としていることを確認してください。Cloudflare 管理用 API トークンでは、Access で保護された HTTP リクエストを認証できません。
 
-For automatic setup, resuming also creates or verifies an Access exception
-limited to `/health` on the reserved dispatch health hostname. Void still requires
-its private probe token on that endpoint; requests without it cannot reach an
-application. This lets installation check routing while employee protection and
-account-wide Default-Deny remain enabled. It does not bypass Access for an entire
-Worker or for deployed apps.
+自動セットアップの場合、再開時には、予約済みのディスパッチヘルスホスト名の `/health` に限定された Access の例外も作成または検証されます。Void はそのエンドポイントで引き続き専用のプローブトークンを要求するため、トークンのないリクエストはアプリケーションに到達できません。これにより、従業員向けの保護とアカウント全体の Default-Deny を有効にしたまま、インストール時にルーティングを確認できます。Worker 全体やデプロイ済みのアプリに対して Access をバイパスするものではありません。
 
-For externally supplied credentials, set `VOID_ACCESS_CREDENTIALS` from your
-secret manager to an object keyed by each exact API/proxy origin, with
-`CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` in each entry. Then rerun
-`void platform install --resume --name <id>`. Void retains the saved resources
-and stops if the gate still rejects its checks. Account-wide Default-Deny and
-deployed-application policies remain your responsibility.
+外部から提供される認証情報を使用する場合は、シークレットマネージャーから `VOID_ACCESS_CREDENTIALS` を、API とプロキシの各オリジンそのものをキーとし、各エントリーに `CF_ACCESS_CLIENT_ID` と `CF_ACCESS_CLIENT_SECRET` を持つオブジェクトとして設定します。その後、`void platform install --resume --name <id>` を再実行します。Void は保存されたリソースを保持し、ゲートが依然としてチェックを拒否する場合は停止します。アカウント全体の Default-Deny とデプロイ済みアプリケーションのポリシーは、引き続きお客様の責任です。
 
-### Expired administrator setup code
+### 管理者セットアップコードの有効期限切れ {#expired-administrator-setup-code}
 
-Resume an unfinished installation with `void platform install --resume --name <id>`.
-For completed provisioning whose administrator setup is still pending, run
-`void platform repair <id>`. Void prints a fresh setup code if the earlier code
-expired. Enter it at `/setup`, sign in, and confirm the displayed identity.
-An installation that already has an administrator does not reopen setup.
+未完了のインストールは、`void platform install --resume --name <id>` で再開します。プロビジョニングは完了しているものの管理者のセットアップが保留中の場合は、`void platform repair <id>` を実行します。以前のコードの有効期限が切れている場合、Void は新しいセットアップコードを表示します。それを `/setup` に入力してサインインし、表示された ID を確認してください。すでに管理者が存在するインストールでは、セットアップは再び開きません。
 
-### First administrator sign-in fails
+### 最初の管理者のサインインに失敗する {#first-administrator-sign-in-fails}
 
-If sign-in fails after you enter the setup code, the page shows the reason and an
-error code. When a provider setting may be the cause, it also shows the callback
-URL the provider must have.
+セットアップコードを入力した後にサインインに失敗した場合、ページには理由とエラーコードが表示されます。プロバイダーの設定が原因と考えられる場合は、プロバイダーに設定すべきコールバック URL も表示されます。
 
-| Error code                                                                  | What to check                                                               |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `github_incorrect_client_credentials`, `github_failed`, `oidc_token_failed` | The client ID and client secret, and that the provider has the callback URL |
-| `github_redirect_uri_mismatch`                                              | The callback URL registered in the GitHub OAuth app                         |
-| `oidc_discovery_failed`                                                     | The issuer URL, exactly, including any trailing slash                       |
-| `github_unverified_user_email`                                              | Verify the primary email of the GitHub account                              |
-| `google_domain_not_allowed`, `oidc_group_not_allowed`                       | Sign in with an allowed account, or change the allowed domains or groups    |
-| `login_denied`, `github_bad_verification_code`                              | Start a new sign-in                                                         |
+| エラーコード                                                                | 確認すること                                                                                |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `github_incorrect_client_credentials`, `github_failed`, `oidc_token_failed` | クライアント ID とクライアントシークレット、およびプロバイダーにコールバック URL があること |
+| `github_redirect_uri_mismatch`                                              | GitHub OAuth アプリに登録されているコールバック URL                                         |
+| `oidc_discovery_failed`                                                     | 末尾のスラッシュを含め、発行者 URL が正確であること                                         |
+| `github_unverified_user_email`                                              | GitHub アカウントのプライマリメールアドレスを確認する                                       |
+| `google_domain_not_allowed`, `oidc_group_not_allowed`                       | 許可されたアカウントでサインインするか、許可するドメインやグループを変更する                |
+| `login_denied`, `github_bad_verification_code`                              | 新しくサインインをやり直す                                                                  |
 
-If the provider shows its own error page instead, register exactly the callback
-URL printed with your setup code.
+プロバイダー独自のエラーページが表示される場合は、セットアップコードとともに表示されたコールバック URL をそのまま登録してください。
 
-To change the login settings, run repair on the computer that installed the
-platform:
+ログイン設定を変更するには、プラットフォームをインストールしたコンピューターで repair を実行します。
 
 ```sh
 void platform repair <id>
 void platform repair <id> --auth-config <path>
 ```
 
-Interactive repair asks whether to change the login settings, with the saved
-values filled in; leave the client secret blank to keep it. `--auth-config`
-takes a file in the [install format](/guide/platform/installation/setup#finish-login-configuration)
-and is the way to change OIDC allowed groups. Login methods and Access protection
-stay as installed. Repair prints a new setup code and the callback URL.
+対話的な repair では、保存済みの値が入力された状態で、ログイン設定を変更するかどうかが尋ねられます。クライアントシークレットを維持するには、空欄のままにしてください。`--auth-config` は[インストール形式](/ja/guide/platform/installation/setup#finish-login-configuration)のファイルを受け取り、OIDC の許可グループを変更する方法です。ログイン方法と Access の保護は、インストール時のまま維持されます。repair は新しいセットアップコードとコールバック URL を表示します。
 
-A GitHub-only installation signs in with the GitHub OAuth App from its
-installation settings. To replace its client ID and secret, set
-`VOID_PLATFORM_GITHUB_CLIENT_ID` and `VOID_PLATFORM_GITHUB_CLIENT_SECRET` when
-you run `void platform repair <id>`.
+GitHub のみのインストールは、インストール設定にある GitHub OAuth アプリでサインインします。そのクライアント ID とシークレットを置き換えるには、`void platform repair <id>` を実行するときに `VOID_PLATFORM_GITHUB_CLIENT_ID` と `VOID_PLATFORM_GITHUB_CLIENT_SECRET` を設定してください。
 
-### Repair missing resources
+### 不足しているリソースを修復する {#repair-missing-resources}
 
-Preview what needs repair, then apply it:
+修復が必要な内容をプレビューしてから、適用します。
 
 ```sh
 void platform repair [id] --plan
 void platform repair [id]
 ```
 
-Repair recreates missing infrastructure that the installer owns. It does not restore PostgreSQL rows or data stored in provider resources. If an adopted or external resource is missing, restore it yourself before continuing. A disabled platform stays disabled through repair and upgrade.
+repair は、インストーラーが所有する不足したインフラストラクチャを再作成します。PostgreSQL の行や、プロバイダーのリソースに保存されているデータは復元しません。取り込んだリソースや外部のリソースが不足している場合は、続行する前にご自身で復元してください。無効化されたプラットフォームは、repair やアップグレードを経ても無効のままです。
 
-### Upgrade the platform
+### プラットフォームをアップグレードする {#upgrade-the-platform}
 
-Keep the platform runtime current when updating the Void CLI.
+Void CLI を更新するときは、プラットフォームのランタイムも最新に保ってください。
 
-Use the installed CLI's packaged runtime to upgrade:
+インストール済みの CLI にパッケージされたランタイムを使用してアップグレードします。
 
 ```sh
 void platform upgrade [id] --plan
 void platform upgrade [id]
 ```
 
-An upgrade validates the runtime, applies supported pending migrations, deploys the Workers, and checks their health. Existing Worker secrets are preserved.
+アップグレードでは、ランタイムを検証し、サポートされている保留中のマイグレーションを適用し、Worker をデプロイして、そのヘルスをチェックします。既存の Worker シークレットは維持されます。
 
-Before starting, Void checks access to the installation's Cloudflare account, Workers, and existing R2 buckets. If credentials are rejected, set `CLOUDFLARE_API_TOKEN` to a management token scoped to that account and retry. This overrides the installation's saved management token.
+開始前に、Void はインストールの Cloudflare アカウント、Worker、既存の R2 バケットへのアクセスを確認します。認証情報が拒否された場合は、そのアカウントにスコープされた管理用トークンを `CLOUDFLARE_API_TOKEN` に設定して再試行してください。これは、インストールに保存されている管理用トークンを上書きします。
 
-::: details Migration safety, credential rotation, and interrupted upgrades
+::: details マイグレーションの安全性、認証情報のローテーション、中断されたアップグレード {#migration-safety}
 
-Some upgrades briefly put the platform into maintenance mode. Traffic resumes after the new version passes health checks. If an upgrade is interrupted during maintenance, rerun the same command to complete it.
+一部のアップグレードでは、プラットフォームが一時的にメンテナンスモードになります。新しいバージョンがヘルスチェックに合格すると、トラフィックが再開されます。メンテナンス中にアップグレードが中断された場合は、同じコマンドを再実行して完了させてください。
 
-To update the runtime Cloudflare token, GitHub OAuth credentials when GitHub login is enabled, or R2 credentials,
-provide their `VOID_PLATFORM_*` environment variables when running the upgrade.
-Only the supplied values replace live credentials. Recovery data from an older
-workstation does not overwrite them, and upgrades preserve the live signing keys
-and complete project-encryption keyring. Keep current credentials in your secret
-manager so they can also restore a missing Worker during repair.
+ランタイムの Cloudflare トークン、GitHub ログインが有効な場合の GitHub OAuth 認証情報、または R2 認証情報を更新するには、アップグレードの実行時にそれぞれの `VOID_PLATFORM_*` 環境変数を指定します。指定した値だけが、稼働中の認証情報を置き換えます。古いワークステーションのリカバリー用データが上書きすることはなく、アップグレードでは稼働中の署名キーと、完全なプロジェクト暗号化キーリングが維持されます。repair 中に不足している Worker を復元できるよう、現在の認証情報をシークレットマネージャーで管理してください。
 
-Database migrations only move forward. Void checks compatibility before upgrading and tells you if an intermediate release is needed. If deployment fails, it attempts to restore the previous Workers against the compatible database schema. Retrying does not repeat completed migrations.
+データベースのマイグレーションは前方にのみ進みます。Void はアップグレード前に互換性を確認し、中間リリースが必要な場合はそれを通知します。デプロイに失敗した場合は、互換性のあるデータベーススキーマに対して以前の Worker を復元しようとします。再試行しても、完了済みのマイグレーションが繰り返されることはありません。
 
-After a successful upgrade, you can restore a declared-compatible earlier runtime without reversing migrations:
+アップグレードの成功後、マイグレーションを元に戻さずに、互換性が宣言されている以前のランタイムを復元できます。
 
 ```sh
 void platform rollback [id] --runtime /path/to/earlier/runtime --plan
 void platform rollback [id] --runtime /path/to/earlier/runtime
 ```
 
-Keep the earlier runtime files if you need rollback. If the installed version is a custom build, also pass its files with `--from-runtime /path/to/current/runtime`. Void checks that the earlier version can run against your current database and refuses incompatible rollbacks. A later `upgrade` can move forward again. See [Platform Development](/guide/platform/development/runtime#deploying-your-runtime) for working with custom builds.
+ロールバックが必要になる場合に備えて、以前のランタイムのファイルを保管しておいてください。インストール済みのバージョンがカスタムビルドの場合は、`--from-runtime /path/to/current/runtime` でそのファイルも渡してください。Void は、以前のバージョンが現在のデータベースに対して動作できるかを確認し、互換性のないロールバックを拒否します。その後の `upgrade` で、再び前に進めることができます。カスタムビルドの扱いについては、[プラットフォーム開発](/ja/guide/platform/development/runtime#deploying-your-runtime)を参照してください。
 
-Do not roll back to 0.26.0 or earlier after upgrading to a later release. Void does not refuse this rollback, but those releases reject the credentials that later releases give your apps. Every project deployed or rotated since the upgrade loses AI, email, ISR revalidation, remote D1, KV, and R2, and prerendering until you upgrade again. If you have rolled back that far, upgrade again, then run `void platform system rotate-proxy-tokens --all --yes` and check with `--plan` until nothing is pending or failed.
+後のリリースにアップグレードした後で、0.26.0 以前にロールバックしないでください。Void はこのロールバックを拒否しませんが、それらのリリースは、後のリリースがアプリに与える認証情報を拒否します。アップグレード以降にデプロイまたはローテーションされたすべてのプロジェクトで、再度アップグレードするまで、AI、メール、ISR の再検証、リモートの D1、KV、R2、およびプリレンダリングが使用できなくなります。そこまでロールバックした場合は、再度アップグレードしてから `void platform system rotate-proxy-tokens --all --yes` を実行し、保留中または失敗した項目がなくなるまで `--plan` で確認してください。
 
-Let running rotations finish before you roll back. If an older proxy runs next to a newer API, prerendering and remote D1, KV, and R2 fail until both run the same release. After a rollback to the release just before credential rotation, projects deployed since the upgrade lose prerendering and remote D1, KV, and R2 until they are deployed again or you upgrade again. A rotated project deployed during any rollback stays broken after you upgrade again, and 0.26.0 and earlier also drop rotations that have not finished. After upgrading again from any rollback, run the same `rotate-proxy-tokens` commands.
+実行中のローテーションは、ロールバックの前に完了させてください。古いプロキシが新しい API と並んで動作していると、両方が同じリリースで動作するまで、プリレンダリングとリモートの D1、KV、R2 が失敗します。認証情報のローテーション直前のリリースにロールバックした後は、アップグレード以降にデプロイされたプロジェクトで、再度デプロイするか再度アップグレードするまで、プリレンダリングとリモートの D1、KV、R2 が使用できなくなります。ロールバック中にデプロイされたローテーション済みのプロジェクトは、再度アップグレードした後も壊れたままです。また、0.26.0 以前では、未完了のローテーションも失われます。どのロールバックの後でも、再度アップグレードしたら、同じ `rotate-proxy-tokens` コマンドを実行してください。
 
 :::
 
-### Follow upgrade and rollback progress
+### アップグレードとロールバックの進行状況を確認する {#follow-upgrade-and-rollback-progress}
 
-Watching progress is optional: a running upgrade or rollback proceeds through
-the CLI without action on the status page. During maintenance, navigating the
-admin UI automatically redirects to `/admin/status`. You can also open it
-directly on your platform API origin and sign in as an administrator.
+進行状況の確認は任意です。実行中のアップグレードやロールバックは、ステータスページで操作しなくても CLI を通じて進行します。メンテナンス中は、管理 UI を移動すると自動的に `/admin/status` にリダイレクトされます。プラットフォームの API オリジンで直接開き、管理者としてサインインすることもできます。
 
-The read-only page shows the saved operation, source and target versions, and
-the traffic state reported by the API. It refreshes automatically every five
-seconds while visible. If updates fail, it keeps the last confirmed snapshot
-and marks it as out of date. Normal administrator changes remain paused.
+この読み取り専用のページには、保存された操作、元と対象のバージョン、API が報告するトラフィックの状態が表示されます。表示中は 5 秒ごとに自動的に更新されます。更新に失敗した場合は、最後に確認されたスナップショットを保持し、古い情報であることを示します。通常の管理者による変更は、引き続き一時停止されます。
 
-Sign-in and status remain available while the API and authentication database
-are reachable. An operation completing
-does not confirm every project's health. A disabled installation keeps traffic
-paused after an upgrade or rollback.
+API と認証データベースに到達できる間は、サインインとステータスを利用できます。操作が完了しても、すべてのプロジェクトの健全性が確認されたわけではありません。無効化されたインストールは、アップグレードやロールバックの後もトラフィックの一時停止が維持されます。
 
-If an operation fails or waits for DNS or Sandbox drain work, the CLI prints
-the recovery instructions and command needed to resume. Resolve the reported
-problem, then resume with the same runtime files. For a custom rollback, retain
-the source runtime files too. `void platform status <id>` also prints locally saved progress
-before checking the live API; this local checkpoint can be out of date if another
-administrator changed the installation.
+操作が失敗した場合や、DNS または Sandbox のドレイン処理を待っている場合、CLI は再開に必要なリカバリーの手順とコマンドを表示します。報告された問題を解決してから、同じランタイムファイルで再開してください。カスタムのロールバックの場合は、元のランタイムファイルも保管しておいてください。`void platform status <id>` も、稼働中の API を確認する前に、ローカルに保存された進行状況を表示します。別の管理者がインストールを変更した場合、このローカルのチェックポイントは古くなっていることがあります。
 
-When application traffic is paused, visitors receive a temporary-unavailability
-page with a **Try again** link. API requests and form submissions still receive
-HTTP 503 responses. Void does not automatically replay requests; visitors who
-submitted a form should check its result before submitting it again.
+アプリケーションのトラフィックが一時停止されている間、訪問者には **Try again** リンクが付いた一時的な利用不可のページが表示されます。API リクエストとフォーム送信には、引き続き HTTP 503 が返されます。Void はリクエストを自動的に再送しません。フォームを送信した訪問者は、再送信する前に結果を確認してください。
 
-### Manage an installation from another machine
+### 別のマシンからインストールを管理する {#manage-an-installation-from-another-machine}
 
-Use `discover` to restore the administrator's local installation records:
+`discover` を使用して、管理者のローカルのインストール記録を復元します。
 
 ```sh
 void platform discover --account <account-id> --installation <id-or-name>
 ```
 
-Discovery restores local installation records after verifying the resources belong to your platform. It also works for interrupted or disabled installations. If infrastructure is missing, run `void platform repair [id]` after discovery. If ownership cannot be verified, the command stops without changing resources.
+discover は、リソースがお客様のプラットフォームに属していることを検証した後、ローカルのインストール記録を復元します。中断されたインストールや無効化されたインストールでも使用できます。インフラストラクチャが不足している場合は、discover の後に `void platform repair [id]` を実行してください。所有権を検証できない場合、コマンドはリソースを変更せずに停止します。
 
-After discovery, provide `VOID_PLATFORM_DATABASE_URL` for migrations and to coordinate administrator commands. You don't need to re-enter the other secrets for an upgrade that preserves every deployed Worker. For an email-enabled installation without its encrypted recovery file, restore `VOID_PLATFORM_EMAIL_SIGNING_SECRET`; recreating only the email gateway needs that key and no Cloudflare runtime token or JWT signing key. Recreating the API or proxy also requires the email key when email is enabled, in addition to their normal secrets. Recreating the API requires its original runtime token (`VOID_PLATFORM_RUNTIME_CLOUDFLARE_API_TOKEN`), R2, JWT, and project-encryption values through the `VOID_PLATFORM_*` variables; a GitHub-only installation also needs its original GitHub OAuth values. Recreating the proxy requires the runtime token and JWT signing key. Cloudflare can't return these values, so keep them in your organization's secret manager.
+discover の後は、マイグレーションと管理者コマンドの調整のために `VOID_PLATFORM_DATABASE_URL` を指定してください。デプロイ済みのすべての Worker を維持するアップグレードでは、他のシークレットを再入力する必要はありません。メールが有効で、暗号化されたリカバリーファイルがないインストールでは、`VOID_PLATFORM_EMAIL_SIGNING_SECRET` を復元してください。メールゲートウェイだけを再作成する場合は、このキーが必要で、Cloudflare のランタイムトークンや JWT 署名キーは必要ありません。API またはプロキシを再作成する場合も、メールが有効であれば、通常のシークレットに加えてメールのキーが必要です。API を再作成するには、元のランタイムトークン（`VOID_PLATFORM_RUNTIME_CLOUDFLARE_API_TOKEN`）、R2、JWT、プロジェクト暗号化の値を `VOID_PLATFORM_*` 変数で渡す必要があります。GitHub のみのインストールでは、元の GitHub OAuth の値も必要です。プロキシを再作成するには、ランタイムトークンと JWT 署名キーが必要です。Cloudflare はこれらの値を返せないため、組織のシークレットマネージャーで管理してください。
 
-If you have not rotated the project-encryption key, restore it with `VOID_PLATFORM_PROJECT_SECRET_KEY`. After rotation, supply `VOID_PLATFORM_PROJECT_SECRET_KEYS_JSON` with all retained keys and `VOID_PLATFORM_PROJECT_SECRET_ACTIVE_KEY_VERSION` with the active key's name. Keep older keys needed to decrypt existing project secrets. These values are used to recreate a missing API Worker; they do not replace the live keys during an ordinary upgrade. Supply them from your secret manager.
+プロジェクト暗号化キーをローテーションしていない場合は、`VOID_PLATFORM_PROJECT_SECRET_KEY` で復元します。ローテーション後は、保持しているすべてのキーを含む `VOID_PLATFORM_PROJECT_SECRET_KEYS_JSON` と、アクティブなキーの名前を指定する `VOID_PLATFORM_PROJECT_SECRET_ACTIVE_KEY_VERSION` を指定してください。既存のプロジェクトシークレットの復号に必要な古いキーも保持してください。これらの値は、不足している API Worker を再作成するために使用されます。通常のアップグレードで稼働中のキーを置き換えることはありません。シークレットマネージャーから指定してください。
 
-### Prepare for disaster recovery
+### ディザスタリカバリーに備える {#prepare-for-disaster-recovery}
 
-`discover` reconstructs verified installation metadata on another machine. It does not download credentials, key material, or backed-up data. `repair` can then recreate missing installer-owned infrastructure, but it does not recover the data that infrastructure previously held.
+`discover` は、検証済みのインストールメタデータを別のマシンで再構築します。認証情報、キー素材、バックアップされたデータはダウンロードしません。その後 `repair` で、不足しているインストーラー所有のインフラストラクチャを再作成できますが、そのインフラストラクチャが以前保持していたデータは復元されません。
 
-Keep a coordinated recovery set for each installation:
+インストールごとに、整合性のあるリカバリーセットを保管してください。
 
-- a PostgreSQL backup;
-- the installation identity—the JWT signing secret, the email signing secret when email is enabled, and the complete project-encryption keyring—in a secret manager;
-- provider-supported backups or exports for every data-bearing provider resource;
-- the immutable runtime artifacts and manifest for the installed version or custom source revision.
+- PostgreSQL のバックアップ
+- インストールの ID（JWT 署名シークレット、メールが有効な場合のメール署名シークレット、完全なプロジェクト暗号化キーリング）を、シークレットマネージャーに保管したもの
+- データを保持するすべてのプロバイダーリソースについて、プロバイダーがサポートするバックアップまたはエクスポート
+- インストール済みのバージョン、またはカスタムソースのリビジョンに対応する、イミュータブルなランタイムアーティファクトとマニフェスト
 
-Capture and label these items as one recovery point so PostgreSQL, provider data, identity, and encryption keys match. Backup and retention capabilities vary by provider and resource; choose and test the supported recovery process for each resource you use.
+PostgreSQL、プロバイダーのデータ、ID、暗号化キーが一致するように、これらを 1 つのリカバリーポイントとして取得し、ラベルを付けてください。バックアップと保持の機能は、プロバイダーやリソースによって異なります。使用する各リソースについて、サポートされているリカバリー手順を選択し、テストしてください。
 
-During a restore, keep platform and application traffic disabled before changing resources. Restore the matching PostgreSQL and provider data with their supported recovery tools, supply the original identity and keyring, and use the preserved runtime artifact. Then run `discover`, preview `repair` with `--plan`, and review every ownership decision and proposed resource change before applying it. Enable traffic only after the restored data and platform health have been verified. Discovery and repair are not substitutes for those backups and do not provide a recovery bypass when required secrets or data are unavailable.
+リストアの際は、リソースを変更する前に、プラットフォームとアプリケーションのトラフィックを無効にしておいてください。対応する PostgreSQL とプロバイダーのデータを、それぞれがサポートするリカバリーツールで復元し、元の ID とキーリングを指定し、保管しておいたランタイムアーティファクトを使用します。その後、`discover` を実行し、`--plan` で `repair` をプレビューして、所有権に関するすべての判断と提案されたリソースの変更を確認してから適用してください。復元したデータとプラットフォームの健全性を確認した後にのみ、トラフィックを有効にしてください。discover と repair はこれらのバックアップの代わりにはならず、必要なシークレットやデータが利用できない場合にリカバリーを回避する手段も提供しません。
 
-### Where local state lives
+### ローカル状態の保存場所 {#where-local-state-lives}
 
-Installation records live in `~/.void/platforms/`. Credentials are stored separately in encrypted recovery files, with the encryption key in your operating system's keychain. Keep your original secrets in a password manager for recovery on another machine. Signing and encryption keys that Void generated exist only in these files; to keep your own copy, [supply them when installing](/guide/platform/installation/credentials#signing-and-encryption-keys).
+インストール記録は `~/.void/platforms/` にあります。認証情報は、暗号化されたリカバリーファイルに別途保存され、暗号化キーはオペレーティングシステムのキーチェーンに保管されます。別のマシンでのリカバリーに備えて、元のシークレットはパスワードマネージャーに保管してください。Void が生成した署名キーと暗号化キーは、これらのファイルにのみ存在します。ご自身でコピーを保管するには、[インストール時に指定](/ja/guide/platform/installation/credentials#signing-and-encryption-keys)してください。
 
-If the keychain isn't available, Void stops before writing secrets. Headless environments can supply `VOID_PLATFORM_RECOVERY_KEY`: a canonical base64-encoded 32-byte key from a secret manager. A temporary CI runner can use a new recovery-encryption key for each run only when every original credential remains available in protected CI secrets, including `VOID_PLATFORM_JWT_SECRET`, `VOID_PLATFORM_EMAIL_SIGNING_SECRET` for an email-enabled installation, and either the original `VOID_PLATFORM_PROJECT_SECRET_KEY` or the complete rotated keyring and active-version pair.
+キーチェーンが利用できない場合、Void はシークレットを書き込む前に停止します。ヘッドレス環境では、`VOID_PLATFORM_RECOVERY_KEY` を指定できます。これは、シークレットマネージャーから取得した、正規の base64 エンコードされた 32 バイトのキーです。一時的な CI ランナーは、元のすべての認証情報が保護された CI シークレットとして利用可能である場合に限り、実行ごとに新しいリカバリー暗号化キーを使用できます。必要な認証情報には、`VOID_PLATFORM_JWT_SECRET`、メールが有効なインストールの `VOID_PLATFORM_EMAIL_SIGNING_SECRET`、および元の `VOID_PLATFORM_PROJECT_SECRET_KEY`、または完全なローテーション済みキーリングとアクティブバージョンのペアのいずれかが含まれます。
 
-::: details Ownership and interrupted maintenance
+::: details 所有権と中断されたメンテナンス {#ownership}
 
-Void checks resource ownership and the configured database before making changes. Concurrent maintenance commands are coordinated so one administrator cannot overwrite another's work.
+Void は、変更を行う前に、リソースの所有権と設定されたデータベースを確認します。並行して実行されるメンテナンスコマンドは調整されるため、ある管理者が別の管理者の作業を上書きすることはありません。
 
-If maintenance is interrupted, rerun the same command. Traffic may stay paused until verification succeeds. Existing routes, domains, and data are preserved.
+メンテナンスが中断された場合は、同じコマンドを再実行してください。検証に成功するまで、トラフィックは一時停止されたままになることがあります。既存のルート、ドメイン、データは保持されます。
 
 :::

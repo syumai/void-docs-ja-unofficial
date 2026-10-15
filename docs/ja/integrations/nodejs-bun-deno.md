@@ -2,67 +2,67 @@
 outline: deep
 ---
 
-# Node.js, Bun, and Deno
+# Node.js、Bun、Deno {#node-js-bun-and-deno}
 
-Set `target` in `void.config.ts` to build for Node.js, Bun, or Deno. You can run the resulting server on your own machine, in a container, or with a hosting provider.
+`void.config.ts` の `target` を設定すると、Node.js、Bun、Deno 向けにビルドできます。生成されたサーバーは、自分のマシン、コンテナー、またはホスティングプロバイダー上で実行できます。
 
 ```json
 { "target": "node" }
 ```
 
-## Getting Started
+## はじめに {#getting-started}
 
-### 1. Configure the target
+### 1. ターゲットを設定する {#1-configure-the-target}
 
 ```json
 // void.config.ts
 { "target": "node" }
 ```
 
-### 2. Install the server dependency (Node.js only)
+### 2. サーバーの依存関係をインストールする(Node.js のみ) {#2-install-the-server-dependency-node-js-only}
 
-Node.js requires `@hono/node-server` as an additional dependency. Bun and Deno use their built-in HTTP servers.
+Node.js では、追加の依存関係として `@hono/node-server` が必要です。Bun と Deno は、組み込みの HTTP サーバーを使用します。
 
 ```bash
 npm install @hono/node-server
 ```
 
-### 3. Develop
+### 3. 開発する {#3-develop}
 
 ```bash
 npx vite dev
 ```
 
-The development server reloads routes and pages when you edit them.
+開発サーバーは、ルートやページを編集するとそれらをリロードします。
 
-### 4. Build and run
+### 4. ビルドして実行する {#4-build-and-run}
 
 ```bash
 npx vite build
 node dist/ssr/index.js
 ```
 
-For Bun:
+Bun の場合:
 
 ```bash
 bunx vite build
 bun dist/ssr/index.js
 ```
 
-For Deno:
+Deno の場合:
 
 ```bash
 deno run -A npm:vite build
 deno run -A dist/ssr/index.js
 ```
 
-Run these commands from your app directory. The server listens on `PORT` (env variable) or `3000` by default.
+これらのコマンドは、アプリのディレクトリから実行してください。サーバーは、`PORT`(環境変数)または既定の `3000` で待ち受けます。
 
-Deploy `dist/ssr` and `dist/client` together.
+`dist/ssr` と `dist/client` は一緒にデプロイしてください。
 
-## Build Output
+## ビルド出力 {#build-output}
 
-The build produces two entry points:
+ビルドは 2 つのエントリーポイントを生成します。
 
 ```
 dist/
@@ -75,81 +75,81 @@ dist/
       ...
 ```
 
-- **`app.js`:** exports the Hono app instance. Use it for programmatic embedding, testing, or custom server setups.
-- **`index.js`:** imports `app.js` and starts the server. This is what you run in production.
+- **`app.js`:** Hono アプリのインスタンスをエクスポートします。プログラムからの組み込み、テスト、カスタムサーバーのセットアップに使用します。
+- **`index.js`:** `app.js` をインポートしてサーバーを起動します。本番ではこれを実行します。
 
-`vite preview` also uses `app.js` to serve your built app locally.
+`vite preview` も、ビルドしたアプリをローカルで提供するために `app.js` を使用します。
 
-Installed packages that depend on `void` are bundled into `dist/ssr`. If one of their dependencies uses a native addon or reads files next to its own code, add that dependency, in the version the package uses, to your app's `dependencies`. The build then leaves it to Node.
+`void` に依存するインストール済みパッケージは、`dist/ssr` にバンドルされます。それらの依存関係のいずれかがネイティブアドオンを使用していたり、自身のコードの隣にあるファイルを読み込んだりする場合は、その依存関係を、パッケージが使用するバージョンでアプリの `dependencies` に追加してください。そうすると、ビルドはそれを Node に任せます。
 
-## What Works
+## 動作するもの {#what-works}
 
-These Void features work identically across all targets:
+次の Void の機能は、すべてのターゲットで同じように動作します。
 
-- [File-based routing](../guide/server-routing.md) (`routes/`, `middleware/`)
-- [Pages mode](../guide/pages-routing/overview.md) with SSR (React, Vue, Svelte, Solid)
-- [Typed fetch client](../guide/typed-fetch.md) (`void/client`)
-- [Custom headers](../guide/edge/headers.md) (`routing.headers`)
-- [Redirects](../guide/edge/redirects.md) (`routing.redirects`)
-- [Static site generation](../guide/ssg.md)
-- [Vite preview](https://vite.dev/guide/cli#vite-preview) for testing production builds locally
+- [ファイルベースルーティング](../guide/server-routing.md)(`routes/`、`middleware/`)
+- SSR(React、Vue、Svelte、Solid)を備えた [Pages モード](../guide/pages-routing/overview.md)
+- [型付き fetch クライアント](../guide/typed-fetch.md)(`void/client`)
+- [カスタムヘッダー](../guide/edge/headers.md)(`routing.headers`)
+- [リダイレクト](../guide/edge/redirects.md)(`routing.redirects`)
+- [静的サイト生成](../guide/ssg.md)
+- 本番ビルドをローカルでテストするための [Vite preview](https://vite.dev/guide/cli#vite-preview)
 
-## What's Different
+## 異なる点 {#what-s-different}
 
-### Environment variables
+### 環境変数 {#environment-variables}
 
-Supply server values through your host's environment and read them with `process.env` in Node.js or Bun, or `Deno.env.get()` in Deno. The `void/env` schema and secret workflow requires Cloudflare.
+サーバーの値はホストの環境を通じて提供し、Node.js または Bun では `process.env`、Deno では `Deno.env.get()` で読み取ります。`void/env` のスキーマとシークレットのワークフローには、Cloudflare が必要です。
 
-For browser code, use Vite's `import.meta.env.VITE_*` values. These are embedded at build time and must not contain secrets.
+ブラウザーのコードには、Vite の `import.meta.env.VITE_*` の値を使用します。これらはビルド時に埋め込まれるため、シークレットを含めてはいけません。
 
-### No Cloudflare bindings
+### Cloudflare バインディングがない {#no-cloudflare-bindings}
 
-The following imports are **not available** with a non-CF target and produce a compile-time error:
+次のインポートは、Cloudflare 以外のターゲットでは**利用できず**、コンパイル時エラーになります。
 
-| Import         | CF Feature               |
-| -------------- | ------------------------ |
-| `void/db`      | D1 (SQL database)        |
-| `void/kv`      | KV (key-value storage)   |
-| `void/storage` | R2 (blob storage)        |
-| `void/auth`    | Void-managed Better Auth |
-| `void/ai`      | Workers AI               |
-| `void/sandbox` | Cloudflare Sandboxes     |
-| `void/env`     | Typed environment schema |
+| インポート     | CF の機能                  |
+| -------------- | -------------------------- |
+| `void/db`      | D1(SQL データベース)       |
+| `void/kv`      | KV(キーバリューストレージ) |
+| `void/storage` | R2(Blob ストレージ)        |
+| `void/auth`    | Void 管理の Better Auth    |
+| `void/ai`      | Workers AI                 |
+| `void/sandbox` | Cloudflare Sandboxes       |
+| `void/env`     | 型付き環境変数スキーマ     |
 
-If you need a database or storage, use an external provider and connect via standard Node.js libraries.
+データベースやストレージが必要な場合は、外部のプロバイダーを使用し、標準的な Node.js ライブラリーで接続してください。
 
-WebSocket route files (`*.ws.ts`) require Cloudflare. You can still use the `void/ws` browser client to connect to a separately hosted WebSocket server.
+WebSocket ルートファイル(`*.ws.ts`)には Cloudflare が必要です。別途ホストされている WebSocket サーバーに接続するために、`void/ws` のブラウザークライアントを使用することはできます。
 
-### No cron job runtime
+### cron ジョブのランタイムがない {#no-cron-job-runtime}
 
-You can still define [cron jobs](../guide/jobs.md) in `crons/` and they will compile into the bundle, but there is no built-in scheduler to invoke them. On Cloudflare, Workers Cron Triggers call the `scheduled` handler automatically. On Node.js, you'll need an external scheduler (e.g. `node-cron`, systemd timers, or your hosting platform's cron) to trigger the exported handler.
+`crons/` で[cron ジョブ](../guide/jobs.md)を定義することはでき、バンドルにコンパイルされますが、それらを呼び出す組み込みのスケジューラーはありません。Cloudflare では、Workers Cron Triggers が `scheduled` ハンドラーを自動的に呼び出します。Node.js では、エクスポートされたハンドラーを起動するために、外部のスケジューラー(`node-cron`、systemd タイマー、ホスティングプラットフォームの cron など)が必要です。
 
-### No inbound email
+### 受信メールがない {#no-inbound-email}
 
-[Inbound email handlers](../guide/email/receiving.md#inbound) and `sendEmail` require Cloudflare. Use an external mail provider on other targets.
+[受信メールハンドラー](../guide/email/receiving.md#inbound)と `sendEmail` には Cloudflare が必要です。他のターゲットでは、外部のメールプロバイダーを使用してください。
 
-### No prerendering
+### プリレンダリングがない {#no-prerendering}
 
-[Edge prerendering](../guide/edge/prerendering.md) requires Cloudflare. Build-time [static generation](../guide/ssg.md) is available on all targets.
+[エッジプリレンダリング](../guide/edge/prerendering.md)には Cloudflare が必要です。ビルド時の[静的生成](../guide/ssg.md)は、すべてのターゲットで利用できます。
 
-### No `void deploy`
+### `void deploy` がない {#no-void-deploy}
 
-`void deploy` handles Cloudflare and Void platform deployments. For Node.js, Bun, or Deno, run `vite build` and deploy `dist/` using your hosting provider's workflow.
+`void deploy` は、Cloudflare と Void プラットフォームへのデプロイを扱います。Node.js、Bun、Deno では、`vite build` を実行し、ホスティングプロバイダーのワークフローで `dist/` をデプロイしてください。
 
-### Ignored config fields
+### 無視される設定フィールド {#ignored-config-fields}
 
-Void warns and ignores these Cloudflare-specific `void.config.ts` fields on other targets:
+Void は、他のターゲットで次の Cloudflare 固有の `void.config.ts` フィールドについて警告を表示し、無視します。
 
-- `inference.bindings`: Cloudflare binding configuration
-- `remote`: remote binding proxy
-- `worker`: Cloudflare-specific config
-- `routing.revalidate`: edge caching, only on Cloudflare
+- `inference.bindings`: Cloudflare バインディングの設定
+- `remote`: リモートバインディングのプロキシ
+- `worker`: Cloudflare 固有の設定
+- `routing.revalidate`: エッジキャッシュ。Cloudflare のみ
 
-If you enable auth through `void/auth`, `void/client`, or `auth.ts`, Void fails the build for non-CF targets. Use Better Auth directly for Node/Bun/Deno deployments.
+`void/auth`、`void/client`、`auth.ts` を通じて認証を有効にした場合、Cloudflare 以外のターゲットでは Void はビルドを失敗させます。Node/Bun/Deno のデプロイでは、Better Auth を直接使用してください。
 
-## Programmatic Usage
+## プログラムからの使用 {#programmatic-usage}
 
-Since `app.js` exports the Hono app, you can import it into a custom server:
+`app.js` は Hono アプリをエクスポートするため、カスタムサーバーにインポートできます。
 
 ```ts
 import app from './dist/ssr/app.js';
@@ -159,4 +159,4 @@ const response = await app.fetch(new Request('http://localhost/api/hello'));
 console.log(await response.json()); // { message: "Hello from Node.js!" }
 ```
 
-This is useful for testing, embedding in Express/Fastify, or running in serverless environments that accept a `fetch` handler.
+これは、テスト、Express/Fastify への組み込み、`fetch` ハンドラーを受け付けるサーバーレス環境での実行に便利です。

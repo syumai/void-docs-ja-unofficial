@@ -2,27 +2,27 @@
 outline: deep
 ---
 
-# Projects {#project-commands}
+# プロジェクト {#project-commands}
 
 ## `void project status [name]` {#void-project-status-name}
 
-Show deployments for the configured target.
+設定されたターゲットのデプロイを表示します。
 
-- Void targets show recent hosted deployments; `[name]` looks up a project by slug and otherwise the linked project is used.
-- Cloudflare targets list Worker Versions, identify the active version, and show the recorded migration count. A project name is not accepted because the Worker name comes from `cloudflare.name` in `void.config.ts`.
-- Owners and admins also see a warning when the platform cannot finish [replacing the project's credentials](../../guide/project-collaboration.md#change-or-remove-access).
+- Void ターゲットでは、最近のホスト型デプロイが表示されます。`[name]` でスラッグを指定してプロジェクトを検索でき、省略した場合はリンクされているプロジェクトが使用されます。
+- Cloudflare ターゲットでは、Worker Version を一覧表示し、アクティブなバージョンを示し、記録されたマイグレーション数を表示します。Worker 名は `void.config.ts` の `cloudflare.name` から決まるため、プロジェクト名は受け付けられません。
+- オーナーと管理者には、プラットフォームが[プロジェクトの認証情報の置き換え](../../guide/project-collaboration.md#change-or-remove-access)を完了できない場合にも、警告が表示されます。
 
 ## `void project link [name]` {#void-project-link-name}
 
-Link current directory to an existing hosted Void project by slug, or select interactively if omitted. State is stored in `.void/project.json`. Direct Cloudflare apps use `cloudflare.name` in `void.config.ts` and do not need linking.
+現在のディレクトリを、既存のホスト型 Void プロジェクトにスラッグでリンクします。省略した場合は、対話的に選択します。状態は `.void/project.json` に保存されます。Cloudflare に直接デプロイするアプリは、`void.config.ts` の `cloudflare.name` を使用するため、リンクは不要です。
 
 ## `void project list` {#void-project-list}
 
-List all accessible hosted projects (slug, role, type, URL). Shared projects are included and the role column distinguishes them from projects you own. For a saved Cloudflare target, this displays the current Worker's versions instead because there is no Void project registry.
+アクセス可能なすべてのホスト型プロジェクト（スラッグ、ロール、種類、URL）を一覧表示します。共有されたプロジェクトも含まれ、ロール列で自分が所有するプロジェクトと区別できます。保存された Cloudflare ターゲットでは、Void のプロジェクトレジストリがないため、代わりに現在の Worker のバージョンが表示されます。
 
 ## `void project team` {#void-project-team}
 
-Manage access to a project hosted on a Void platform:
+Void プラットフォームでホストされているプロジェクトへのアクセスを管理します。
 
 ```sh
 void project team list [--project <slug>]
@@ -37,22 +37,15 @@ void project team accept <invitation-id>
 void project team decline <invitation-id>
 ```
 
-Project-scoped commands use `--project`, then `VOID_PROJECT`, then the linked project. Invitations can target only an email address already registered to a user on that platform; they do not create accounts or grant signup access. Only the invited account can accept or decline its invitation. `list` shows the same credential warning as `void project status`.
+プロジェクトにスコープされたコマンドは、`--project`、`VOID_PROJECT`、リンクされているプロジェクトの順に使用します。招待できるのは、そのプラットフォームのユーザーとしてすでに登録されているメールアドレスのみです。アカウントの作成やサインアップアクセスの付与は行いません。招待されたアカウントだけが、その招待を承諾または辞退できます。`list` は、`void project status` と同じ認証情報の警告を表示します。
 
-Readers can view the project but cannot deploy. Collaborators can deploy and manage deploy prerequisites. Project administrators can additionally manage domains, email destinations, GitHub configuration, and the project team. The owner alone can delete the project. See [Project Collaboration](../../guide/project-collaboration.md) for the full role boundaries.
+リーダーはプロジェクトを閲覧できますが、デプロイはできません。コラボレーターはデプロイし、デプロイの前提条件を管理できます。プロジェクト管理者はさらに、ドメイン、メール送信先、GitHub の設定、プロジェクトチームを管理できます。プロジェクトを削除できるのは、オーナーだけです。ロールの境界の詳細については、[プロジェクトのコラボレーション](../../guide/project-collaboration.md)を参照してください。
 
-Project-scoped team management commands are not available for projects deployed
-directly to Cloudflare. The account-scoped `pending`, `accept`, and `decline`
-commands use the active connection selected by `void connect <url>`, regardless
-of the current project's link or deploy target. `VOID_API_URL` takes precedence;
-an unscoped `VOID_TOKEN` selects Void Cloud. These commands display their
-platform, and accepting an invitation leaves directory links intact. To link
-the invited application, run `void project link` in an unlinked checkout of
-that application.
+プロジェクトにスコープされたチーム管理コマンドは、Cloudflare に直接デプロイされたプロジェクトでは利用できません。アカウントにスコープされた `pending`、`accept`、`decline` コマンドは、現在のプロジェクトのリンクやデプロイターゲットに関係なく、`void connect <url>` で選択されたアクティブな接続を使用します。`VOID_API_URL` が優先されます。スコープのない `VOID_TOKEN` は Void Cloud を選択します。これらのコマンドは接続先のプラットフォームを表示し、招待を承諾してもディレクトリのリンクはそのまま維持されます。招待されたアプリケーションをリンクするには、そのアプリケーションのリンクされていないチェックアウトで `void project link` を実行します。
 
 ## `void project zero-trust` {#void-project-zero-trust}
 
-Inspect or override protection for a project on a Void platform:
+Void プラットフォーム上のプロジェクトの保護を確認または上書きします。
 
 ```sh
 void project zero-trust status [--project <slug>]
@@ -61,21 +54,13 @@ void project zero-trust public [--project <slug>]
 void project zero-trust reconcile [--project <slug>]
 ```
 
-Project selection follows `--project`, then `VOID_PROJECT`, then the linked
-project.
+プロジェクトの選択は、`--project`、`VOID_PROJECT`、リンクされているプロジェクトの順に従います。
 
-Readers can inspect the state. The owner or a project administrator can protect
-the project, make it public, or repair drift. `public` does not change the
-platform default for future projects. Deploys and rollbacks wait until a
-protection change is finished; if one is refused, the owner or a project
-administrator can run `void project zero-trust reconcile` before you retry.
-These commands do not apply to direct Cloudflare deployments.
+リーダーは状態を確認できます。オーナーまたはプロジェクト管理者は、プロジェクトを保護したり、公開したり、ドリフトを修復したりできます。`public` は、今後のプロジェクトに対するプラットフォームのデフォルトを変更しません。デプロイとロールバックは、保護の変更が完了するまで待機します。拒否された場合は、再試行する前に、オーナーまたはプロジェクト管理者が `void project zero-trust reconcile` を実行できます。これらのコマンドは、Cloudflare への直接デプロイには適用されません。
 
 ## `void project token <create|list|renew|revoke>` {#void-project-token-create-list-renew-revoke}
 
-Manage revocable `aud: deploy` credentials for one Void platform project. The
-credential can only call the endpoints used by `void deploy`; it cannot access
-operator, account, secret-writing, project-deletion, or other projects' routes.
+1 つの Void プラットフォームのプロジェクトに対して、失効可能な `aud: deploy` 認証情報を管理します。この認証情報は、`void deploy` が使用するエンドポイントのみを呼び出せます。オペレーター、アカウント、シークレットの書き込み、プロジェクトの削除、または他のプロジェクトのルートにはアクセスできません。
 
 ```sh
 void project token create --name github-actions --expires-in 30
@@ -84,18 +69,9 @@ void project token renew <credential-id> --expires-in 30
 void project token revoke <credential-id>
 ```
 
-Pass `--project <name>` outside a linked project. Expiry is bounded to 1–90
-days. Create and renew display the bearer value once; replace the stored secret
-immediately after renewal because the previous credential is revoked in the
-same operation. Project deletion and owner suspension also stop its use. Login
-method disablement does not revoke these independent deploy credentials.
+リンクされたプロジェクトの外では、`--project <name>` を渡してください。有効期限は 1 日から 90 日の範囲です。作成と更新ではベアラー値が 1 度だけ表示されます。更新と同じ操作で以前の認証情報が失効するため、更新後はすぐに保存済みのシークレットを置き換えてください。プロジェクトの削除とオーナーの停止によっても、使用できなくなります。ログイン方法の無効化では、これらの独立したデプロイ用認証情報は失効しません。
 
-Store the printed `VOID_TOKEN` and `VOID_API_URL` in the CI secret manager. The
-Access pair passes the perimeter; the scoped Void credential authorizes only
-this project's deploy workflow. When prerendering or remote proxy bindings are
-used on an Access-protected platform, store `VOID_ACCESS_CREDENTIALS` as an
-origin-keyed JSON secret containing both exact HTTPS origins, even if both use
-the same service-token pair:
+表示された `VOID_TOKEN` と `VOID_API_URL` を、CI のシークレットマネージャーに保存してください。Access のペアは境界を通過するためのもので、スコープが限定された Void の認証情報は、このプロジェクトのデプロイワークフローのみを認可します。Access で保護されたプラットフォームでプリレンダリングやリモートプロキシのバインディングを使用する場合は、両方に同じサービストークンのペアを使用していても、正確な HTTPS オリジンを両方含む、オリジンをキーとした JSON シークレットとして `VOID_ACCESS_CREDENTIALS` を保存してください。
 
 ```json
 {
@@ -110,9 +86,7 @@ the same service-token pair:
 }
 ```
 
-`VOID_ACCESS_ORIGIN` scopes a pair to one origin, so selecting only the API
-origin is insufficient for a workflow that calls the proxy. Use distinct pairs
-in the two entries when the Access policies require them.
+`VOID_ACCESS_ORIGIN` は、ペアを 1 つのオリジンにスコープします。そのため、API のオリジンだけを選択しても、プロキシを呼び出すワークフローには不十分です。Access のポリシーで必要な場合は、2 つのエントリーで異なるペアを使用してください。
 
 ## `void project logs` {#void-project-logs}
 
@@ -120,29 +94,29 @@ in the two entries when the Access policies require them.
 void project logs [--level <level>] [--filter <text>] [--range <duration>] [--deployment <id>]
 ```
 
-Show runtime logs from the deployed target. Hosted Void targets query retained log history. Cloudflare targets open a live tail for the Worker named in `void.config.ts`; they do not provide historical log storage.
+デプロイされたターゲットのランタイムログを表示します。ホスト型の Void ターゲットでは、保持されているログ履歴を照会します。Cloudflare ターゲットでは、`void.config.ts` に指定された Worker のライブテイルを開きます。過去のログの保存は提供されません。
 
-| Flag                 | Purpose                                                                                                                                                                                                         | Default |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `--range <duration>` | How far back to look. Format: `<number><unit>` (m/h/d). Max 7d.                                                                                                                                                 | `1h`    |
-| `--level <level>`    | Filter by log level. One of `error`, `warn`, `info`, `log`, `debug`, `all`. `error` also includes uncaught exceptions, non-`ok` outcomes, and any 5xx response — even when the worker neither threw nor logged. | `all`   |
-| `--filter <text>`    | Case-insensitive **substring** match against log message text and exception name/message — not a level filter. Shows the full request entry on any hit.                                                         | none    |
-| `--deployment <id>`  | Filter logs to a specific deployment ID.                                                                                                                                                                        | none    |
+| フラグ               | 目的                                                                                                                                                                                                                                                 | デフォルト |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `--range <duration>` | どこまで遡るか。形式は `<number><unit>` (m/h/d)。最大 7d。                                                                                                                                                                                           | `1h`       |
+| `--level <level>`    | ログレベルで絞り込みます。`error`、`warn`、`info`、`log`、`debug`、`all` のいずれかです。`error` には、キャッチされなかった例外、`ok` 以外の結果、およびすべての 5xx レスポンスも含まれます。Worker が例外をスローせずログも出力しなくても対象です。 | `all`      |
+| `--filter <text>`    | ログメッセージのテキストと例外の名前・メッセージに対する、大文字小文字を区別しない**部分文字列**の一致です。レベルフィルターではありません。一致した場合は、リクエストのエントリー全体が表示されます。                                               | なし       |
+| `--deployment <id>`  | ログを特定のデプロイ ID で絞り込みます。                                                                                                                                                                                                             | なし       |
 
-Output shows one line per request (`HH:MM:SS METHOD URL STATUS`) with indented console log and exception lines beneath. Errors and exceptions are colored red, warnings yellow.
+出力には、リクエストごとに 1 行（`HH:MM:SS METHOD URL STATUS`）が表示され、その下にインデントされたコンソールログと例外の行が続きます。エラーと例外は赤、警告は黄色で表示されます。
 
-Examples:
+例:
 
 ```
 void project logs --level error --range 12h
 void project logs --level error --filter websocket
 ```
 
-Logs include top-level `console.*` calls and uncaught errors captured by Cloudflare Tail. If you catch an error and save it only to your database, it won't appear here. Also log it with `console.error()` or `logger.error()` from `void/log`. On hosted Void targets, pass the `Error` object itself to `console.error()`, as in `console.error('Save failed:', error)`, to see its stack trace under the log line. Logging only `error.message` shows no stack.
+ログには、トップレベルの `console.*` 呼び出しと、Cloudflare Tail によって捕捉されたキャッチされなかったエラーが含まれます。エラーをキャッチしてデータベースにのみ保存した場合、ここには表示されません。`void/log` の `console.error()` または `logger.error()` でもログに出力してください。ホスト型の Void ターゲットでは、`console.error('Save failed:', error)` のように `Error` オブジェクト自体を `console.error()` に渡すと、ログ行の下にスタックトレースが表示されます。`error.message` だけをログに出力した場合、スタックは表示されません。
 
-For errors that never reach your Worker, such as edge routing errors or static site requests, use `void project requests --status 5xx`.
+エッジのルーティングエラーや静的サイトへのリクエストなど、Worker に到達しないエラーについては、`void project requests --status 5xx` を使用してください。
 
-On a direct Cloudflare target, `--filter` becomes Cloudflare's live search, `--deployment` selects a Worker Version, and `--level error` selects error invocations. Other individual console levels cannot be filtered, and `--range` does not select history. `void project requests` is hosted-only.
+Cloudflare に直接デプロイしたターゲットでは、`--filter` は Cloudflare のライブ検索になり、`--deployment` は Worker Version を選択し、`--level error` はエラーの呼び出しを選択します。それ以外の個別のコンソールレベルでは絞り込めず、`--range` で履歴を選択することはできません。`void project requests` はホスト型専用です。
 
 ## `void project requests` {#void-project-requests}
 
@@ -150,16 +124,16 @@ On a direct Cloudflare target, `--filter` becomes Cloudflare's live search, `--d
 void project requests [--status <filter>] [--range <duration>]
 ```
 
-Show request traffic for the linked project, including static assets and edge errors that do not appear in Worker logs.
+リンクされているプロジェクトのリクエストトラフィックを表示します。Worker のログに表示されない静的アセットやエッジのエラーも含まれます。
 
-| Flag                 | Purpose                                                                                       | Default |
-| -------------------- | --------------------------------------------------------------------------------------------- | ------- |
-| `--status <filter>`  | Filter by status: a class (`2xx`, `3xx`, `4xx`, `5xx`) or an exact 3-digit code (e.g. `500`). | none    |
-| `--range <duration>` | How far back to look. Format: `<number><unit>` (m/h/d). Max 7d.                               | `1h`    |
+| フラグ               | 目的                                                                                                       | デフォルト |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- |
+| `--status <filter>`  | ステータスで絞り込みます。クラス（`2xx`、`3xx`、`4xx`、`5xx`）または正確な 3 桁のコード（例: `500`）です。 | なし       |
+| `--range <duration>` | どこまで遡るか。形式は `<number><unit>` (m/h/d)。最大 7d。                                                 | `1h`       |
 
-Output shows one line per request (`HH:MM:SS METHOD STATUS TYPE DURATION`). 5xx are colored red, 4xx yellow. Note: request paths are not recorded, so this view shows status and type rather than URLs — use `void project logs` for per-URL, per-log detail on requests that do reach your worker.
+出力には、リクエストごとに 1 行（`HH:MM:SS METHOD STATUS TYPE DURATION`）が表示されます。5xx は赤、4xx は黄色で表示されます。注意: リクエストのパスは記録されないため、このビューには URL ではなく、ステータスと種類が表示されます。Worker に到達したリクエストの URL ごと、ログごとの詳細については、`void project logs` を使用してください。
 
-Examples:
+例:
 
 ```
 void project requests --status 5xx
@@ -172,14 +146,14 @@ void project requests --range 24h
 void project rollback [deployId]
 ```
 
-Roll back to a previous deployment or Worker Version.
+以前のデプロイまたは Worker Version にロールバックします。
 
-- If `[deployId]` is omitted, shows an interactive select menu of retained deployments
-- If the target deployment has fewer applied migrations than the current one, a warning is shown listing the migration diff before confirmation
+- `[deployId]` を省略すると、保持されているデプロイの対話的な選択メニューが表示されます
+- 対象のデプロイの適用済みマイグレーションが現在のデプロイより少ない場合は、確認の前に、マイグレーションの差分を一覧にした警告が表示されます
 
-On a Void platform, you can select a retained deployment. On Cloudflare, use a complete Worker Version ID or an unambiguous prefix. Void activates that version at 100%. When both versions have complete trigger snapshots, it also restores the selected version's schedules, queues, workflows, routes, and custom domains. Otherwise, rollback keeps the current triggers and restores the code, including versions originally deployed outside Void.
+Void プラットフォームでは、保持されているデプロイを選択できます。Cloudflare では、完全な Worker Version ID、または曖昧でないプレフィックスを使用します。Void は、そのバージョンを 100% でアクティブにします。両方のバージョンに完全なトリガーのスナップショットがある場合は、選択したバージョンのスケジュール、キュー、ワークフロー、ルート、カスタムドメインも復元します。そうでない場合、ロールバックは現在のトリガーを維持してコードを復元します。これには、もともと Void の外でデプロイされたバージョンも含まれます。
 
-Rollback doesn't reverse database migrations. If older code may run against a newer schema, or migration metadata is missing, Void explains the risk and asks for confirmation.
+ロールバックでは、データベースのマイグレーションは元に戻りません。古いコードが新しいスキーマに対して実行される可能性がある場合や、マイグレーションのメタデータが不足している場合は、Void がリスクを説明し、確認を求めます。
 
 ## `void project cancel [deployId]` {#void-project-cancel-deployid}
 
@@ -187,22 +161,22 @@ Rollback doesn't reverse database migrations. If older code may run against a ne
 void project cancel [deployId]
 ```
 
-Cancel an active deployment.
+アクティブなデプロイをキャンセルします。
 
-- If `[deployId]` is omitted, targets the linked project's active deployment
-- If `[deployId]` is provided, targets that deployment; it must still be active
+- `[deployId]` を省略すると、リンクされているプロジェクトのアクティブなデプロイが対象になります
+- `[deployId]` を指定すると、そのデプロイが対象になります。そのデプロイはまだアクティブである必要があります
 
-Void asks for confirmation before it requests cancellation.
+Void は、キャンセルを要求する前に確認を求めます。
 
-This command is hosted-only. Direct Cloudflare deploys are local operations and do not expose a remote build to cancel.
+このコマンドはホスト型専用です。Cloudflare への直接デプロイはローカルでの操作であり、キャンセルできるリモートビルドはありません。
 
 ## `void project delete [name]` {#void-project-delete-name}
 
-Permanently delete a hosted Void project and all its resources (databases, KV namespaces, R2 buckets, deployments). Requires typing the project slug to confirm; `--force` (`-f`) skips the prompt.
+ホスト型の Void プロジェクトと、そのすべてのリソース（データベース、KV 名前空間、R2 バケット、デプロイ）を完全に削除します。確認のためにプロジェクトのスラッグの入力が必要です。`--force`（`-f`）を指定すると、プロンプトをスキップします。
 
-If `[name]` is omitted, uses the linked project.
+`[name]` を省略した場合は、リンクされているプロジェクトが使用されます。
 
-For direct Cloudflare targets this command refuses to run. Inferred resources can be shared, so Void never performs automatic teardown; verify ownership and remove resources explicitly with Cloudflare tooling.
+Cloudflare への直接のターゲットでは、このコマンドの実行は拒否されます。推論されたリソースは共有されている可能性があるため、Void は自動的な削除を行いません。所有権を確認し、Cloudflare のツールで明示的にリソースを削除してください。
 
 ## `void project purge-cache` {#void-project-purge-cache}
 
@@ -210,8 +184,8 @@ For direct Cloudflare targets this command refuses to run. Inferred resources ca
 void project purge-cache [--project <name>]
 ```
 
-Purge all cached pages for the linked project. The edge cache will clear within seconds.
+リンクされているプロジェクトのキャッシュ済みのページをすべてパージします。エッジキャッシュは数秒以内にクリアされます。
 
-If `--project` is provided, purges that project's cache instead of the linked project.
+`--project` を指定すると、リンクされているプロジェクトの代わりに、そのプロジェクトのキャッシュをパージします。
 
-This command is hosted-only. For direct Cloudflare targets, redeploy or purge the configured ISR KV namespace yourself.
+このコマンドはホスト型専用です。Cloudflare への直接のターゲットでは、再デプロイするか、設定済みの ISR KV 名前空間を自分でパージしてください。

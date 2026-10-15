@@ -2,26 +2,26 @@
 outline: deep
 ---
 
-# TanStack Start
+# TanStack Start {#tanstack-start}
 
-Add `voidPlugin()` alongside the [TanStack Start](https://tanstack.com/start/latest) Vite plugin to use Void's database, storage, and deployment features. You don't need a separate Cloudflare adapter.
+[TanStack Start](https://tanstack.com/start/latest) の Vite プラグインと並べて `voidPlugin()` を追加すると、Void のデータベース、ストレージ、デプロイ機能を利用できます。別途 Cloudflare アダプターは必要ありません。
 
-## Setup
+## セットアップ {#setup}
 
-### 1. Create a new project
+### 1. 新しいプロジェクトを作成する {#_1-create-a-new-project}
 
 ```bash
 npm create @tanstack/start@latest my-app
 cd my-app
 ```
 
-### 2. Install dependencies
+### 2. 依存関係をインストールする {#_2-install-dependencies}
 
 ```bash
 npm install -D void
 ```
 
-### 3. Configure `vite.config.ts`
+### 3. `vite.config.ts` を設定する {#_3-configure-vite-config-ts}
 
 ```ts
 import { tanstackStart } from '@tanstack/react-start/plugin';
@@ -38,20 +38,20 @@ export default defineConfig({
 });
 ```
 
-### 4. Deploy
+### 4. デプロイする {#_4-deploy}
 
 ```bash
 void auth login
 void deploy
 ```
 
-## Using Void Features
+## Void の機能を使う {#using-void-features}
 
-Most [Void platform features](../../guide/app-types.md#void-apps) work with TanStack Start. Use them in server functions:
+[Void プラットフォームの機能](../../guide/app-types.md#void-apps)のほとんどは TanStack Start で動作します。サーバー関数で使用できます。
 
-Void-managed auth is not supported in framework mode yet. Use Better Auth's official TanStack Start integration directly for now.
+Void が管理する認証は、フレームワークモードではまだサポートされていません。当面は Better Auth の公式 TanStack Start インテグレーションを直接使用してください。
 
-### Database
+### データベース {#database}
 
 ```tsx
 import { users } from '@schema';
@@ -63,17 +63,17 @@ const getUsers = createServerFn().handler(async () => {
 });
 ```
 
-### Other resources
+### その他のリソース {#other-resources}
 
-Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
+[KV](../../guide/kv.md)、[オブジェクトストレージ](../../guide/storage.md)、[AI](../../guide/ai.md) は、Void アプリと同じインポートでサーバーサイドのコードから使用できます。[cron ジョブ](../../guide/jobs.md)は `crons/` に、[キューコンシューマー](../../guide/queues.md)は `queues/` に追加します。
 
-### Environment Variables
+### 環境変数 {#environment-variables}
 
-Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
+変数は `env.ts` で宣言し、`import { env } from "void/env"` で読み取ります。ローカルの値、本番用のシークレット、公開用の `VITE_*` の値については[環境変数](../../guide/env-vars.md)を参照してください。
 
-## Accessing Bindings Directly
+## バインディングに直接アクセスする {#accessing-bindings-directly}
 
-You can also access Cloudflare bindings via the `cloudflare:workers` module:
+`cloudflare:workers` モジュールを通じて、Cloudflare バインディングにアクセスすることもできます。
 
 ```tsx
 import { env } from 'cloudflare:workers';

@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# Head Management
+# Head の管理 {#head-management}
 
-Set page titles and metadata with `head()`, middleware, or site-wide defaults. Page values take precedence over middleware and config.
+`head()`、ミドルウェア、サイト全体のデフォルトを使って、ページタイトルとメタデータを設定します。ページの値は、ミドルウェアや設定の値より優先されます。
 
-## Page titles and metadata
+## ページタイトルとメタデータ {#page-titles-and-metadata}
 
-Export a `head()` function from your `.server.ts` file. It receives the Hono context and the resolved loader props, and returns a `HeadDescriptor`:
+`.server.ts` ファイルから `head()` 関数をエクスポートします。この関数は Hono のコンテキストと解決済みのローダーの props を受け取り、`HeadDescriptor` を返します。
 
 ```ts
 // pages/posts/[slug].server.ts
@@ -35,11 +35,11 @@ export const head = defineHead<Props>((c, props) => {
 });
 ```
 
-`head()` runs server-side only, after the loader resolves.
+`head()` はローダーの解決後に、サーバーサイドでのみ実行されます。
 
-## Site defaults
+## サイトのデフォルト {#site-defaults}
 
-Set site-wide head defaults in `void.config.ts`:
+サイト全体の head のデフォルトは、`void.config.ts` で設定します。
 
 ```json
 {
@@ -54,11 +54,11 @@ Set site-wide head defaults in `void.config.ts`:
 }
 ```
 
-`titleTemplate` wraps the page title. `%s` is replaced with whatever `head()` returns as `title`. A page returning `{ title: "About" }` with the template above produces `<title>About | My Site</title>`.
+`titleTemplate` はページタイトルを包みます。`%s` は、`head()` が `title` として返した値に置き換えられます。上記のテンプレートで `{ title: "About" }` を返すページは、`<title>About | My Site</title>` を生成します。
 
-## Middleware defaults
+## ミドルウェアのデフォルト {#middleware-defaults}
 
-Set `headDefaults` in middleware to apply defaults to every page. For example, a theme script can run before first paint:
+ミドルウェアで `headDefaults` を設定すると、すべてのページにデフォルトを適用できます。たとえば、最初の描画前にテーマ用のスクリプトを実行できます。
 
 ```ts
 // middleware/01.head.ts
@@ -77,20 +77,20 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-## Precedence
+## 優先順位 {#precedence}
 
-When multiple layers provide head data, they merge with this precedence:
+複数のレイヤーが head のデータを提供する場合、次の優先順位でマージされます。
 
-| Field       | Behavior                                                                                                             |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| `title`     | Page wins. `titleTemplate` from config wraps the winning title.                                                      |
-| `meta`      | Deduplicates by `name` or `property`. Page entries override matching keys, and non-conflicting entries are appended. |
-| `link`      | Concatenated: config first, then middleware, then page.                                                              |
-| `script`    | Concatenated: config first, then middleware, then page.                                                              |
-| `htmlAttrs` | Shallow merge, page wins conflicts.                                                                                  |
-| `bodyAttrs` | Shallow merge, page wins conflicts.                                                                                  |
+| フィールド  | 動作                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `title`     | ページが優先されます。設定の `titleTemplate` が、優先されたタイトルを包みます。                                           |
+| `meta`      | `name` または `property` で重複を排除します。ページのエントリが一致するキーを上書きし、競合しないエントリは追加されます。 |
+| `link`      | 連結されます。設定、ミドルウェア、ページの順です。                                                                        |
+| `script`    | 連結されます。設定、ミドルウェア、ページの順です。                                                                        |
+| `htmlAttrs` | 浅いマージで、競合時はページが優先されます。                                                                              |
+| `bodyAttrs` | 浅いマージで、競合時はページが優先されます。                                                                              |
 
-## HeadDescriptor
+## HeadDescriptor {#headdescriptor}
 
 ```ts
 interface HeadDescriptor {
@@ -108,9 +108,9 @@ interface HeadDescriptor {
 }
 ```
 
-## Markdown pages
+## Markdown ページ {#markdown-pages}
 
-Markdown pages (`.md` files) automatically generate head tags from frontmatter. You do not need a `.server.ts` file:
+Markdown ページ（`.md` ファイル）では、フロントマターから head タグが自動的に生成されます。`.server.ts` ファイルは不要です。
 
 ```md
 ---
@@ -121,10 +121,10 @@ description: Learn how to use Void
 Your content here...
 ```
 
-This produces `<title>Getting Started</title>` and `<meta name="description" content="Learn how to use Void">`, with `titleTemplate` applied if configured.
+これにより `<title>Getting Started</title>` と `<meta name="description" content="Learn how to use Void">` が生成され、設定されている場合は `titleTemplate` が適用されます。
 
-## Client-side updates
+## クライアントサイドでの更新 {#client-side-updates}
 
-Titles, meta tags, and links update automatically on client-side navigation.
+タイトル、メタタグ、リンクは、クライアントサイドのナビゲーション時に自動的に更新されます。
 
-`script`, `htmlAttrs`, and `bodyAttrs` are SSR-only. They are not re-applied on client-side navigation.
+`script`、`htmlAttrs`、`bodyAttrs` は SSR 専用です。クライアントサイドのナビゲーション時には再適用されません。

@@ -2,9 +2,9 @@
 outline: deep
 ---
 
-# Custom Headers
+# カスタムヘッダー {#custom-headers}
 
-Define custom response headers in [`void.config.ts`](../../reference/config) using the `routing.headers` field. Keys are URL patterns, values are arrays of `"Name: value"` strings.
+[`void.config.ts`](../../reference/config) の `routing.headers` フィールドを使って、カスタムのレスポンスヘッダーを定義します。キーは URL パターン、値は `"Name: value"` 形式の文字列の配列です。
 
 ```json
 {
@@ -18,33 +18,33 @@ Define custom response headers in [`void.config.ts`](../../reference/config) usi
 }
 ```
 
-## Rules
+## ルール {#rules}
 
-- **Pattern keys** start with `/`. `*` matches any characters including `/`.
-- **Header values** use `Name: value` format. The value may contain colons.
-- All matching rules are merged. When multiple rules set the same header name, the **last match wins**.
-- User-defined `Cache-Control` overrides the built-in default. The default still applies when no rule matches.
+- **パターンのキー**は `/` で始めます。`*` は `/` を含む任意の文字列に一致します。
+- **ヘッダーの値**は `Name: value` 形式で指定します。値にコロンを含めることもできます。
+- 一致したすべてのルールはマージされます。複数のルールが同じヘッダー名を設定した場合は、**最後に一致したものが優先**されます。
+- ユーザーが定義した `Cache-Control` は、組み込みのデフォルトを上書きします。どのルールにも一致しない場合は、デフォルトが引き続き適用されます。
 
-## Scope
+## 適用範囲 {#scope}
 
-Header rules apply to static assets, SSR pages, and API responses, including hashed assets served from cache.
+ヘッダールールは、静的アセット、SSR ページ、API レスポンスに適用されます。キャッシュから配信されるハッシュ付きアセットも含みます。
 
-For hashed assets, you can add headers, but the platform keeps control of caching and response encoding. Rules cannot replace `Cache-Control`, `Content-Type`, `Content-Encoding`, `Content-Length`, `Content-Range`, `Accept-Ranges`, or `Transfer-Encoding` on these files.
+ハッシュ付きアセットには、ヘッダーを追加できますが、キャッシュとレスポンスのエンコーディングの制御はプラットフォームが保持します。これらのファイルでは、ルールで `Cache-Control`、`Content-Type`、`Content-Encoding`、`Content-Length`、`Content-Range`、`Accept-Ranges`、`Transfer-Encoding` を置き換えることはできません。
 
-Header rules do not apply to ISR cache responses.
+ヘッダールールは、ISR キャッシュのレスポンスには適用されません。
 
-### Cookie headers
+### Cookie ヘッダー {#cookie-headers}
 
-On a [Void platform](../deployment.md#deploy-to-a-team-platform), apps usually share an application domain, such as `apps.example.com`. Header rules on a platform deploy change two headers on all hostnames of the app, including custom domains:
+[Void プラットフォーム](../deployment.md#deploy-to-a-team-platform)では、通常、アプリは `apps.example.com` のようなアプリケーションドメインを共有します。プラットフォームへのデプロイでは、ヘッダールールによって、カスタムドメインを含むアプリのすべてのホスト名で 2 つのヘッダーが変更されます。
 
-- Void ignores `Set-Cookie` in header rules.
-- Void removes the `"cookies"` directive from `Clear-Site-Data` in header rules. Other directives, such as `"cache"` and `"storage"`, still apply.
-- Void ignores the full value of a `Clear-Site-Data` rule that includes `"*"`. The response then keeps the `Clear-Site-Data` value from your app's response, without `"cookies"`. If that value also includes `"*"`, the response has no `Clear-Site-Data`.
+- Void は、ヘッダールール内の `Set-Cookie` を無視します。
+- Void は、ヘッダールール内の `Clear-Site-Data` から `"cookies"` ディレクティブを取り除きます。`"cache"` や `"storage"` などの他のディレクティブは引き続き適用されます。
+- Void は、`"*"` を含む `Clear-Site-Data` ルールの値全体を無視します。この場合、レスポンスにはアプリのレスポンスの `Clear-Site-Data` の値が、`"cookies"` を除いた状態で残ります。その値にも `"*"` が含まれている場合、レスポンスには `Clear-Site-Data` が付きません。
 
-This stops a header rule from setting or clearing cookies for other apps on the same domain. These limits apply only to header rules. Your app's own response can set cookies and send `Clear-Site-Data`, and on a shared domain those can affect other apps. See [Domains and Resources](../platform/installation/domains.md#adding-a-domain).
+これにより、ヘッダールールが同じドメイン上の他のアプリの Cookie を設定したり削除したりすることを防ぎます。これらの制限はヘッダールールにのみ適用されます。アプリ自身のレスポンスは Cookie を設定したり `Clear-Site-Data` を送信したりでき、共有ドメインでは、それが他のアプリに影響する可能性があります。[ドメインとリソース](../platform/installation/domains.md#adding-a-domain)を参照してください。
 
-In `void dev`, with `void deploy --platform cloudflare`, and on [other runtimes](../deployment.md#other-runtimes), header rules apply both headers as written.
+`void dev` と `void deploy --platform cloudflare`、および[その他のランタイム](../deployment.md#other-runtimes)では、ヘッダールールは両方のヘッダーを記述どおりに適用します。
 
-## Framework `_headers` files
+## フレームワークの `_headers` ファイル {#framework-headers-files}
 
-Void reads `_headers` files produced by supported frameworks. Your `routing.headers` rules run afterward, so they can override framework defaults. No additional setup is needed.
+Void は、サポートされているフレームワークが生成する `_headers` ファイルを読み込みます。`routing.headers` のルールはその後に実行されるため、フレームワークのデフォルトを上書きできます。追加のセットアップは不要です。

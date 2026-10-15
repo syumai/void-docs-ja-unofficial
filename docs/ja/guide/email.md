@@ -9,14 +9,14 @@ import links from '../.vitepress/redirects/guide-email.json';
 
 <LegacyDocRedirect page="guide/email.md" :links="links" />
 
-# Email
+# メール {#email}
 
-Use Void to send transactional email, receive messages in route handlers, and test outgoing mail in a local inbox.
+Void を使って、トランザクションメールの送信、ルートハンドラーでのメッセージ受信、ローカルの受信トレイでの送信メールのテストができます。
 
-| Guide                                   | Use it for                                                                   |
-| --------------------------------------- | ---------------------------------------------------------------------------- |
-| [Sending Email](./email/sending.md)     | Send messages and attachments, handle errors, and test delivery locally.     |
-| [Receiving Email](./email/receiving.md) | Route incoming messages, reply, forward, and test handlers.                  |
-| [Domains and Setup](./email/domains.md) | Register a domain on your platform or configure your own Cloudflare account. |
+| ガイド                                       | 用途                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| [メールを送信する](./email/sending.md)       | メッセージと添付ファイルの送信、エラー処理、ローカルでの配信テスト。             |
+| [メールを受信する](./email/receiving.md)     | 受信メッセージのルーティング、返信、転送、ハンドラーのテスト。                   |
+| [ドメインとセットアップ](./email/domains.md) | プラットフォームでのドメインの登録、またはご自身の Cloudflare アカウントの設定。 |
 
-On an email-enabled Void platform, start with its [shared sender](./email/sending.md#setup). For a direct Cloudflare deployment, [configure a sender and domain](./email/domains.md#your-own-cloudflare-account) first.
+メールが有効な Void プラットフォームでは、まず[共有送信元](./email/sending.md#setup)から始めてください。Cloudflare への直接デプロイでは、最初に[送信元とドメインを設定](./email/domains.md#your-own-cloudflare-account)してください。

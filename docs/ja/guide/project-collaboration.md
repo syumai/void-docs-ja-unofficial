@@ -2,56 +2,45 @@
 outline: deep
 ---
 
-# Project Collaboration
+# プロジェクトのコラボレーション {#project-collaboration}
 
-A project hosted on a Void platform can have one owner and additional readers, collaborators, and project administrators. Team access is a platform feature; it is not available for projects deployed directly to Cloudflare.
+Void プラットフォームでホストされるプロジェクトには、1 人のオーナーと、追加のリーダー、コラボレーター、プロジェクト管理者を設定できます。チームアクセスはプラットフォームの機能であり、Cloudflare に直接デプロイされたプロジェクトでは利用できません。
 
-## Roles
+## ロール {#roles}
 
-| Role                  | Access                                                                                                                    |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Reader                | View the project, usage, resources, deployments, builds, logs, and member roster. Cannot deploy.                          |
-| Collaborator          | Reader access plus deploy, rollback, cancellation, migrations, secrets, database configuration, and deploy prerequisites. |
-| Project administrator | Collaborator access plus domains, email destinations, GitHub configuration, invitations, roles, and member removal.       |
-| Owner                 | Project administrator access plus project deletion.                                                                       |
+| ロール             | アクセス                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| リーダー           | プロジェクト、使用量、リソース、デプロイ、ビルド、ログ、メンバー一覧を閲覧できます。デプロイはできません。                                       |
+| コラボレーター     | リーダーのアクセスに加えて、デプロイ、ロールバック、キャンセル、マイグレーション、シークレット、データベース設定、デプロイの前提条件を扱えます。 |
+| プロジェクト管理者 | コラボレーターのアクセスに加えて、ドメイン、メール送信先、GitHub の設定、招待、ロール、メンバーの削除を扱えます。                                |
+| オーナー           | プロジェクト管理者のアクセスに加えて、プロジェクトを削除できます。                                                                               |
 
-Only the owner can create, list, renew, or revoke the project's CI deploy
-credentials. Those credentials run unattended deployments as the billing owner
-and remain independent of a member's login session, so collaborators and
-project administrators deploy with their own account instead of minting a
-durable owner credential.
+プロジェクトの CI デプロイ用認証情報を作成、一覧表示、更新、失効できるのは、オーナーのみです。これらの認証情報は、請求先のオーナーとして無人のデプロイを実行し、メンバーのログインセッションとは独立しています。そのため、コラボレーターやプロジェクト管理者は、永続的なオーナーの認証情報を発行するのではなく、自分のアカウントでデプロイします。
 
-The owner's plan, limits, and suspension state govern the project. A member's
-own plan does not change the project's available usage, and acting through a
-collaborator does not bypass an owner suspension. A project administrator is
-not an installation administrator and receives no platform-wide access.
+プロジェクトには、オーナーのプラン、制限、停止状態が適用されます。メンバー自身のプランは、プロジェクトの利用可能な使用量を変えず、コラボレーターを介して操作してもオーナーの停止を回避できません。プロジェクト管理者はインストール管理者ではなく、プラットフォーム全体へのアクセス権は得られません。
 
-## Invite a Registered User
+## 登録済みユーザーを招待する {#invite-a-registered-user}
 
-An owner or project administrator can invite someone by the email address registered to their existing account on the same platform:
+オーナーまたはプロジェクト管理者は、同じプラットフォーム上の既存のアカウントに登録されているメールアドレスを指定して、ユーザーを招待できます。
 
 ```sh
 void project team invite teammate@example.com --role collaborator
 ```
 
-Pass `--project <slug>` to manage a project other than the linked project. An unknown email is rejected. A project invitation neither creates an account nor adds the address to a restricted-signup allowlist.
+リンクされているプロジェクト以外のプロジェクトを管理するには、`--project <slug>` を渡します。未登録のメールアドレスは拒否されます。プロジェクトへの招待は、アカウントを作成することも、サインアップ制限の許可リストにアドレスを追加することもありません。
 
-Invitations expire after seven days. If the platform cannot send invitation
-email, the CLI prints the invitation ID and connection and acceptance commands
-to share with the invited user. The invitation also appears when that user runs
-`void project team pending` on the same platform.
+招待は 7 日後に失効します。プラットフォームが招待メールを送信できない場合、CLI は招待 ID と、招待されたユーザーに共有するための接続コマンドおよび承諾コマンドを表示します。その招待は、同じプラットフォーム上で、そのユーザーが `void project team pending` を実行したときにも表示されます。
 
-List the roster and sent invitations with:
+メンバー一覧と送信済みの招待は、次のコマンドで確認できます。
 
 ```sh
 void project team list
 void project team invitations
 ```
 
-## Respond to an Invitation
+## 招待に応答する {#respond-to-an-invitation}
 
-Connect to the platform from your invitation, then see invitations addressed to
-your account and respond using the invitation ID:
+招待に記載されたプラットフォームに接続し、自分のアカウント宛ての招待を確認してから、招待 ID を使って応答します。
 
 ```sh
 void connect api.example.com
@@ -61,29 +50,17 @@ void project team accept <invitation-id>
 void project team decline <invitation-id>
 ```
 
-An invitation is bound to the registered account. Forwarding its ID does not let another user accept it.
+招待は、登録済みのアカウントに紐付けられています。招待 ID を転送しても、別のユーザーが承諾することはできません。
 
-These three commands use the active platform connection selected by
-`void connect`, even inside a directory linked to another project or deployed
-directly to Cloudflare. `VOID_API_URL` takes precedence when set. If you use
-`VOID_TOKEN`, also set `VOID_API_URL` to the matching platform. Each command
-shows the platform it contacts.
+これら 3 つのコマンドは、別のプロジェクトにリンクされたディレクトリや、Cloudflare に直接デプロイされたディレクトリ内であっても、`void connect` で選択したアクティブなプラットフォーム接続を使用します。`VOID_API_URL` が設定されている場合は、それが優先されます。`VOID_TOKEN` を使用する場合は、対応するプラットフォームを `VOID_API_URL` にも設定してください。各コマンドは、接続先のプラットフォームを表示します。
 
-Accepting an invitation grants access without linking your current directory.
-Open the invited application's directory and run `void project link` if it is
-not linked yet. If it is already linked to another project, use a separate
-checkout without `.void/project.json`, connect to the invited platform there,
-and run `void project link`.
+招待を承諾すると、現在のディレクトリをリンクすることなく、アクセス権が付与されます。招待されたアプリケーションのディレクトリを開き、まだリンクされていない場合は `void project link` を実行してください。すでに別のプロジェクトにリンクされている場合は、`.void/project.json` のない別のチェックアウトを使用し、そこで招待されたプラットフォームに接続して、`void project link` を実行します。
 
-If the invitation is missing, check the platform and signed-in account. To
-switch accounts, set `VOID_API_URL` to the invitation's platform URL, unset
-`VOID_TOKEN` if present, then run `void account logout` and `void account login` using
-the invited email address. For an expired or revoked invitation, ask a project
-administrator to invite you again.
+招待が見つからない場合は、プラットフォームとサインインしているアカウントを確認してください。アカウントを切り替えるには、`VOID_API_URL` を招待のプラットフォーム URL に設定し、`VOID_TOKEN` が設定されている場合は解除してから、招待されたメールアドレスで `void account logout` と `void account login` を実行します。招待が失効または取り消されている場合は、プロジェクト管理者に再度招待を依頼してください。
 
-## Change or Remove Access
+## アクセス権を変更または削除する {#change-or-remove-access}
 
-Owners and project administrators can change any non-owner member or revoke a pending invitation:
+オーナーとプロジェクト管理者は、オーナー以外のメンバーを変更したり、保留中の招待を取り消したりできます。
 
 ```sh
 void project team role <user-id> reader
@@ -91,8 +68,8 @@ void project team remove <user-id>
 void project team revoke <invitation-id>
 ```
 
-A non-owner member can leave with `void project team leave`. The owner cannot leave; an installation administrator must [transfer ownership](./platform/administration/projects.md#transferring-project-ownership) first.
+オーナー以外のメンバーは、`void project team leave` で退出できます。オーナーは退出できません。先にインストール管理者が[オーナーシップを移譲](./platform/administration/projects.md#transferring-project-ownership)する必要があります。
 
-When a collaborator or admin is removed, leaves, or is changed to reader, the platform replaces the credentials the project's Workers use to call platform services such as AI, email, and remote bindings. The old credentials stop working once every Worker of the project has the new ones, usually within about 10 minutes, later while a deploy is running. If the replacement cannot finish, the old credentials keep working until it does, and owners and admins see a warning in `void project status` and `void project team list`. WebSocket connections reconnect once. While a Worker is switched to the new credentials, its calls to platform services can fail for a moment, a scheduled run can be skipped, and queue messages are delivered again a couple of minutes later.
+コラボレーターや管理者が削除された場合、退出した場合、またはリーダーに変更された場合、プラットフォームは、プロジェクトの Worker が AI、メール、リモートバインディングなどのプラットフォームサービスを呼び出すために使用する認証情報を置き換えます。古い認証情報は、プロジェクトのすべての Worker に新しい認証情報が行き渡った時点で使用できなくなります。通常は約 10 分以内ですが、デプロイの実行中はそれより遅くなります。置き換えを完了できない場合は、完了するまで古い認証情報が引き続き使用でき、オーナーと管理者には `void project status` と `void project team list` に警告が表示されます。WebSocket 接続は一度再接続されます。Worker が新しい認証情報に切り替わる間は、プラットフォームサービスの呼び出しが一時的に失敗したり、スケジュールされた実行がスキップされたり、キューメッセージが数分後に再配信されたりすることがあります。
 
-Code the removed person deployed keeps running until you replace it. If you no longer trust it, deploy code you trust; the platform replaces the credentials again after that deploy. Earlier deployments of theirs kept for rollback keep the old credentials, so after a rollback to one of them, AI, email, and ISR revalidation fail until you deploy again.
+削除された人がデプロイしたコードは、置き換えるまで実行され続けます。そのコードを信頼できない場合は、信頼できるコードをデプロイしてください。そのデプロイの後に、プラットフォームは再び認証情報を置き換えます。ロールバック用に保持されているその人の以前のデプロイは古い認証情報を保持しているため、それらにロールバックした後は、再度デプロイするまで AI、メール、ISR の再検証が失敗します。

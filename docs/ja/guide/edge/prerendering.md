@@ -2,41 +2,41 @@
 outline: deep
 ---
 
-# Edge Prerendering
+# エッジプリレンダリング {#edge-prerendering}
 
-Prerender pages at deploy time so the first visitor receives cached HTML.
+デプロイ時にページをプリレンダリングし、最初の訪問者にキャッシュ済みの HTML を返します。
 
-- [Markdown pages](../pages-routing/markdown.md) are auto-prerendered.
-- [Island pages](../pages-routing/islands) with no companion loader and no dynamic params are also auto-prerendered.
+- [Markdown ページ](../pages-routing/markdown.md)は自動的にプリレンダリングされます。
+- コンパニオンローダーを持たず、動的パラメーターもない[アイランドページ](../pages-routing/islands)も自動的にプリレンダリングされます。
 
-## Static pages (no params)
+## 静的ページ(パラメーターなし) {#static-pages-no-params}
 
-Export `prerender = true` from the companion `.server.ts` file:
+コンパニオンの `.server.ts` ファイルから `prerender = true` をエクスポートします。
 
 ```ts
 // pages/about.server.ts
 export const prerender = true;
 ```
 
-Pages without dynamic params do not need `getPrerenderPaths()`.
+動的パラメーターを持たないページでは `getPrerenderPaths()` は不要です。
 
-## Dynamic pages (with params)
+## 動的ページ(パラメーターあり) {#dynamic-pages-with-params}
 
-For pages with URL params, also export `getPrerenderPaths()` to specify which param combinations to prerender:
+URL パラメーターを持つページでは、プリレンダリングするパラメーターの組み合わせを指定するために、`getPrerenderPaths()` もエクスポートします。
 
 ```ts
 // pages/blog/[slug].server.ts
 export const prerender = true;
 
 export async function getPrerenderPaths() {
-  // Return param objects matching the URL pattern
+  // URL パターンに一致するパラメーターのオブジェクトを返す
   return [{ slug: 'hello-world' }, { slug: 'getting-started' }];
 }
 ```
 
-## Custom SSR
+## カスタム SSR {#custom-ssr}
 
-In custom SSR mode (`src/main.ssr.ts`), export `getPrerenderPaths()` at the top level. Since there's no file-based routing, return full path strings:
+カスタム SSR モード(`src/main.ssr.ts`)では、トップレベルで `getPrerenderPaths()` をエクスポートします。ファイルベースルーティングがないため、完全なパス文字列を返します。
 
 ```ts
 // src/main.ssr.ts
@@ -47,13 +47,13 @@ export async function getPrerenderPaths() {
 }
 ```
 
-## Relationship to revalidation
+## 再検証との関係 {#relationship-to-revalidation}
 
-Setting `routing.isr: false` in `void.config.ts` disables ISR and this edge-prerendering behavior, including per-page exports. It does not disable build-time HTML generation with `output: "static"`.
+`void.config.ts` で `routing.isr: false` を設定すると、ISR とこのエッジプリレンダリング動作(ページごとのエクスポートを含む)が無効になります。`output: "static"` によるビルド時の HTML 生成は無効になりません。
 
-Prerendered pages default to a one-year revalidate TTL. Deploys clear the ISR cache.
+プリレンダリングされたページの再検証 TTL は、既定で 1 年です。デプロイすると ISR キャッシュはクリアされます。
 
-Override the TTL per page:
+ページごとに TTL を上書きできます。
 
 ```ts
 // pages/about.server.ts
@@ -61,10 +61,10 @@ export const prerender = true;
 export const revalidate = 3600;
 ```
 
-If the cached page expires before your next deploy, the next request waits for a fresh render.
+次のデプロイより前にキャッシュ済みページの有効期限が切れた場合、次のリクエストは新しいレンダリングの完了を待ちます。
 
-## Behavior details
+## 動作の詳細 {#behavior-details}
 
-- Prerender happens once per deployment, before traffic is routed to the new version. Prerendered pages are cached at the edge.
-- Only paths with a positive revalidate TTL are prerendered (TTL `0` is skipped).
-- Prerender failures are logged but never block the deploy. The page will render on the first request as usual.
+- プリレンダリングは、新しいバージョンにトラフィックが振り分けられる前に、デプロイごとに 1 回実行されます。プリレンダリングされたページはエッジにキャッシュされます。
+- 再検証 TTL が正の値であるパスだけがプリレンダリングされます(TTL が `0` の場合はスキップされます)。
+- プリレンダリングの失敗はログに記録されますが、デプロイをブロックすることはありません。ページは通常どおり、最初のリクエスト時にレンダリングされます。

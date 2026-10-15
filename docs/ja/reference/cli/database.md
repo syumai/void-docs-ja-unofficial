@@ -2,25 +2,25 @@
 outline: deep
 ---
 
-# Database {#database}
+# データベース {#database}
 
 ## `void db push` {#void-db-push}
 
-Apply your Drizzle schema directly to the development database without creating migration files. D1 updates the local database; PostgreSQL and MySQL use `DATABASE_URL` from `.env`.
+マイグレーションファイルを作成せずに、Drizzle スキーマを開発用データベースへ直接適用します。D1 ではローカルのデータベースが更新され、PostgreSQL と MySQL では `.env` の `DATABASE_URL` が使用されます。
 
-Use this for quick schema iteration while prototyping. Before deploying, generate and review migration files with `void db generate`.
+プロトタイピング中の素早いスキーマの試行錯誤に使用します。デプロイする前に、`void db generate` でマイグレーションファイルを生成して確認してください。
 
 ## `void db generate` {#void-db-generate}
 
-Generate SQL migration files from schema changes.
+スキーマの変更から SQL マイグレーションファイルを生成します。
 
-Compares your schema with the last Drizzle snapshot and writes migrations under `db/migrations/`. It includes Void-managed auth tables and configured auth plugins, even without an application schema. Review and commit the generated files before deploying.
+スキーマを最新の Drizzle スナップショットと比較し、マイグレーションを `db/migrations/` の下に書き込みます。アプリケーションのスキーマがなくても、Void が管理する認証テーブルと、構成済みの認証プラグインが含まれます。デプロイの前に、生成されたファイルを確認してコミットしてください。
 
-For SQLite, Void checks that the migration history applies to a fresh database. If generation fails this check, the previous SQL, snapshots, and journal are restored. If an existing migration fails, repair that unapplied migration first: rerunning generation compares snapshots and does not repair existing SQL. This check does not verify that a migration preserves existing data; review table rebuilds and foreign-key actions carefully.
+SQLite では、Void はマイグレーション履歴が新しいデータベースに適用できることを検査します。この検査で生成が失敗した場合、以前の SQL、スナップショット、ジャーナルが復元されます。既存のマイグレーションが失敗する場合は、まずその未適用のマイグレーションを修復してください。生成を再実行してもスナップショットが比較されるだけで、既存の SQL は修復されません。この検査は、マイグレーションが既存のデータを保持するかどうかを検証するものではありません。テーブルの再構築や外部キーのアクションは、慎重に確認してください。
 
 ## `void db status` {#void-db-status}
 
-Show migration status. Displays which migrations are applied or pending locally, then uses the saved deployment target for remote status: the hosted API for Void projects, the pinned D1 database and its configured migration table for direct Cloudflare SQLite projects, or the shell `DATABASE_URL` for direct Cloudflare PostgreSQL/MySQL projects. If the remote credential or service is unavailable, local status is still shown. If the local PostgreSQL or MySQL database cannot be read, local status shows `unknown`; the command fails when remote status is not available either.
+マイグレーションのステータスを表示します。ローカルで適用済みまたは保留中のマイグレーションを表示したうえで、保存されたデプロイターゲットを使ってリモートのステータスを表示します。Void プロジェクトではホスト型 API、直接 Cloudflare の SQLite プロジェクトでは固定された D1 データベースとその構成済みのマイグレーションテーブル、直接 Cloudflare の PostgreSQL/MySQL プロジェクトではシェルの `DATABASE_URL` が使われます。リモートの認証情報やサービスが利用できない場合でも、ローカルのステータスは表示されます。ローカルの PostgreSQL または MySQL データベースを読み取れない場合、ローカルのステータスは `unknown` と表示されます。リモートのステータスも取得できない場合、コマンドは失敗します。
 
 ## `void db reset` {#void-db-reset}
 
@@ -28,9 +28,9 @@ Show migration status. Displays which migrations are applied or pending locally,
 void db reset [--yes]
 ```
 
-Drop the development database and re-apply all migrations. D1 resets the local database. PostgreSQL drops the tables, views, sequences, and custom types in the `public` schema of the `DATABASE_URL` database from `.env` and keeps installed extensions. If a table, view, or function in another schema uses one of those views, sequences, or types, reset stops before it drops anything and lists those objects. MySQL drops every table and view in that database.
+開発用データベースを削除し、すべてのマイグレーションを再適用します。D1 ではローカルのデータベースがリセットされます。PostgreSQL では、`.env` の `DATABASE_URL` のデータベースにある `public` スキーマのテーブル、ビュー、シーケンス、カスタム型を削除し、インストール済みの拡張機能は保持します。別のスキーマのテーブル、ビュー、関数がそれらのビュー、シーケンス、型のいずれかを使用している場合、リセットは何も削除する前に停止し、それらのオブジェクトを一覧表示します。MySQL では、そのデータベースのすべてのテーブルとビューが削除されます。
 
-When that `DATABASE_URL` points to a host other than `localhost`, Void names the database and asks before dropping its tables. Pass `--yes` to skip the prompt in scripts and CI; without a terminal, the command stops unless `--yes` is set. If `.env` uses the same URL as your deployment (for example after `void db connect`), reset drops the deployed tables.
+その `DATABASE_URL` が `localhost` 以外のホストを指している場合、Void はデータベース名を示し、テーブルを削除する前に確認します。スクリプトや CI でプロンプトをスキップするには、`--yes` を渡します。ターミナルがない場合、`--yes` が設定されていなければコマンドは停止します。`.env` がデプロイと同じ URL を使っている場合（たとえば `void db connect` の後）、リセットによってデプロイ済みのテーブルが削除されます。
 
 ## `void db seed` {#void-db-seed}
 
@@ -38,13 +38,13 @@ When that `DATABASE_URL` points to a host other than `localhost`, Void names the
 void db seed [--file <path>] [--yes]
 ```
 
-Reset the local database, re-apply all migrations, then execute a seed file. The reset works like `void db reset`, including the prompt and `--yes`.
+ローカルのデータベースをリセットし、すべてのマイグレーションを再適用してから、シードファイルを実行します。リセットは、プロンプトと `--yes` を含め、`void db reset` と同様に動作します。
 
-If `--file` is omitted, Void looks for default seed files in this order: `db/seed.ts`, `db/seed.mts`, `db/seed.js`, `db/seed.mjs`, `db/seed.sql`.
+`--file` を省略した場合、Void は次の順序でデフォルトのシードファイルを探します: `db/seed.ts`、`db/seed.mts`、`db/seed.js`、`db/seed.mjs`、`db/seed.sql`。
 
-If more than one default seed file exists, the CLI stops and asks you to pass `--file <path>`.
+デフォルトのシードファイルが複数存在する場合、CLI は停止し、`--file <path>` を指定するよう求めます。
 
-Programmatic seed modules must export either a default function or a named `seed` function.
+プログラムによるシードモジュールは、デフォルトの関数、または名前付きの `seed` 関数のいずれかをエクスポートする必要があります。
 
 ## `void db execute` {#void-db-execute}
 
@@ -54,16 +54,16 @@ void db execute --file <path>
 void db execute --remote <sql>
 ```
 
-Run ad-hoc SQL against the database. Provide SQL inline or from a file. SELECT queries display results as a formatted table; other statements execute silently.
+データベースに対してアドホックな SQL を実行します。SQL はインラインで指定するか、ファイルから指定します。SELECT クエリの結果は整形されたテーブルとして表示され、それ以外のステートメントは何も表示せずに実行されます。
 
-By default, targets the local database. Pass `--remote` to run against the deployed database selected in `.void/project.json`:
+デフォルトではローカルのデータベースが対象です。`--remote` を渡すと、`.void/project.json` で選択されたデプロイ済みのデータベースに対して実行します。
 
-- **Void platform D1 projects**: routes the query through the selected platform's registered proxy using your auth token.
-- **Direct Cloudflare D1 projects**: invokes Cloudflare against the pinned D1 binding from `void.config.ts` or `void.lock.json`.
-- **Hosted PostgreSQL and MySQL projects**: fetches the stored connection string from the platform and connects directly.
-- **Direct Cloudflare PostgreSQL and MySQL projects**: uses `DATABASE_URL` from the current shell; Cloudflare cannot return the password from Hyperdrive.
+- **Void プラットフォームの D1 プロジェクト**: 認証トークンを使って、選択したプラットフォームの登録済みプロキシ経由でクエリをルーティングします。
+- **直接 Cloudflare の D1 プロジェクト**: `void.config.ts` または `void.lock.json` から固定された D1 バインディングに対して Cloudflare を呼び出します。
+- **ホスト型の PostgreSQL および MySQL プロジェクト**: プラットフォームから保存済みの接続文字列を取得し、直接接続します。
+- **直接 Cloudflare の PostgreSQL および MySQL プロジェクト**: 現在のシェルの `DATABASE_URL` を使用します。Cloudflare は Hyperdrive からパスワードを返せません。
 
-For destructive statements (`DELETE`, `UPDATE`, `DROP`, etc.) when running in a TTY, you will be prompted to confirm before the query is sent to the deployed database. Non-TTY environments (CI) skip the prompt.
+TTY で実行している場合、破壊的なステートメント（`DELETE`、`UPDATE`、`DROP` など）では、クエリをデプロイ済みのデータベースに送信する前に確認が求められます。TTY ではない環境（CI）では、このプロンプトはスキップされます。
 
 ## `void db migrate` {#void-db-migrate}
 
@@ -71,9 +71,9 @@ For destructive statements (`DELETE`, `UPDATE`, `DROP`, etc.) when running in a 
 void db migrate [--remote]
 ```
 
-Apply pending migrations to the local database without resetting. Unlike `void db reset`, this preserves existing data and only runs migrations that haven't been applied yet.
+リセットせずに、保留中のマイグレーションをローカルのデータベースに適用します。`void db reset` とは異なり、既存のデータは保持され、まだ適用されていないマイグレーションだけが実行されます。
 
-Pass `--remote` to apply pending migrations to the saved target. Hosted projects require a Void login and link. Direct Cloudflare D1 projects use the binding's configured migration directory, table, and pattern. The D1 binding must set `migrations_dir`. Direct PostgreSQL and MySQL projects use the shell `DATABASE_URL`.
+保存されたターゲットに保留中のマイグレーションを適用するには、`--remote` を渡します。ホスト型のプロジェクトには、Void のログインとリンクが必要です。直接 Cloudflare の D1 プロジェクトでは、バインディングに構成されたマイグレーションのディレクトリ、テーブル、パターンが使用されます。D1 バインディングには `migrations_dir` を設定する必要があります。直接 PostgreSQL および MySQL のプロジェクトでは、シェルの `DATABASE_URL` が使用されます。
 
 ## `void db studio` {#void-db-studio}
 
@@ -81,23 +81,23 @@ Pass `--remote` to apply pending migrations to the saved target. Hosted projects
 void db studio [--remote]
 ```
 
-Open [Drizzle Studio](https://orm.drizzle.team/docs/drizzle-kit-studio) for the database. Launches a web-based GUI for browsing and editing your data.
+データベースに対して [Drizzle Studio](https://orm.drizzle.team/docs/drizzle-kit-studio) を開きます。データの閲覧と編集ができる Web ベースの GUI を起動します。
 
-By default, targets the local database. Pass `--remote` to open Studio against the deployed database:
+デフォルトではローカルのデータベースが対象です。`--remote` を渡すと、デプロイ済みのデータベースに対して Studio を開きます。
 
-- **Hosted PostgreSQL and MySQL projects**: fetch the stored connection string from the platform and open Studio against it. If the URL isn't stored yet, run `void db set-url` first.
-- **Direct Cloudflare PostgreSQL and MySQL projects**: use `DATABASE_URL` from the current shell.
-- **D1 projects**: remote Studio is not available. Use `void db execute --remote` to query your deployed D1 database.
+- **ホスト型の PostgreSQL および MySQL プロジェクト**: プラットフォームから保存済みの接続文字列を取得し、それに対して Studio を開きます。URL がまだ保存されていない場合は、先に `void db set-url` を実行してください。
+- **直接 Cloudflare の PostgreSQL および MySQL プロジェクト**: 現在のシェルの `DATABASE_URL` を使用します。
+- **D1 プロジェクト**: リモートの Studio は利用できません。デプロイ済みの D1 データベースにクエリするには、`void db execute --remote` を使用してください。
 
 ## `void db rename-migrations` {#void-db-rename-migrations}
 
-Rename existing migrations from the old numeric prefix format (`0001_name.sql`) to timestamp-based format (`20260410161500_name.sql`). Updates local tracking table and remote records if logged in with a linked project. A project that deploys to Void must be linked first with `void project link`; otherwise the command stops without changes.
+既存のマイグレーションを、古い数値のプレフィックス形式（`0001_name.sql`）からタイムスタンプベースの形式（`20260410161500_name.sql`）に名前変更します。ローカルのトラッキングテーブルを更新し、リンクされたプロジェクトでログインしている場合はリモートのレコードも更新します。Void にデプロイするプロジェクトは、先に `void project link` でリンクしておく必要があります。そうでない場合、コマンドは変更を加えずに停止します。
 
-Direct Cloudflare deploys are not supported: Void cannot rename the records in the deployed database, so the command stops without changes. Keep the existing names; new migrations use timestamps and run after them.
+直接 Cloudflare へのデプロイはサポートされていません。Void はデプロイ済みのデータベースのレコードの名前を変更できないため、コマンドは変更を加えずに停止します。既存の名前はそのまま維持してください。新しいマイグレーションはタイムスタンプを使用し、それらの後に実行されます。
 
 ## `void db connect` {#void-db-connect}
 
-Connect an existing PostgreSQL/MySQL database or provision one through an adapter:
+既存の PostgreSQL/MySQL データベースに接続するか、アダプター経由でプロビジョニングします。
 
 ```sh
 void db connect 'postgresql://user:password@host/database'
@@ -105,15 +105,15 @@ NEON_API_KEY=... void db connect --provider neon --name my-app
 void db connect --provider @acme/void-db-provider --region region-id
 ```
 
-The command saves `DATABASE_URL` in `.env`. When authenticated with a linked Void project, it also updates the encrypted deployment URL; pass `--local-only` to skip that sync. `neon` is built in. Other adapters are project dependencies or local modules exporting a `DatabaseProviderAdapter` from `void/database-provider`.
+このコマンドは `DATABASE_URL` を `.env` に保存します。リンクされた Void プロジェクトで認証済みの場合は、暗号化されたデプロイ用 URL も更新します。この同期をスキップするには `--local-only` を渡します。`neon` は組み込みです。その他のアダプターは、プロジェクトの依存関係、または `void/database-provider` から `DatabaseProviderAdapter` をエクスポートするローカルモジュールです。
 
-Provider-created credentials are never printed. For direct Cloudflare deploys, configure the same URL as a protected `DATABASE_URL` in the shell or CI environment that runs deploy.
+プロバイダーが作成した認証情報が表示されることはありません。直接 Cloudflare へのデプロイでは、デプロイを実行するシェルまたは CI 環境に、同じ URL を保護された `DATABASE_URL` として設定してください。
 
 ## `void db set-url` {#void-db-set-url}
 
-Update the PostgreSQL or MySQL connection string for deployment. Available for projects with `"database": "pg"` or `"database": "mysql"`.
+デプロイ用の PostgreSQL または MySQL の接続文字列を更新します。`"database": "pg"` または `"database": "mysql"` のプロジェクトで使用できます。
 
-Prompts for a connection string and sends it to the platform API to create or update the Hyperdrive configuration.
+接続文字列の入力を求め、それをプラットフォーム API に送信して Hyperdrive の構成を作成または更新します。
 
 ## `void db export` {#void-db-export}
 
@@ -121,15 +121,15 @@ Prompts for a connection string and sends it to the platform API to create or up
 void db export [--output <path>] [--no-data] [--no-schema] [--table <name>]
 ```
 
-Dump the local database as SQL. Outputs to stdout by default (pipeable), or to a file with `--output`.
+ローカルのデータベースを SQL としてダンプします。デフォルトでは標準出力に出力され（パイプ可能）、`--output` を指定するとファイルに出力されます。
 
-Data exports preserve SQLite AUTOINCREMENT and PostgreSQL SERIAL and identity counters, including IDs consumed by deleted rows. SQLite schema exports include indexes, views, and triggers. PostgreSQL schema exports preserve column types, generated columns, identity definitions, serial sequences, constraints, and indexes. `--no-schema` restores counter values into an existing schema; `--no-data` starts counters at their schema-defined starting values.
+データのエクスポートでは、SQLite の AUTOINCREMENT と、PostgreSQL の SERIAL および identity のカウンターが保持されます。これには、削除された行によって消費された ID も含まれます。SQLite のスキーマのエクスポートには、インデックス、ビュー、トリガーが含まれます。PostgreSQL のスキーマのエクスポートでは、カラム型、生成カラム、identity の定義、シリアルシーケンス、制約、インデックスが保持されます。`--no-schema` はカウンターの値を既存のスキーマに復元し、`--no-data` はカウンターをスキーマで定義された開始値から始めます。
 
-For PostgreSQL schemas with views, triggers, custom types, functions, or standalone sequences, use `pg_dump` for a complete backup. `void db export` reports these objects before writing a schema dump.
+ビュー、トリガー、カスタム型、関数、独立したシーケンスを持つ PostgreSQL のスキーマでは、完全なバックアップに `pg_dump` を使用してください。`void db export` は、スキーマのダンプを書き込む前に、これらのオブジェクトを報告します。
 
-| Flag              | Purpose                            |
-| ----------------- | ---------------------------------- |
-| `--output <path>` | Write to a file instead of stdout  |
-| `--no-data`       | Schema only (no INSERT statements) |
-| `--no-schema`     | Data only (no CREATE TABLE)        |
-| `--table <name>`  | Export a single table              |
+| フラグ            | 目的                                      |
+| ----------------- | ----------------------------------------- |
+| `--output <path>` | 標準出力の代わりにファイルへ書き込む      |
+| `--no-data`       | スキーマのみ（INSERT ステートメントなし） |
+| `--no-schema`     | データのみ（CREATE TABLE なし）           |
+| `--table <name>`  | 単一のテーブルをエクスポートする          |

@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# Rewrites
+# リライト {#rewrites}
 
-A rewrite serves a route at a different URL without changing the browser's address. For example, `/docs` can serve `/en/docs`. Use a [redirect](./redirects) when the browser should move to the destination instead.
+リライトは、ブラウザーのアドレスを変えずに、別の URL のルートを返します。たとえば、`/docs` で `/en/docs` を返せます。ブラウザーを宛先に移動させたい場合は、[リダイレクト](./redirects)を使用します。
 
-Define rewrites in [`void.config.ts`](../../reference/config):
+リライトは [`void.config.ts`](../../reference/config) で定義します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -22,18 +22,18 @@ export default defineConfig({
 });
 ```
 
-A request to `/docs/getting-started` serves `/en/docs/getting-started`. Other locales, such as `/ja/docs/getting-started`, keep their own routes.
+`/docs/getting-started` へのリクエストは `/en/docs/getting-started` を返します。`/ja/docs/getting-started` のような他のロケールは、それぞれのルートを維持します。
 
-## Rules
+## ルール {#rules}
 
-- Sources and destinations start with `/`. Destinations must be paths within the app.
-- `*` matches any characters, including `/`. Use `:splat` in the destination for the matched portion.
-- The first matching rule wins. Put specific patterns before catch-all patterns.
-- Rewrites run before static assets and application routes.
+- ソースと宛先は `/` で始めます。宛先はアプリ内のパスである必要があります。
+- `*` は `/` を含む任意の文字列に一致します。宛先で `:splat` を使うと、一致した部分を参照できます。
+- 最初に一致したルールが優先されます。具体的なパターンは、包括的なパターンより前に置いてください。
+- リライトは、静的アセットとアプリケーションルートより前に実行されます。
 
-## Programmatic rewrites in middleware
+## ミドルウェアでのプログラムによるリライト {#programmatic-rewrites-in-middleware}
 
-Use `c.rewrite()` when the destination depends on the request, such as a locale chosen from a cookie:
+Cookie から選択したロケールなど、宛先がリクエストに依存する場合は `c.rewrite()` を使用します。
 
 ```ts
 import { defineMiddleware } from 'void';
@@ -46,25 +46,25 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-Return the result of `c.rewrite()`. Middleware runs again at the destination, so skip paths that are already rewritten to avoid a loop. Use `c.isRewritten()` to skip work that should happen only once:
+`c.rewrite()` の結果を返してください。ミドルウェアは宛先でも再度実行されるため、ループを避けるために、すでにリライト済みのパスはスキップします。1 度だけ行いたい処理をスキップするには、`c.isRewritten()` を使用します。
 
 ```ts
 if (c.isRewritten()) return next();
 ```
 
-Keep access checks on any destination that needs them.
+アクセスチェックが必要な宛先には、そのチェックを残してください。
 
-A destination without `?` preserves the incoming query string. `c.rewrite('/search')` keeps `?q=...`, while `c.rewrite('/search?q=all')` replaces it.
+`?` を含まない宛先は、受信したクエリ文字列を保持します。`c.rewrite('/search')` は `?q=...` を保持しますが、`c.rewrite('/search?q=all')` はクエリ文字列を置き換えます。
 
-Your editor suggests known routes through the [`RewriteDestination`](../../reference/api/rewrites.md#rewritedestination) type. Dynamic strings are also accepted.
+エディターは、[`RewriteDestination`](../../reference/api/rewrites.md#rewritedestination) 型を通じて既知のルートを候補として提示します。動的な文字列も使用できます。
 
-### Runtime rewrites cannot reach static assets
+### ランタイムのリライトは静的アセットに到達できない {#runtime-rewrites-cannot-reach-static-assets}
 
-`c.rewrite()` targets application routes. To serve an asset such as `/hero.png` at another URL, use `routing.rewrites` or a `_redirects` rule instead. A middleware rewrite to a recognized asset extension throws `VoidAssetRewriteError`.
+`c.rewrite()` の対象はアプリケーションルートです。`/hero.png` のようなアセットを別の URL で返すには、代わりに `routing.rewrites` または `_redirects` のルールを使用します。認識されるアセット拡張子へのミドルウェアリライトは、`VoidAssetRewriteError` をスローします。
 
-## Original URL access
+## 元の URL へのアクセス {#original-url-access}
 
-`c.originalUrl()` returns the URL requested before a static or middleware rewrite, or `null` when no rewrite occurred. Use it for canonical links or locale detection:
+`c.originalUrl()` は、静的リライトまたはミドルウェアリライトの前にリクエストされた URL を返します。リライトが発生していない場合は `null` を返します。正規リンクやロケール検出に使用できます。
 
 ```ts
 import { defineHandler } from 'void';
@@ -75,9 +75,9 @@ export default defineHandler((c) => {
 });
 ```
 
-## Fallbacks
+## フォールバック {#fallbacks}
 
-`routing.fallbacks` uses the same patterns as rewrites, but applies only when no asset or route matches:
+`routing.fallbacks` はリライトと同じパターンを使用しますが、一致するアセットもルートもない場合にのみ適用されます。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -89,13 +89,13 @@ export default defineConfig({
 });
 ```
 
-Use a fallback for a client-side router or a default-locale catch-all. An intentional `404` from a Void route remains a `404`. For third-party frameworks, fallbacks can also replace the framework's `404` response.
+フォールバックは、クライアントサイドルーターやデフォルトロケールの包括的な受け皿に使用します。Void ルートが意図的に返した `404` は、`404` のままです。サードパーティーのフレームワークでは、フォールバックによってフレームワークの `404` レスポンスを置き換えることもできます。
 
-SPA apps already fall back to `/index.html`. Custom fallback rules run first; unmatched paths still use the SPA shell. You don't need to add `'/*': '/index.html'` yourself.
+SPA アプリはすでに `/index.html` にフォールバックします。カスタムのフォールバックルールが先に実行され、一致しないパスは引き続き SPA シェルを使用します。`'/*': '/index.html'` を自分で追加する必要はありません。
 
-## `_redirects` file
+## `_redirects` ファイル {#redirects-file}
 
-You can also place rules in Vite's `publicDir`, which defaults to `public/`:
+Vite の `publicDir`(既定は `public/`)にルールを置くこともできます。
 
 ```text
 # Fallback: only when no asset or route matches
@@ -105,21 +105,21 @@ You can also place rules in Vite's `publicDir`, which defaults to `public/`:
 /docs/*    /en/docs/:splat  200!
 ```
 
-The file can include [3xx redirects](./redirects) too. Rules in `void.config.ts` take precedence over file rules; within each group, the first match wins.
+このファイルには [3xx リダイレクト](./redirects)も記述できます。`void.config.ts` のルールはファイルのルールより優先され、各グループ内では最初に一致したものが優先されます。
 
-## Client navigation
+## クライアントナビゲーション {#client-navigation}
 
-Rewrites run on the server. In Pages mode, a client-side `<Link href="/docs">` navigation may fetch loader data for `/docs` rather than the rewritten route `/en/docs`.
+リライトはサーバー上で実行されます。Pages モードでは、クライアントサイドの `<Link href="/docs">` によるナビゲーションが、リライト後のルート `/en/docs` ではなく `/docs` のローダーデータを取得する場合があります。
 
-Use `<a href="/docs">` to make a full server request when the destination has a different loader. Use a redirect if the URL should change.
+宛先のローダーが異なる場合は、`<a href="/docs">` を使用してサーバーへの完全なリクエストを行ってください。URL を変更したい場合は、リダイレクトを使用します。
 
-## ISR cache keys with rewrites
+## リライトと ISR キャッシュキー {#isr-cache-keys-with-rewrites}
 
-Purge the destination path, such as `/en/docs/foo`, to clear rewritten cache entries. See [Cache keys and rewrites](./revalidation#cache-keys-and-rewrites).
+リライトされたキャッシュエントリーをクリアするには、`/en/docs/foo` のような宛先のパスをパージします。[キャッシュキーとリライト](./revalidation#cache-keys-and-rewrites)を参照してください。
 
-## Debugging with `X-Void-Routing`
+## `X-Void-Routing` によるデバッグ {#debugging-with-x-void-routing}
 
-During development, inspect the `X-Void-Routing` response header in your browser's Network tab. It shows the matching rule and where it was declared:
+開発中は、ブラウザーの Network タブで `X-Void-Routing` レスポンスヘッダーを確認できます。一致したルールと、そのルールが宣言された場所が表示されます。
 
 ```text
 X-Void-Routing: rewrite[/docs/*] -> /en/docs/:splat (void.config.ts#routing.rewrites)

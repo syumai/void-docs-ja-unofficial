@@ -2,17 +2,17 @@
 outline: deep
 ---
 
-# Platform Administration
+# プラットフォーム管理 {#platform-administration}
 
-`void platform` lets you manage the people and apps on a Void platform from your terminal. You can give teammates access, inspect their projects, follow deployment logs, and check the platform's health.
+`void platform` を使うと、Void プラットフォーム上のユーザーとアプリをターミナルから管理できます。チームメンバーへのアクセス付与、プロジェクトの確認、デプロイログの追跡、プラットフォームの状態確認を行えます。
 
-The operator commands for users, projects, deployments, and system status require an administrator account. Connection and installation lifecycle commands use their own authentication. If you're setting up a platform for the first time, start with [Install a Void Platform](/guide/self-hosted-platform).
+ユーザー、プロジェクト、デプロイ、システムステータスに関するオペレーターコマンドには、管理者アカウントが必要です。接続とインストールのライフサイクルコマンドは、それぞれ独自の認証を使用します。プラットフォームを初めてセットアップする場合は、[Void プラットフォームをインストールする](/ja/guide/self-hosted-platform)から始めてください。
 
-## Administration Guides
+## 管理ガイド {#administration-guides}
 
-- [Sign-in and Access](/guide/platform/administration/access)
-- [Users and Projects](/guide/platform/administration/projects)
-- [Plans and Limits](/guide/platform/administration/plans)
-- [Project Zero Trust](/guide/platform/administration/zero-trust)
-- [Email](/guide/platform/administration/email)
-- [Operations](/guide/platform/administration/operations)
+- [サインインとアクセス](/ja/guide/platform/administration/access)
+- [ユーザーとプロジェクト](/ja/guide/platform/administration/projects)
+- [プランと制限](/ja/guide/platform/administration/plans)
+- [プロジェクトのゼロトラスト](/ja/guide/platform/administration/zero-trust)
+- [メール](/ja/guide/platform/administration/email)
+- [運用](/ja/guide/platform/administration/operations)

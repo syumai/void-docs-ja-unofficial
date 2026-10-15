@@ -2,32 +2,32 @@
 outline: deep
 ---
 
-# Astro
+# Astro {#astro}
 
-Use Void with [Astro](https://astro.build/) for resource detection, typed database queries, and migrations. Astro keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
+[Astro](https://astro.build/) で Void を使用すると、リソースの検出、型付きのデータベースクエリ、マイグレーションを利用できます。Astro は独自のビルドと Cloudflare インテグレーションを維持し、Void はその Vite 設定に組み込まれます。
 
-::: warning Astro 6 required
+::: warning Astro 6 が必要です
 
-- [Astro 6+](https://astro.build/blog/astro-6/) is required to use `import { x } from "void/x"` helpers in Astro apps.
-- You also need to enable `"nodejs_als"` under `compatibility_flags` in your Cloudflare config.
+- Astro アプリで `import { x } from "void/x"` ヘルパーを使用するには、[Astro 6 以上](https://astro.build/blog/astro-6/)が必要です。
+- また、Cloudflare の設定で `compatibility_flags` に `"nodejs_als"` を有効にする必要があります。
 :::
 
-## Setup
+## セットアップ {#setup}
 
-### 1. Create a new project
+### 1. 新しいプロジェクトを作成する {#1-create-a-new-project}
 
 ```bash
 npm create astro@latest my-app
 cd my-app
 ```
 
-### 2. Install dependencies
+### 2. 依存関係をインストールする {#2-install-dependencies}
 
 ```bash
 npm install -D @astrojs/cloudflare void
 ```
 
-### 3. Configure `astro.config.mjs`
+### 3. `astro.config.mjs` を設定する {#3-configure-astro-config-mjs}
 
 ```js
 import cloudflare from '@astrojs/cloudflare';
@@ -40,9 +40,9 @@ export default defineConfig({
 });
 ```
 
-### 4. Create `void.config.ts`
+### 4. `void.config.ts` を作成する {#4-create-void-config-ts}
 
-Void uses this config for the Cloudflare adapter during development and deployment:
+Void は、開発時とデプロイ時に、この設定を Cloudflare アダプター用に使用します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -56,22 +56,22 @@ export default defineConfig({
 });
 ```
 
-`nodejs_als` is required for `void/*` runtime helpers (for example `void/db`, `void/kv`) in Astro.
+Astro で `void/*` のランタイムヘルパー（たとえば `void/db`、`void/kv`）を使用するには、`nodejs_als` が必要です。
 
-### 5. Deploy
+### 5. デプロイする {#5-deploy}
 
 ```bash
 void auth login
 void deploy
 ```
 
-## Using Void Features
+## Void の機能を使用する {#using-void-features}
 
-Most [Void platform features](../../guide/app-types.md#void-apps) work with Astro in both local dev and production when using Astro 6+ with `nodejs_als`.
+[Void プラットフォームの機能](../../guide/app-types.md#void-apps)の多くは、Astro 6 以上で `nodejs_als` を使用している場合、ローカル開発と本番環境の両方で Astro と連携して動作します。
 
-Void-managed auth is not supported in framework mode yet. Use Better Auth's official Astro integration directly for now.
+Void が管理する認証は、フレームワークモードではまだサポートされていません。当面は、Better Auth の公式の Astro インテグレーションを直接使用してください。
 
-Pages that access runtime bindings must opt out of prerendering:
+ランタイムバインディングにアクセスするページは、プリレンダリングをオプトアウトする必要があります。
 
 ```astro
 ---
@@ -80,9 +80,9 @@ export const prerender = false;
 ---
 ```
 
-### Database
+### データベース {#database}
 
-Use `void/db` in API routes and server-side code:
+API ルートとサーバーサイドのコードで `void/db` を使用します。
 
 ```ts
 import { users } from '@schema';
@@ -95,21 +95,21 @@ export const GET: APIRoute = async () => {
 };
 ```
 
-### Other resources
+### その他のリソース {#other-resources}
 
-Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
+[KV](../../guide/kv.md)、[オブジェクトストレージ](../../guide/storage.md)、[AI](../../guide/ai.md) は、Void アプリと同じインポートでサーバーサイドのコードから使用できます。[cron ジョブ](../../guide/jobs.md)は `crons/` に、[キューコンシューマー](../../guide/queues.md)は `queues/` に追加します。
 
-### Environment Variables
+### 環境変数 {#environment-variables}
 
-Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
+`env.ts` で変数を宣言し、`import { env } from "void/env"` で読み取ります。ローカルの値、本番環境のシークレット、公開される `VITE_*` の値については、[環境変数](../../guide/env-vars.md)を参照してください。
 
-Void always uses `VITE_*` for client-exposed schema keys, including in Astro projects. Astro's separate `PUBLIC_*` convention still applies to direct `import.meta.env` access, but it does not change the `void/env` server/client boundary.
+Void は、Astro プロジェクトであっても、クライアントに公開されるスキーマキーには常に `VITE_*` を使用します。Astro 独自の `PUBLIC_*` の規約は、`import.meta.env` への直接アクセスには引き続き適用されますが、`void/env` のサーバーとクライアントの境界は変わりません。
 
-`void/env` replaces [`astro:env`](https://docs.astro.build/en/guides/environment-variables/) and `Astro.locals.runtime.env` for env-var access. Keep `Astro.locals.runtime.env` around when you need raw binding access (D1, KV, R2, etc.).
+`void/env` は、環境変数へのアクセスにおいて、[`astro:env`](https://docs.astro.build/en/guides/environment-variables/) と `Astro.locals.runtime.env` に代わるものです。生のバインディング（D1、KV、R2 など）に直接アクセスする必要がある場合は、`Astro.locals.runtime.env` を引き続き使用してください。
 
-## Accessing Bindings Directly
+## バインディングに直接アクセスする {#accessing-bindings-directly}
 
-Access bindings via `Astro.locals.runtime.env` (works in both dev and production):
+バインディングには `Astro.locals.runtime.env` からアクセスします（開発と本番の両方で動作します）。
 
 ```ts
 import type { APIRoute } from 'astro';
@@ -121,7 +121,7 @@ export const GET: APIRoute = async ({ locals }) => {
 };
 ```
 
-In `.astro` pages (remember to set `prerender = false`):
+`.astro` ページでは（`prerender = false` を設定するのを忘れないでください）:
 
 ```astro
 ---

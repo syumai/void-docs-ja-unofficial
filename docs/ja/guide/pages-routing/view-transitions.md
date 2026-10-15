@@ -2,13 +2,13 @@
 outline: deep
 ---
 
-# View Transitions
+# View Transitions {#view-transitions}
 
-Add animated page transitions with the browser’s [View Transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API). Pages cross-fade by default; use CSS to customize the animation.
+ブラウザーの [View Transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API) を使って、アニメーション付きのページ遷移を追加します。ページはデフォルトでクロスフェードします。アニメーションは CSS でカスタマイズできます。
 
-## Enabling View Transitions
+## View Transitions を有効にする {#enabling-view-transitions}
 
-Pass `viewTransitions: true` to the adapter plugin:
+アダプタープラグインに `viewTransitions: true` を渡します。
 
 ::: code-group
 
@@ -42,11 +42,11 @@ export default defineConfig({
 
 :::
 
-This enables view transitions for all navigations, including `Link` clicks, programmatic `router.visit()` calls, and browser back or forward.
+これにより、`Link` のクリック、プログラムによる `router.visit()` の呼び出し、ブラウザーの戻る・進む操作を含むすべてのナビゲーションで View Transitions が有効になります。
 
-## Per-Link Override
+## リンクごとの上書き {#per-link-override}
 
-Override the global setting on individual links:
+個々のリンクで、グローバル設定を上書きできます。
 
 ::: code-group
 
@@ -100,16 +100,16 @@ Override the global setting on individual links:
 
 :::
 
-Or programmatically:
+プログラムから指定することもできます。
 
 ```ts
 router.visit('/about', { viewTransition: true });
 router.visit('/settings', { viewTransition: false });
 ```
 
-## Customizing with CSS
+## CSS でカスタマイズする {#customizing-with-css}
 
-The default transition is a cross-fade. Customize it using the `::view-transition-old` and `::view-transition-new` pseudo-elements:
+デフォルトの遷移はクロスフェードです。`::view-transition-old` と `::view-transition-new` 疑似要素を使ってカスタマイズします。
 
 ```css
 /* Faster transition */
@@ -127,7 +127,7 @@ The default transition is a cross-fade. Customize it using the `::view-transitio
 }
 ```
 
-Assign `view-transition-name` to elements that should animate independently (e.g., a hero image that morphs between pages):
+独立してアニメーションさせたい要素（たとえば、ページ間でモーフィングするヒーロー画像）には、`view-transition-name` を割り当てます。
 
 ```css
 .hero-image {
@@ -136,5 +136,5 @@ Assign `view-transition-name` to elements that should animate independently (e.g
 ```
 
 ::: tip
-View transitions are progressive enhancement. Browsers that do not support the API fall back to instant navigation with no errors.
+View Transitions はプログレッシブエンハンスメントです。この API をサポートしないブラウザーでは、エラーなく即座にナビゲーションされます。
 :::

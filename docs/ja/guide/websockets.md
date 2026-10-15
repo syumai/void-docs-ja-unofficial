@@ -2,19 +2,19 @@
 outline: deep
 ---
 
-# WebSockets
+# WebSockets {#websockets}
 
-::: warning ⚠️ Void Apps Only
-Typed WebSocket routes currently work in native Void apps. They aren't available in meta-framework mode yet.
+::: warning ⚠️ Void アプリ限定
+型付き WebSocket ルートは、現在のところネイティブな Void アプリでのみ動作します。メタフレームワークモードではまだ利用できません。
 :::
 
-Create a `.ws.ts` route to send typed messages between your server and connected clients. Each route instance has its own Cloudflare Durable Object for shared state. WebSocket routes require the Cloudflare target.
+`.ws.ts` ルートを作成すると、サーバーと接続中のクライアントの間で型付きメッセージを送受信できます。各ルートインスタンスは、共有状態のために専用の Cloudflare Durable Object を持ちます。WebSocket ルートには Cloudflare ターゲットが必要です。
 
-For example, `/rooms/[id]` gives each chat room its own instance. Use it for chat, presence, collaborative documents, or notifications.
+たとえば `/rooms/[id]` では、各チャットルームがそれぞれのインスタンスを持ちます。チャット、プレゼンス、共同編集ドキュメント、通知などに使用できます。
 
-## Route files
+## ルートファイル {#route-files}
 
-Create WebSocket routes in `routes/` with the `.ws.ts` suffix:
+WebSocket ルートは、`routes/` に `.ws.ts` サフィックスを付けて作成します。
 
 ```text
 routes/
@@ -22,19 +22,19 @@ routes/
   notifications.ws.ts
 ```
 
-Filename rules match regular server routes:
+ファイル名のルールは、通常のサーバールートと同じです。
 
-- `index.ws.ts` becomes the parent path
-- `[id].ws.ts` becomes `:id`
-- `[...slug].ws.ts` becomes a catch-all
-- route groups like `(marketing)/chat.ws.ts` are ignored in the URL
-- `chat.dev.ws.ts` / `chat.prod.ws.ts` restrict the route to one environment
+- `index.ws.ts` は親のパスになります
+- `[id].ws.ts` は `:id` になります
+- `[...slug].ws.ts` はキャッチオールになります
+- `(marketing)/chat.ws.ts` のようなルートグループは、URL では無視されます
+- `chat.dev.ws.ts` / `chat.prod.ws.ts` は、ルートを 1 つの環境に限定します
 
-The environment suffix goes **before** `.ws`. `chat.ws.dev.ts` is not recognised.
+環境サフィックスは `.ws` の**前**に付けます。`chat.ws.dev.ts` は認識されません。
 
-## `defineRoom()`
+## `defineRoom()` {#defineroom}
 
-Use `defineRoom()` when clients should share a room or document identified by the route.
+ルートによって識別される、ルームやドキュメントをクライアントが共有する場合は、`defineRoom()` を使用します。
 
 ```ts
 // routes/chat/[room].ws.ts
@@ -79,7 +79,7 @@ export default defineRoom({
 });
 ```
 
-`defineRoom()` adds room helpers to the hook context:
+`defineRoom()` は、フックのコンテキストにルーム用のヘルパーを追加します。
 
 - `ctx.room.broadcast(event, excludeIds?)`
 - `ctx.room.getConnections()`
@@ -88,9 +88,9 @@ export default defineRoom({
 - `ctx.connection.close(code?, reason?)`
 - `ctx.connection.setState(data)`
 
-## `defineWebSocket()`
+## `defineWebSocket()` {#definewebsocket}
 
-Use `defineWebSocket()` when each connection is handled independently instead of as a shared room.
+共有ルームではなく、各接続を個別に処理する場合は、`defineWebSocket()` を使用します。
 
 ```ts
 // routes/notifications.ws.ts
@@ -113,9 +113,9 @@ export default defineWebSocket({
 });
 ```
 
-## Client
+## クライアント {#client}
 
-Use `connect()` from `void/ws` on the client:
+クライアントでは、`void/ws` の `connect()` を使用します。
 
 ```ts
 import { connect } from 'void/ws';
@@ -133,62 +133,61 @@ socket.on('message', (event) => {
 socket.send({ type: 'chat.message', text: 'hello' });
 ```
 
-`connect()` resolves relative URLs against the current origin and automatically uses `ws:` or `wss:`. It also buffers messages until the socket opens and reconnects by default.
+`connect()` は、相対 URL を現在のオリジンに対して解決し、`ws:` または `wss:` を自動的に使用します。また、ソケットが開くまでメッセージをバッファリングし、デフォルトで再接続します。
 
-## Typed messages
+## 型付きメッセージ {#typed-messages}
 
-Define schemas for messages sent by the client and server:
+クライアントとサーバーが送信するメッセージのスキーマを定義します。
 
-- `messages.client` validates what the browser may send
-- `messages.server` validates what the server may send
-- `onMessage()` receives the parsed, validated client event
-- `ctx.room.broadcast()`, `ctx.connection.send()`, and `ctx.socket.send()` are typed from `messages.server`
-- `connect()` infers route params, outgoing client messages, and incoming server messages from generated route types
+- `messages.client` は、ブラウザーが送信できる内容を検証します
+- `messages.server` は、サーバーが送信できる内容を検証します
+- `onMessage()` は、パースおよび検証済みのクライアントイベントを受け取ります
+- `ctx.room.broadcast()`、`ctx.connection.send()`、`ctx.socket.send()` は、`messages.server` から型付けされます
+- `connect()` は、生成されたルートの型から、ルートパラメーター、送信するクライアントメッセージ、受信するサーバーメッセージを推論します
 
-Messages are JSON events. Raw string and binary messages are not supported.
+メッセージは JSON イベントです。生の文字列やバイナリのメッセージはサポートされていません。
 
-## Authentication
+## 認証 {#authentication}
 
-When Void auth is enabled, every WebSocket hook receives the current user as `ctx.user`, or `null` for an anonymous connection. Use `onBeforeConnect` to reject unauthenticated clients.
+Void の認証が有効な場合、すべての WebSocket フックは現在のユーザーを `ctx.user` として受け取ります。匿名の接続では `null` です。認証されていないクライアントを拒否するには、`onBeforeConnect` を使用します。
 
-Connections from another origin are anonymous unless that origin is in your auth `trustedOrigins`. If you read your own cookies from `ctx.request` in `onBeforeConnect`, check its `Origin` header yourself.
+別のオリジンからの接続は、そのオリジンが認証の `trustedOrigins` に含まれていない限り、匿名として扱われます。`onBeforeConnect` で `ctx.request` から独自の Cookie を読み取る場合は、その `Origin` ヘッダーを自分で確認してください。
 
-`ctx.user` is resolved when the socket connects and stays the same for that connection, even if the user later signs out or the session is revoked. For actions that must respect a ban or role change, re-check your own records in `onMessage` and close the connection with `ctx.connection.close()` in rooms or `ctx.socket.close()` in `defineWebSocket()`.
+`ctx.user` はソケットの接続時に解決され、その接続の間は、ユーザーがその後サインアウトしたりセッションが失効したりしても変わりません。BAN やロールの変更を反映する必要がある操作では、`onMessage` で独自のレコードを再確認し、ルームでは `ctx.connection.close()`、`defineWebSocket()` では `ctx.socket.close()` で接続を閉じてください。
 
-## Hooks
+## フック {#hooks}
 
-Both `defineRoom()` and `defineWebSocket()` support:
+`defineRoom()` と `defineWebSocket()` はどちらも、次をサポートしています。
 
-- `onBeforeConnect(ctx)`: return a `Response` to reject the upgrade
-- `onConnect(ctx)`: runs after the socket is accepted
-- `onMessage(ctx, event)`: receives the validated client event
-- `onClose(ctx, details)`: receives `{ code, reason, wasClean }`
-- `onRequest(ctx)`: handles ordinary HTTP requests to the same path
+- `onBeforeConnect(ctx)`: `Response` を返すと、アップグレードを拒否します
+- `onConnect(ctx)`: ソケットが受け入れられた後に実行されます
+- `onMessage(ctx, event)`: 検証済みのクライアントイベントを受け取ります
+- `onClose(ctx, details)`: `{ code, reason, wasClean }` を受け取ります
+- `onRequest(ctx)`: 同じパスへの通常の HTTP リクエストを処理します
 
-Void completes the WebSocket close handshake automatically. Use `onClose` for application cleanup;
-you do not need to close the socket again in this hook.
+Void は WebSocket のクローズハンドシェイクを自動的に完了します。アプリケーションのクリーンアップには `onClose` を使用してください。このフックでソケットを再度閉じる必要はありません。
 
-Every hook receives a context with:
+すべてのフックは、次を持つコンテキストを受け取ります。
 
-- `ctx.id`: deterministic route instance id
-- `ctx.params`: matched route params
-- `ctx.user`: resolved auth user or `null`
-- `ctx.request`: the HTTP request in `onBeforeConnect`, `onConnect`, and `onRequest`. In `onMessage` and `onClose`, it is a placeholder without headers, cookies, or query. To keep request data, save it in `onConnect` with `ctx.connection.setState()` in rooms or `ctx.socket.setState()` in `defineWebSocket()`. Read it later from `ctx.connection.state` or `ctx.socket.state`.
+- `ctx.id`: ルートインスタンスの決定的な ID
+- `ctx.params`: マッチしたルートパラメーター
+- `ctx.user`: 解決された認証ユーザー、または `null`
+- `ctx.request`: `onBeforeConnect`、`onConnect`、`onRequest` では HTTP リクエストです。`onMessage` と `onClose` では、ヘッダー、Cookie、クエリのないプレースホルダーです。リクエストのデータを保持するには、`onConnect` で、ルームでは `ctx.connection.setState()`、`defineWebSocket()` では `ctx.socket.setState()` を使って保存します。後で `ctx.connection.state` または `ctx.socket.state` から読み取ります。
 - `ctx.env`
 - `ctx.storage`
 
-If a route does not define `onRequest()`, non-WebSocket requests return `426 Upgrade Required`.
+ルートに `onRequest()` が定義されていない場合、WebSocket 以外のリクエストには `426 Upgrade Required` が返されます。
 
-## Move a route while keeping its state
+## 状態を維持したままルートを移動する {#move-a-route-while-keeping-its-state}
 
-Before moving a deployed route, run `void info`. For `routes/chat/[room].ws.ts`, the output includes:
+デプロイ済みのルートを移動する前に、`void info` を実行します。`routes/chat/[room].ws.ts` の場合、出力には次が含まれます。
 
 ```text
 To preserve this resource when moving its code, add this to 'defineRoom':
   name: "chat-room",
 ```
 
-Add the displayed name to your existing definition:
+表示された名前を、既存の定義に追加します。
 
 ```ts
 export default defineRoom({
@@ -198,15 +197,15 @@ export default defineRoom({
 });
 ```
 
-Move the file to `routes/rooms/[room].ws.ts`, update clients to connect to `/rooms/:room`, and deploy normally. Keep the same parameter names and values: room `general` still uses its existing storage. The Worker class, binding, and migration history stay the same on both Cloudflare and Void platform deployments.
+ファイルを `routes/rooms/[room].ws.ts` に移動し、クライアントが `/rooms/:room` に接続するよう更新して、通常どおりデプロイします。パラメーター名と値は同じままにしてください。ルーム `general` は、引き続き既存のストレージを使用します。Worker クラス、バインディング、マイグレーション履歴は、Cloudflare と Void プラットフォームのどちらのデプロイでも変わりません。
 
-Both `defineRoom()` and `defineWebSocket()` accept optional `name`. Use a static string, inline or in a local `const`. Each route must produce a distinct Worker class; changing the name selects a different resource. If you already moved a route, `void info` also shows unmatched identities recorded in `void.lock.json`. Identify the original resource before adopting its suggested name; otherwise restore the original source and discover the name there.
+`defineRoom()` と `defineWebSocket()` はどちらも、省略可能な `name` を受け付けます。静的な文字列を、インラインまたはローカルの `const` で使用してください。各ルートは、それぞれ別の Worker クラスを生成する必要があります。名前を変更すると、別のリソースが選択されます。すでにルートを移動した場合、`void info` は `void.lock.json` に記録された、一致しない識別子も表示します。提案された名前を採用する前に、元のリソースを特定してください。特定できない場合は、元のソースを復元し、そこで名前を確認してください。
 
-### Rename a route parameter
+### ルートパラメーターの名前を変更する {#rename-a-route-parameter}
 
-By default, the instance key includes parameter names. `/chat/:room` with `room: 'general'` uses `room=general`; a route without parameters uses `default`. Multiple parameters are joined in route order, for example `team=acme&room=general`. If a multi-parameter route has a value containing `&`, its key uses a versioned encoding to keep rooms separate.
+デフォルトでは、インスタンスキーにパラメーター名が含まれます。`room: 'general'` の `/chat/:room` は `room=general` を使用し、パラメーターのないルートは `default` を使用します。複数のパラメーターは、ルートの順序で連結されます。たとえば `team=acme&room=general` です。複数のパラメーターを持つルートで、値に `&` が含まれる場合、ルームを分離したまま保つために、キーにはバージョン付きのエンコーディングが使用されます。
 
-If you also rename `[room]` to `[id]`, preserve the old key explicitly:
+`[room]` を `[id]` にも名前変更する場合は、古いキーを明示的に維持してください。
 
 ```ts
 // routes/rooms/[id].ws.ts
@@ -218,14 +217,14 @@ export default defineRoom({
 });
 ```
 
-Clients now connect to `/rooms/:id` with `params: { id: 'general' }`. The key remains `room=general`, so storage and `ctx.id` stay the same. Returning only `params.id` would select a different instance.
+クライアントは、`params: { id: 'general' }` で `/rooms/:id` に接続するようになります。キーは `room=general` のままなので、ストレージと `ctx.id` は変わりません。`params.id` だけを返すと、別のインスタンスが選択されます。
 
-`key` is optional on both WebSocket helpers. It must return a string synchronously and consistently for the same parameters. Preserve the complete old key when migrating multiple parameters. Keep the callback stable after deployment.
+`key` は、どちらの WebSocket ヘルパーでも省略可能です。同じパラメーターに対して、同期的かつ一貫して文字列を返す必要があります。複数のパラメーターを移行する場合は、古いキー全体を維持してください。デプロイ後は、このコールバックを変更しないでください。
 
-## Constraints
+## 制約 {#constraints}
 
-Each socket connects to one route instance. To switch rooms, close the current connection and open another. For publishing to multiple topics, see [Live Event Streams](./live.md).
+各ソケットは、1 つのルートインスタンスに接続します。ルームを切り替えるには、現在の接続を閉じて、別の接続を開きます。複数のトピックへの発行については、[ライブイベントストリーム](./live.md)を参照してください。
 
-## Deployment
+## デプロイ {#deployment}
 
-WebSocket routes work on Cloudflare and Void platform deployments. Commit `void.lock.json` when Void adds a binding or migration. Do not delete or reorder deployed migration steps.
+WebSocket ルートは、Cloudflare と Void プラットフォームのデプロイで動作します。Void がバインディングやマイグレーションを追加した場合は、`void.lock.json` をコミットしてください。デプロイ済みのマイグレーションステップを削除したり、並べ替えたりしないでください。

@@ -2,12 +2,12 @@
 outline: deep
 ---
 
-# Receiving Email {#inbound}
+# メールの受信 {#inbound}
 
-Receive mail with handlers in the top-level `email/` directory. Inbound handlers require a native Void app; framework and Node.js, Bun, or Deno builds do not support them.
+トップレベルの `email/` ディレクトリにあるハンドラーでメールを受信します。受信ハンドラーにはネイティブの Void アプリが必要で、フレームワークや Node.js、Bun、Deno 向けのビルドではサポートされません。
 
 ```ts
-// email/_default.ts — fallback for any unmatched recipient
+// email/_default.ts — 一致しない宛先すべてのフォールバック
 import { defineEmail, parseEmail } from 'void/email';
 
 export default defineEmail(async (message, env, ctx) => {
@@ -22,47 +22,47 @@ export default defineEmail(async (message, env, ctx) => {
 });
 ```
 
-The handler receives Cloudflare's native `ForwardableEmailMessage` plus an optional fourth `info` arg with `params` populated for dynamic / tagged route segments:
+ハンドラーは Cloudflare ネイティブの `ForwardableEmailMessage` に加えて、動的 / タグ付きのルートセグメントの `params` が設定された、省略可能な 4 番目の引数 `info` を受け取ります。
 
-| Method                             | Purpose                                    |
-| ---------------------------------- | ------------------------------------------ |
-| `message.setReject(reason)`        | Reject the message with an SMTP error.     |
-| `message.forward(to, headers?)`    | Forward to a verified destination.         |
-| `replyEmail(message, options)`     | Send a threaded reply.                     |
-| `message.reply({ from, to, raw })` | Reply using your own MIME bytes or stream. |
+| メソッド                           | 用途                                               |
+| ---------------------------------- | -------------------------------------------------- |
+| `message.setReject(reason)`        | SMTP エラーでメッセージを拒否します。              |
+| `message.forward(to, headers?)`    | 検証済みの宛先に転送します。                       |
+| `replyEmail(message, options)`     | スレッド化された返信を送信します。                 |
+| `message.reply({ from, to, raw })` | 独自の MIME バイト列またはストリームで返信します。 |
 
-Returning without an action accepts the message. Use bare email addresses for `forward` and `message.reply`.
+何も操作せずに戻ると、メッセージは受理されます。`forward` と `message.reply` にはメールアドレスのみを指定してください。
 
-`parseEmail(message)` returns `from`, `to`, `subject`, `text`, `html`, `attachments`, and `headers`. Call it at most once per message — the underlying stream can only be read once.
+`parseEmail(message)` は `from`、`to`、`subject`、`text`、`html`、`attachments`、`headers` を返します。基盤となるストリームは一度しか読み取れないため、メッセージごとに最大 1 回だけ呼び出してください。
 
-## Per-recipient routing {#per-recipient-routing}
+## 宛先ごとのルーティング {#per-recipient-routing}
 
 ```
 email/
-  support.ts                — handles support@<your-domain>
-  billing.ts                — handles billing@<your-domain>
-  support+[ticket].ts       — handles support+ticket-123@... → info.params.ticket = "ticket-123"
-  support+vip.ts            — handles exactly support+vip@..., ahead of support+[ticket].ts
-  [user].ts                 — dynamic local-part   → info.params.user
-  [user]+[tag].ts           — dynamic + subaddress → info.params.user, info.params.tag
-  _default.ts               — fallback when no per-address pattern matches
+  support.ts                — support@<your-domain> を処理
+  billing.ts                — billing@<your-domain> を処理
+  support+[ticket].ts       — support+ticket-123@... を処理 → info.params.ticket = "ticket-123"
+  support+vip.ts            — support+vip@... のみを処理（support+[ticket].ts より優先）
+  [user].ts                 — 動的なローカルパート   → info.params.user
+  [user]+[tag].ts           — 動的 + サブアドレス → info.params.user, info.params.tag
+  _default.ts               — どのアドレスパターンにも一致しない場合のフォールバック
 ```
 
-Files are matched against the local-part of the `To` address (the portion before `@`), case-insensitive. **Match precedence (most specific wins):**
+ファイルは `To` アドレスのローカルパート（`@` より前の部分）に対して、大文字小文字を区別せずに照合されます。**一致の優先順位（より具体的なものが優先）:**
 
-1. `support+vip.ts` (static + literal tag)
-2. `support+[ticket].ts` (static + captured tag)
-3. `support.ts` (static)
-4. `[user]+vip.ts` (dynamic + literal tag)
-5. `[user]+[tag].ts` (dynamic + captured tag)
-6. `[user].ts` (dynamic)
-7. `_default.ts` (fallback)
+1. `support+vip.ts`（静的 + リテラルのタグ）
+2. `support+[ticket].ts`（静的 + キャプチャされるタグ）
+3. `support.ts`（静的）
+4. `[user]+vip.ts`（動的 + リテラルのタグ）
+5. `[user]+[tag].ts`（動的 + キャプチャされるタグ）
+6. `[user].ts`（動的）
+7. `_default.ts`（フォールバック）
 
-The first pattern that matches wins. Within a shape, a literal tag beats a captured tag — `support+vip@` reaches `support+vip.ts`, and every other `support+…@` reaches `support+[ticket].ts`. Handlers of the same shape are tried alphabetically.
+最初に一致したパターンが採用されます。同じ形式の中では、リテラルのタグがキャプチャされるタグより優先されます。`support+vip@` は `support+vip.ts` に届き、それ以外の `support+…@` はすべて `support+[ticket].ts` に届きます。同じ形式のハンドラーはアルファベット順に試されます。
 
-If nothing matches and there's no `_default.ts`, control returns to Cloudflare and the sender receives a non-delivery report. Nested folders under `email/` are ignored — the recipient is a flat string, not a path.
+どれにも一致せず `_default.ts` もない場合、制御は Cloudflare に戻り、送信者には配信不能通知が送られます。`email/` 配下のネストしたフォルダーは無視されます。宛先はパスではなく、フラットな文字列です。
 
-## Threaded replies {#threaded-replies}
+## スレッド化された返信 {#threaded-replies}
 
 ```ts
 // email/support+[ticket].ts
@@ -78,29 +78,25 @@ export default defineEmail(async (message, env, ctx, info) => {
 });
 ```
 
-`replyEmail()` replies to the original sender with a threaded subject. You can override `subject`.
+`replyEmail()` は、スレッド化された件名で元の送信者に返信します。`subject` は上書きできます。
 
-On a Void platform, the default sender is your project's shared address, or the address that received mail on your registered domain. Use that default for shared mail; `message.to` has the project prefix removed. Sender overrides must belong to your project.
+Void プラットフォームでは、既定の送信元はプロジェクトの共有アドレス、または登録済みドメインでメールを受信したアドレスです。共有メールにはこの既定値を使用してください。`message.to` からはプロジェクトのプレフィックスが取り除かれています。送信元を上書きする場合は、プロジェクトに属するアドレスでなければなりません。
 
-Replies follow your project's recipient policy. Verify shared-sender recipients with `void email allow <address>`. Check `void email logs` for the provider outcome after the handler finishes.
+返信はプロジェクトの宛先ポリシーに従います。共有送信元の宛先は `void email allow <address>` で検証してください。ハンドラーの終了後、プロバイダーの結果は `void email logs` で確認できます。
 
-Forwarding requires a native Cloudflare email event. For custom domains relayed through the platform, use replies instead.
+転送にはネイティブの Cloudflare メールイベントが必要です。プラットフォーム経由で中継されるカスタムドメインでは、代わりに返信を使用してください。
 
-## Configuring inbound delivery {#configuring-inbound-delivery}
+## 受信配信の設定 {#configuring-inbound-delivery}
 
-On an email-enabled platform, `<slug>+anything@<mail domain>` reaches your
-deployed `email/` handlers without per-project DNS setup once the platform has verified your recipient rule and enabled plus addressing. Void sets up that rule when you deploy handlers; creating a project or only sending mail requires no inbound rule. Deployment reports a routing conflict or capacity limit if setup cannot complete. A
-[registered custom domain](./domains.md#your-own-domain-on-the-platform) reaches those
-handlers once its inbound readiness is `ready`. Use `void email domain status`
-to check current provider routing and any remaining setup steps.
+メールが有効なプラットフォームでは、プラットフォームが宛先ルールを検証してプラス記号付きアドレス指定を有効にすると、プロジェクトごとの DNS 設定なしで `<slug>+anything@<mail domain>` がデプロイ済みの `email/` ハンドラーに届きます。このルールはハンドラーをデプロイしたときに Void が設定します。プロジェクトの作成やメール送信だけでは、受信ルールは必要ありません。設定を完了できない場合、デプロイ時にルーティングの競合または容量の上限が報告されます。[登録済みのカスタムドメイン](./domains.md#your-own-domain-on-the-platform)は、受信の準備状況が `ready` になるとそれらのハンドラーに届くようになります。現在のプロバイダーのルーティングと残りのセットアップ手順は、`void email domain status` で確認できます。
 
-For direct deployments, follow [Your own Cloudflare account](./domains.md#your-own-cloudflare-account) to configure inbound addresses.
+直接デプロイの場合は、[自分の Cloudflare アカウント](./domains.md#your-own-cloudflare-account)に従って受信アドレスを設定してください。
 
-`void dev` has no local inbound trigger. It serves only the outbound dev inbox. Test inbound handlers with `createInboundTestHarness` below.
+`void dev` にはローカルの受信トリガーがありません。開発用の送信インボックスのみを提供します。受信ハンドラーは、後述の `createInboundTestHarness` でテストしてください。
 
-## Testing inbound handlers {#testing-inbound-handlers}
+## 受信ハンドラーのテスト {#testing-inbound-handlers}
 
-Use `createInboundTestHarness` to capture replies, forwards, and rejections. For shared platform mail, pass the full address including the project prefix, such as [`acme+support+abc-123@acme.dev`](mailto:acme+support+abc-123@acme.dev). For direct Cloudflare mail, set `slug: null` and use [`support+abc-123@mail.acme.com`](mailto:support+abc-123@mail.acme.com).
+`createInboundTestHarness` を使うと、返信、転送、拒否を捕捉できます。共有プラットフォームのメールでは、[`acme+support+abc-123@acme.dev`](mailto:acme+support+abc-123@acme.dev) のように、プロジェクトのプレフィックスを含む完全なアドレスを渡します。Cloudflare への直接配信では、`slug: null` を設定し、[`support+abc-123@mail.acme.com`](mailto:support+abc-123@mail.acme.com) のように指定します。
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -136,4 +132,4 @@ describe('email handlers', () => {
 });
 ```
 
-The harness matches handlers in the same order as deployed email routes.
+ハーネスは、デプロイされたメールルートと同じ順序でハンドラーを照合します。

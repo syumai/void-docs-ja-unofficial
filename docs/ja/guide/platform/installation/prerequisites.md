@@ -2,97 +2,97 @@
 outline: deep
 ---
 
-# Prerequisites
+# 前提条件 {#prerequisites}
 
-To run a Void platform, you need:
+Void プラットフォームを運用するには、次のものが必要です。
 
-- A Cloudflare account with Workers for Platforms, R2, and Analytics Engine enabled.
-- An empty hosted PostgreSQL database.
-- An account with your chosen login provider: GitHub, Google, OIDC, or Cloudflare Access.
-- A domain for your apps, or `workers.dev` for testing. You can [add a domain later](/guide/platform/installation/domains#adding-a-domain).
+- Workers for Platforms、R2、Analytics Engine が有効な Cloudflare アカウント。
+- 空のホスト型 PostgreSQL データベース。
+- 選択したログインプロバイダー(GitHub、Google、OIDC、Cloudflare Access)のアカウント。
+- アプリ用のドメイン、またはテスト用の `workers.dev`。[ドメインは後から追加](/ja/guide/platform/installation/domains#adding-a-domain)できます。
 
-Void creates the Workers, storage, queues, routing, and database tables through the CLI.
+Void は、CLI を通じて Workers、ストレージ、キュー、ルーティング、データベースのテーブルを作成します。
 
-Workers for Platforms requires a paid plan. Your database and Cloudflare usage are billed separately.
+Workers for Platforms には有料プランが必要です。データベースと Cloudflare の利用料金は別途請求されます。
 
-## Prepare Your Cloudflare Account and Domain
+## Cloudflare アカウントとドメインを準備する {#prepare-your-cloudflare-account-and-domain}
 
-In the [Cloudflare dashboard](https://dash.cloudflare.com/), select the account where you want the platform to live:
+[Cloudflare ダッシュボード](https://dash.cloudflare.com/)で、プラットフォームを置くアカウントを選択します。
 
-1. Open **Workers & Pages** once to let Cloudflare provision Workers for the account.
-2. Open **Workers for Platforms** and enable its plan. Review [Workers for Platforms pricing](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/pricing/) before confirming.
-3. Open **R2 Object Storage** and complete its activation. Void creates the bucket later.
-4. For a domain installation, choose a domain you own, such as `example.app`. If you need one, register it with your preferred registrar. Use a spare domain's root: apps will be served at `my-app.example.app`. For workers.dev testing, skip this step and the DNS setup below.
+1. **Workers & Pages** を一度開いて、Cloudflare にアカウントの Workers をプロビジョニングさせます。
+2. **Workers for Platforms** を開いて、そのプランを有効にします。確定する前に [Workers for Platforms の料金](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/pricing/)を確認してください。
+3. **R2 Object Storage** を開いて、有効化を完了します。バケットは後で Void が作成します。
+4. ドメインでのインストールの場合は、`example.app` のように自分が所有するドメインを選びます。必要であれば、お好みのレジストラで登録してください。使っていないドメインのルートを使用します。アプリは `my-app.example.app` で配信されます。workers.dev でテストする場合は、この手順と後述の DNS 設定をスキップしてください。
 
-If that domain is already in this Cloudflare account, use its existing zone. Otherwise, [add the domain to Cloudflare](https://developers.cloudflare.com/dns/zone-setups/full-setup/setup/) and follow the nameserver instructions until the zone is active. A zone is Cloudflare's DNS configuration for a domain; creating one does not buy the domain.
+そのドメインがすでにこの Cloudflare アカウントにある場合は、既存のゾーンを使用します。そうでなければ、[ドメインを Cloudflare に追加](https://developers.cloudflare.com/dns/zone-setups/full-setup/setup/)し、ゾーンが有効になるまでネームサーバーの手順に従ってください。ゾーンとは、ドメインに対する Cloudflare の DNS 設定のことです。ゾーンを作成してもドメインを購入したことにはなりません。
 
-You can also let Void create the zone during installation. Setting it up now lets you scope the API tokens to that zone and finish installation without a DNS pause. The platform API uses `workers.dev` by default, so it needs no additional domain.
+インストール中に Void にゾーンを作成させることもできます。あらかじめ設定しておけば、API トークンをそのゾーンにスコープでき、DNS の待ち時間なしにインストールを完了できます。プラットフォーム API はデフォルトで `workers.dev` を使うため、追加のドメインは不要です。
 
-### If Cloudflare rejects Analytics Engine
+### Cloudflare が Analytics Engine を拒否する場合 {#if-cloudflare-rejects-analytics-engine}
 
-The platform stores request metrics and logs in Analytics Engine. If installation stops with "You need to enable Analytics Engine" (code 10089), add an Analytics Engine binding to a Worker that is not part of the platform under **Settings** > **Bindings**, and deploy it once from the dashboard. A new Hello World Worker works. Do not edit the platform's own Workers. Then run the printed `void platform install --resume` command.
+プラットフォームは、リクエストのメトリクスとログを Analytics Engine に保存します。インストールが「You need to enable Analytics Engine」(コード 10089)で停止した場合は、プラットフォームに含まれない Worker の **Settings** > **Bindings** で Analytics Engine バインディングを追加し、ダッシュボードから一度デプロイしてください。新しい Hello World Worker で構いません。プラットフォーム自身の Workers は編集しないでください。その後、表示された `void platform install --resume` コマンドを実行します。
 
-## Install the CLI and Preview
+## CLI をインストールしてプレビューする {#install-the-cli-and-preview}
 
-With Node.js 24.21.0 or later, install the CLI:
+Node.js 24.21.0 以降で、CLI をインストールします。
 
 ```sh
 pnpm add --global void
 void platform install --plan
 ```
 
-Sign in to Cloudflare when prompted, then choose an installation name and account. `--plan` previews the resources without changing them or requiring runtime secrets. Completed plans save your choices locally. Run `void platform install` again to select a saved plan; Void checks the current Cloudflare state before asking you to apply it.
+プロンプトが表示されたら Cloudflare にサインインし、インストール名とアカウントを選択します。`--plan` は、リソースを変更したりランタイムシークレットを要求したりせずに、作成されるリソースをプレビューします。完了したプランは、選択内容がローカルに保存されます。`void platform install` を再度実行すると、保存済みのプランを選択できます。適用を求める前に、Void は現在の Cloudflare の状態を確認します。
 
-For a domain installation, use these answers. Testing mode skips the application domain, zone, and catch-all questions:
+ドメインでのインストールでは、次の内容で回答します。テストモードでは、アプリケーションドメイン、ゾーン、キャッチオールに関する質問はスキップされます。
 
-| Prompt                                  | Answer                                              |
-| --------------------------------------- | --------------------------------------------------- |
-| Installation name                       | A short name, such as `team`                        |
-| Application base domain                 | Your domain, such as `example.app`                  |
-| Cloudflare zone                         | The same domain                                     |
-| Platform display name                   | Any name your team will recognize                   |
-| Optional custom API hostname            | Leave empty to use `workers.dev`                    |
-| Dedicate all unmatched traffic to Void? | Yes only if this whole zone belongs to the platform |
+| プロンプト                              | 回答                                                   |
+| --------------------------------------- | ------------------------------------------------------ |
+| Installation name                       | `team` のような短い名前                                |
+| Application base domain                 | `example.app` のような自分のドメイン                   |
+| Cloudflare zone                         | 同じドメイン                                           |
+| Platform display name                   | チームが認識しやすい任意の名前                         |
+| Optional custom API hostname            | `workers.dev` を使う場合は空のままにする               |
+| Dedicate all unmatched traffic to Void? | ゾーン全体がプラットフォームのものである場合にのみ Yes |
 
-Choose an unused installation name in your account. For example, `team` creates resources such as `void-team-api` and `void-team-proxy`.
+アカウント内で未使用のインストール名を選んでください。たとえば `team` を指定すると、`void-team-api` や `void-team-proxy` といったリソースが作成されます。
 
-The preview lists the credentials you will need. Review [Credentials](/guide/platform/installation/credentials), then run the install command printed at the end. The guided installation provides setup links and the login callback when needed.
+プレビューには、必要になる認証情報が一覧表示されます。[認証情報](/ja/guide/platform/installation/credentials)を確認してから、最後に表示されるインストールコマンドを実行してください。ガイド付きインストールでは、必要に応じてセットアップ用のリンクとログインのコールバックが提示されます。
 
-You can select either path directly:
+どちらの方法も直接指定できます。
 
 ```sh
 void platform install --application-domain example.app --plan
 void platform install --workers-dev --plan
 ```
 
-`--workers-dev` cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
+`--workers-dev` は、`--application-domain`、`--zone`、`--dedicated-zone` と組み合わせられません。
 
-## Create the Platform Database {#platform-database}
+## プラットフォームのデータベースを作成する {#platform-database}
 
-Use an empty PostgreSQL database dedicated to this platform. It stores users, projects, and deployments; individual apps can still use D1. Void creates the tables and the Hyperdrive connection, but does not provision the PostgreSQL server.
+このプラットフォーム専用の、空の PostgreSQL データベースを使用します。ユーザー、プロジェクト、デプロイが保存されます。個々のアプリは引き続き D1 を使用できます。Void はテーブルと Hyperdrive 接続を作成しますが、PostgreSQL サーバー自体はプロビジョニングしません。
 
-Use any PostgreSQL provider that accepts connections from your computer and Cloudflare:
+お使いのコンピューターと Cloudflare の両方からの接続を受け付ける PostgreSQL プロバイダーであれば、どれでも使用できます。
 
-1. Create a fresh database or project dedicated to the platform, with no existing application tables. Use a database role that can create and manage its tables and schemas.
-2. Open the provider's connection details and select the primary database. Use a direct connection or a session-mode pooler, not transaction pooling. The connection must work from both your computer and Cloudflare.
-3. Copy the PostgreSQL connection URL, including the password and SSL settings, into your password manager. Paste only the URL—not a surrounding `psql` command—into Void's `PostgreSQL DATABASE_URL` prompt, as the provider gives it, including SSL settings such as `sslmode=verify-full`. A Hyperdrive that Void creates trusts only public certificate authorities, so if your database uses a private certificate authority, use a separately managed Hyperdrive, as described below.
+1. プラットフォーム専用の新しいデータベースまたはプロジェクトを作成します。既存のアプリケーションのテーブルがあってはいけません。テーブルとスキーマを作成・管理できるデータベースロールを使用してください。
+2. プロバイダーの接続情報を開いて、プライマリデータベースを選択します。直接接続またはセッションモードのプーラーを使用し、トランザクションプーリングは使用しないでください。接続は、お使いのコンピューターと Cloudflare の両方から機能する必要があります。
+3. パスワードと SSL 設定を含む PostgreSQL の接続 URL を、パスワードマネージャーにコピーします。Void の `PostgreSQL DATABASE_URL` プロンプトには、`psql` コマンドで囲まずに URL だけを、`sslmode=verify-full` などの SSL 設定を含めてプロバイダーが提示したとおりに貼り付けます。Void が作成する Hyperdrive は公的な認証局のみを信頼するため、データベースがプライベート認証局を使用している場合は、後述のとおり別途管理する Hyperdrive を使用してください。
 
-| Provider                                                                 | Connection setup                                                                                                                                                 |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [PlanetScale Postgres](https://planetscale.com/docs/postgres/connecting) | Choose **Postgres**, not Vitess/MySQL. Open **Connect**, create role credentials, and use the direct primary connection on port `5432`, not PgBouncer on `6432`. |
-| [Neon](https://neon.com/docs/get-started-with-neon/connect-neon)         | Open **Connect**, select the database and owner role, and turn **connection pooling off**.                                                                       |
+| プロバイダー                                                             | 接続の設定                                                                                                                                                                               |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [PlanetScale Postgres](https://planetscale.com/docs/postgres/connecting) | Vitess/MySQL ではなく **Postgres** を選択します。**Connect** を開いてロールの認証情報を作成し、`6432` 番ポートの PgBouncer ではなく、`5432` 番ポートの直接のプライマリ接続を使用します。 |
+| [Neon](https://neon.com/docs/get-started-with-neon/connect-neon)         | **Connect** を開き、データベースとオーナーロールを選択して、**connection pooling をオフ**にします。                                                                                      |
 
-Once installation claims the database, continue using that same database for resume and maintenance commands. If installation stops because it cannot use the database, for example because the database is not empty, set `VOID_PLATFORM_DATABASE_URL` to another database's URL before you resume. Uninstall never deletes external PostgreSQL.
+インストールがデータベースを確保した後は、再開やメンテナンスのコマンドでも同じデータベースを使い続けてください。データベースが空でないなどの理由で、インストールがデータベースを使用できずに停止した場合は、再開する前に `VOID_PLATFORM_DATABASE_URL` を別のデータベースの URL に設定してください。アンインストールしても、外部の PostgreSQL が削除されることはありません。
 
-### Use a provider CLI
+### プロバイダーの CLI を使う {#use-a-provider-cli}
 
-You can create the database and retrieve its connection URL from either provider's CLI instead of its dashboard.
+ダッシュボードの代わりに、どちらのプロバイダーの CLI でもデータベースの作成と接続 URL の取得ができます。
 
 ::: details PlanetScale Postgres
 
-Install the latest [PlanetScale CLI](https://planetscale.com/docs/cli/planetscale-environment-setup). On macOS, use `brew install pscale`; the installation guide also covers Linux and Windows.
+最新の [PlanetScale CLI](https://planetscale.com/docs/cli/planetscale-environment-setup) をインストールします。macOS では `brew install pscale` を使用します。Linux と Windows については、インストールガイドを参照してください。
 
-Sign in and list your organizations and regions:
+サインインして、組織とリージョンを一覧表示します。
 
 ```sh
 pscale auth login
@@ -100,13 +100,13 @@ pscale org list
 pscale region list --org <organization>
 ```
 
-Replace `<organization>` with your organization slug and choose a region. List the available Postgres cluster sizes and their prices for that region:
+`<organization>` を自分の組織のスラッグに置き換えて、リージョンを選択します。そのリージョンで利用できる Postgres のクラスターサイズと料金を一覧表示します。
 
 ```sh
 pscale size cluster list --org <organization> --engine postgresql --region <region>
 ```
 
-Create a dedicated Postgres database with your chosen cluster size, then create a role with permission to create and migrate Void's tables:
+選択したクラスターサイズで専用の Postgres データベースを作成し、Void のテーブルを作成・マイグレーションできる権限を持つロールを作成します。
 
 ```sh
 pscale database create void-platform \
@@ -121,22 +121,22 @@ pscale role create void-platform main void_owner \
   --inherited-roles postgres
 ```
 
-Save the **DATABASE URL** printed by the role-creation command in your password manager and paste it into Void's `PostgreSQL DATABASE_URL` prompt. Use the direct primary connection on port `5432` with `sslmode=verify-full`. The role's password is shown when it is created, so save it before closing the terminal.
+ロール作成コマンドが出力する **DATABASE URL** をパスワードマネージャーに保存し、Void の `PostgreSQL DATABASE_URL` プロンプトに貼り付けます。`5432` 番ポートの直接のプライマリ接続を `sslmode=verify-full` で使用してください。ロールのパスワードは作成時にのみ表示されるため、ターミナルを閉じる前に保存してください。
 
-See PlanetScale's [database commands](https://planetscale.com/docs/cli/database) and [role commands](https://planetscale.com/docs/cli/role) for more options.
+その他のオプションについては、PlanetScale の[データベースコマンド](https://planetscale.com/docs/cli/database)と[ロールコマンド](https://planetscale.com/docs/cli/role)を参照してください。
 
 :::
 
 ::: details Neon
 
-Install the latest [Neon CLI](https://neon.com/docs/cli/install) and sign in:
+最新の [Neon CLI](https://neon.com/docs/cli/install) をインストールして、サインインします。
 
 ```sh
 pnpm add --global neon@latest
 neon login
 ```
 
-Create a dedicated project, database, and owner role. Replace `<region-id>` with one of Neon's [supported regions](https://neon.com/docs/cli/projects#create), such as `aws-us-east-2`:
+専用のプロジェクト、データベース、オーナーロールを作成します。`<region-id>` は、`aws-us-east-2` など Neon の[サポート対象リージョン](https://neon.com/docs/cli/projects#create)のいずれかに置き換えてください。
 
 ```sh
 neon projects create --name void-platform \
@@ -145,7 +145,7 @@ neon projects create --name void-platform \
   --region-id <region-id>
 ```
 
-Use the project ID from the output to retrieve a direct primary connection URL with TLS certificate verification:
+出力されたプロジェクト ID を使って、TLS 証明書の検証付きで直接のプライマリ接続 URL を取得します。
 
 ```sh
 neon connection-string --project-id <project-id> \
@@ -155,16 +155,16 @@ neon connection-string --project-id <project-id> \
   --ssl verify-full
 ```
 
-Save the printed URL in your password manager and paste it into Void's `PostgreSQL DATABASE_URL` prompt. Keep this connection unpooled. See Neon's [connection-string command](https://neon.com/docs/cli/connection-string) for more options.
+出力された URL をパスワードマネージャーに保存し、Void の `PostgreSQL DATABASE_URL` プロンプトに貼り付けます。この接続はプーリングなしのままにしてください。その他のオプションについては、Neon の [connection-string コマンド](https://neon.com/docs/cli/connection-string)を参照してください。
 
 :::
 
-### Use an existing Hyperdrive
+### 既存の Hyperdrive を使う {#use-an-existing-hyperdrive}
 
-The installer can create Hyperdrive for you or use one you manage separately. For an existing configuration:
+インストーラーは、Hyperdrive を作成することも、別途管理している Hyperdrive を使用することもできます。既存の構成を使う場合は、次のようにします。
 
-1. Point it at the dedicated platform database using a runtime user, and disable SQL result caching.
-2. Select it in the installer and review the database, host, port, and runtime user.
-3. Supply a database owner connection at the PostgreSQL URL prompt so Void can apply migrations.
+1. ランタイムユーザーを使って、プラットフォーム専用のデータベースを指すように設定し、SQL 結果のキャッシュを無効にします。
+2. インストーラーでそれを選択し、データベース、ホスト、ポート、ランタイムユーザーを確認します。
+3. Void がマイグレーションを適用できるよう、PostgreSQL URL のプロンプトにデータベースオーナーの接続を指定します。
 
-To create one first, choose **Set up a separately managed Hyperdrive** and follow the printed instructions or [Cloudflare’s setup guide](https://developers.cloudflare.com/hyperdrive/get-started/). Rerun the installer once it is ready. Void leaves its configuration under your control. For unattended setup, use the Hyperdrive variables in [Install from CI](/guide/platform/installation/ci).
+先に作成する場合は、**Set up a separately managed Hyperdrive** を選択し、表示される手順または [Cloudflare のセットアップガイド](https://developers.cloudflare.com/hyperdrive/get-started/)に従ってください。準備ができたら、インストーラーを再実行します。Void はその構成をユーザーの管理下に置いたままにします。無人セットアップでは、[CI からインストールする](/ja/guide/platform/installation/ci)の Hyperdrive 変数を使用してください。

@@ -2,28 +2,28 @@
 outline: deep
 ---
 
-# Analog
+# Analog {#analog}
 
-Use Void with [Analog](https://analogjs.org/) for resource detection, typed database queries, and migrations. Analog keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
+[Analog](https://analogjs.org/) で Void を使うと、リソースの検出、型付きデータベースクエリ、マイグレーションが利用できます。Analog は独自のビルドと Cloudflare インテグレーションを維持し、Void はその Vite 設定に組み込まれます。
 
-## Setup
+## セットアップ {#setup}
 
-### 1. Create a new project
+### 1. 新しいプロジェクトを作成する {#_1-create-a-new-project}
 
 ```bash
 npx create-analog@latest my-app
 cd my-app
 ```
 
-### 2. Install dependencies
+### 2. 依存関係をインストールする {#_2-install-dependencies}
 
 ```bash
 npm install -D void nitro-cloudflare-dev
 ```
 
-Void provides the local Cloudflare binding runtime. `nitro-cloudflare-dev` creates the platform proxy during development so that `void/db`, `void/kv`, and other runtime helpers can access bindings.
+Void はローカルの Cloudflare バインディングランタイムを提供します。`nitro-cloudflare-dev` は開発中にプラットフォームプロキシを作成し、`void/db`、`void/kv` などのランタイムヘルパーがバインディングにアクセスできるようにします。
 
-### 3. Configure `vite.config.ts`
+### 3. `vite.config.ts` を設定する {#_3-configure-vite-config-ts}
 
 ```ts
 import analog from '@analogjs/platform';
@@ -48,11 +48,11 @@ export default defineConfig({
 });
 ```
 
-The `void/nitro` module gives Analog API routes and page server loads your app's `void/db` and `@schema`.
+`void/nitro` モジュールにより、Analog の API ルートとページのサーバーロードから、アプリの `void/db` と `@schema` を利用できるようになります。
 
-### 4. Create `void.config.ts`
+### 4. `void.config.ts` を作成する {#_4-create-void-config-ts}
 
-Void generates the Cloudflare config used by Analog's development runtime:
+Void は、Analog の開発ランタイムが使用する Cloudflare の設定を生成します。
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -66,22 +66,22 @@ export default defineConfig({
 });
 ```
 
-`nodejs_compat` is required for Nitro's Cloudflare runtime. `nodejs_als` is required for `void/*` runtime helpers (e.g. `void/db`, `void/kv`).
+`nodejs_compat` は Nitro の Cloudflare ランタイムに必要です。`nodejs_als` は `void/*` のランタイムヘルパー(例: `void/db`、`void/kv`)に必要です。
 
-### 5. Deploy
+### 5. デプロイする {#_5-deploy}
 
 ```bash
 void auth login
 void deploy
 ```
 
-## Using Void Features
+## Void の機能を使う {#using-void-features}
 
-Most [Void platform features](../../guide/app-types.md#void-apps) work with Analog. Use them in page server loaders, actions, and API routes:
+[Void プラットフォームの機能](../../guide/app-types.md#void-apps)のほとんどは Analog で動作します。ページのサーバーローダー、アクション、API ルートで使用できます。
 
-Void-managed auth is not supported in framework mode yet. Use Better Auth's official integration directly for now.
+Void が管理する認証は、フレームワークモードではまだサポートされていません。当面は Better Auth の公式インテグレーションを直接使用してください。
 
-### Database
+### データベース {#database}
 
 ```ts
 // src/app/pages/users.server.ts
@@ -94,19 +94,19 @@ export const load = async ({ event }: PageServerLoad) => {
 };
 ```
 
-### Other resources
+### その他のリソース {#other-resources}
 
-Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
+[KV](../../guide/kv.md)、[オブジェクトストレージ](../../guide/storage.md)、[AI](../../guide/ai.md) は、Void アプリと同じインポートでサーバーサイドのコードから使用できます。[cron ジョブ](../../guide/jobs.md)は `crons/` に、[キューコンシューマー](../../guide/queues.md)は `queues/` に追加します。
 
-### Environment Variables
+### 環境変数 {#environment-variables}
 
-Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
+変数は `env.ts` で宣言し、`import { env } from "void/env"` で読み取ります。ローカルの値、本番用のシークレット、公開用の `VITE_*` の値については[環境変数](../../guide/env-vars.md)を参照してください。
 
-`void/env` replaces the H3 event context and `import { env } from "cloudflare:workers"` for env-var access. Keep those around when you need raw binding access (D1, KV, R2, etc.).
+`void/env` は、環境変数へのアクセスにおいて、H3 のイベントコンテキストと `import { env } from "cloudflare:workers"` の代わりになります。生のバインディング(D1、KV、R2 など)へのアクセスが必要な場合は、これらを引き続き使用してください。
 
-## Accessing Bindings Directly
+## バインディングに直接アクセスする {#accessing-bindings-directly}
 
-You can also access raw Cloudflare bindings via the H3 event context or the `cloudflare:workers` module:
+H3 のイベントコンテキストまたは `cloudflare:workers` モジュールを通じて、生の Cloudflare バインディングにアクセスすることもできます。
 
 ```ts
 import { env } from 'cloudflare:workers';

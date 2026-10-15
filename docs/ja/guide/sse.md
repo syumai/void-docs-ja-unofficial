@@ -2,15 +2,15 @@
 outline: deep
 ---
 
-# Server-Sent Events
+# Server-Sent Events {#server-sent-events}
 
-Use `void/sse` to stream events from a route handler to the browser. Void formats messages, sends keepalives, and closes the stream when the request ends.
+`void/sse` を使うと、ルートハンドラーからブラウザへイベントをストリーミングできます。Void はメッセージのフォーマット、キープアライブの送信、リクエスト終了時のストリームのクローズを行います。
 
-SSE is a good fit for AI tokens, progress updates, or logs produced by one request. If other requests need to publish to connected clients, see [Live Event Streams](./live.md). Store events yourself if clients need to replay them.
+SSE は、AI のトークン、進捗の更新、1 つのリクエストが生成するログに適しています。他のリクエストから接続中のクライアントにイベントを発行する必要がある場合は、[ライブイベントストリーム](./live.md)を参照してください。クライアントがイベントを再生できる必要がある場合は、イベントを自分で保存してください。
 
-## Server streams
+## サーバーストリーム {#server-streams}
 
-Return `eventStream()` from a route handler:
+ルートハンドラーから `eventStream()` を返します。
 
 ```ts
 // routes/api/events.ts
@@ -40,7 +40,7 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-`eventStream()` returns a `Response` immediately with these default headers:
+`eventStream()` は、次のデフォルトヘッダーを持つ `Response` をただちに返します。
 
 ```http
 Content-Type: text/event-stream; charset=utf-8
@@ -48,11 +48,11 @@ Cache-Control: no-cache, no-transform
 X-Accel-Buffering: no
 ```
 
-When the `start` callback returns, the stream closes. Long-lived streams should wait on `stream.closed`, a producer promise, or an application cancellation signal before returning.
+`start` コールバックが戻ると、ストリームはクローズされます。長時間続くストリームでは、戻る前に `stream.closed`、プロデューサーの Promise、またはアプリケーションのキャンセルシグナルを待機してください。
 
-## Sending events
+## イベントの送信 {#sending-events}
 
-Use `send()` for SSE messages and `comment()` for comments:
+SSE メッセージには `send()` を、コメントには `comment()` を使用します。
 
 ```ts
 await stream.send({
@@ -65,11 +65,11 @@ await stream.send({
 await stream.comment('still connected');
 ```
 
-`data` accepts strings or JSON-serializable values. SSE is text-only.
+`data` には、文字列または JSON シリアライズ可能な値を指定できます。SSE はテキストのみです。
 
-Writing to a closed stream throws `SseStreamClosedError`.
+クローズ済みのストリームに書き込むと、`SseStreamClosedError` がスローされます。
 
-Use `formatSseText()` to format a payload you have already serialized:
+すでにシリアライズ済みのペイロードをフォーマットするには、`formatSseText()` を使用します。
 
 ```ts
 import { formatSseText } from 'void/sse';
@@ -80,15 +80,15 @@ const frame = formatSseText({
 });
 ```
 
-## Keepalives
+## キープアライブ {#keepalives}
 
-Keepalives are enabled by default every 15 seconds:
+キープアライブは、デフォルトで 15 秒ごとに有効になっています。
 
 ```ts
 return eventStream(start);
 ```
 
-Disable them or customize the interval and comment text:
+無効にしたり、間隔とコメントのテキストをカスタマイズしたりできます。
 
 ```ts
 return eventStream(start, { keepAlive: false });
@@ -98,9 +98,9 @@ return eventStream(start, {
 });
 ```
 
-## Last Event ID
+## Last Event ID {#last-event-id}
 
-Browsers send `Last-Event-ID` when reconnecting after an event with an `id` field. Use `getLastEventId()` to resume from your own storage:
+ブラウザは、`id` フィールドを持つイベントの後に再接続する際、`Last-Event-ID` を送信します。`getLastEventId()` を使うと、自分のストレージから再開できます。
 
 ```ts
 import { getLastEventId } from 'void/sse';
@@ -113,9 +113,9 @@ export const GET = defineHandler((c) => {
 });
 ```
 
-## Client
+## クライアント {#client}
 
-Use `connectEventStream()` from the browser-only `void/sse/client` subpath:
+ブラウザ専用の `void/sse/client` サブパスから `connectEventStream()` を使用します。
 
 ```ts
 import { connectEventStream } from 'void/sse/client';
@@ -139,9 +139,9 @@ offReady();
 stream.close();
 ```
 
-The client wraps native `EventSource`. It supports cookie credentials and typed event handlers, but it does not support request bodies or arbitrary headers. Use cookie auth, signed URLs, or a fetch-based streaming route when you need custom headers.
+クライアントはネイティブの `EventSource` をラップしています。Cookie の認証情報と型付きのイベントハンドラーをサポートしますが、リクエストボディや任意のヘッダーはサポートしません。カスタムヘッダーが必要な場合は、Cookie 認証、署名付き URL、または fetch ベースのストリーミングルートを使用してください。
 
-JSON parsing is the default. Set `parse: 'text'` or pass a custom parser for non-JSON payloads:
+デフォルトでは JSON としてパースされます。JSON 以外のペイロードには、`parse: 'text'` を設定するか、カスタムパーサーを渡します。
 
 ```ts
 const logs = connectEventStream('/api/logs', { parse: 'text' });
@@ -151,9 +151,9 @@ logs.on('line', (event) => {
 });
 ```
 
-## Auth
+## 認証 {#auth}
 
-SSE routes are ordinary route handlers, so use the same auth checks you use for JSON routes:
+SSE ルートは通常のルートハンドラーなので、JSON ルートと同じ認証チェックを使用できます。
 
 ```ts
 import { requireAuth } from 'void/auth';
@@ -168,4 +168,4 @@ export const GET = defineHandler(async (c) => {
 });
 ```
 
-For shared topics and subscriptions, use [Live Event Streams](./live.md). For two-way communication, use [WebSockets](./websockets.md).
+共有トピックとサブスクリプションには、[ライブイベントストリーム](./live.md)を使用してください。双方向通信には、[WebSocket](./websockets.md)を使用してください。

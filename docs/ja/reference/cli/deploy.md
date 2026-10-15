@@ -2,7 +2,7 @@
 outline: deep
 ---
 
-# Deployment {#deploy}
+# デプロイ {#deploy}
 
 ## `void deploy` {#void-deploy}
 
@@ -13,95 +13,88 @@ void deploy --platform cloudflare --atomic
 void deploy --platform cloudflare --provision
 ```
 
-Auto-detects your project type and chooses the right pipeline. See [Supported App Types](../../guide/app-types.md) and [Deployment](../../guide/deployment.md) for details.
+プロジェクトの種類を自動的に検出し、適切なパイプラインを選択します。詳細は[サポートされるアプリの種類](../../guide/app-types.md)と[デプロイ](../../guide/deployment.md)を参照してください。
 
-Deploying to a Void platform requires an explicit connection with `void connect <url>`.
-A saved project URL or `VOID_API_URL` alone does not establish a connection.
-In fresh CI environments, run `void connect "$VOID_API_URL" --no-login` first.
+Void プラットフォームにデプロイするには、`void connect <url>` による明示的な接続が必要です。保存されたプロジェクトの URL や `VOID_API_URL` だけでは、接続は確立されません。新しい CI 環境では、先に `void connect "$VOID_API_URL" --no-login` を実行してください。
 
-On a Void platform, an accepted deployment continues if the CLI disconnects. The CLI automatically reconnects to its progress. Pressing Ctrl+C stops observation; use `void project cancel` to request cancellation and `void project status` to inspect the result. If interrupted execution requires recovery, wait for its result before deploying again.
+Void プラットフォームでは、受理されたデプロイは CLI が切断されても継続します。CLI は自動的に進行状況へ再接続します。Ctrl+C を押すと観察が停止します。キャンセルを要求するには `void project cancel`、結果を確認するには `void project status` を使用します。中断された実行で復旧が必要な場合は、その結果を待ってから再度デプロイしてください。
 
-The CLI reports stalled progress and automatic recovery, and waits up to 30 minutes after acceptance. If it times out, the deployment can continue; check `void project status` before trying another deployment.
+CLI は、進行の停滞と自動復旧を報告し、受理後は最大 30 分間待機します。タイムアウトした場合でもデプロイは継続できるため、別のデプロイを試す前に `void project status` を確認してください。
 
-For an existing Void Worker, `void deploy` can link the Worker and migrate its root Cloudflare config. Keep the first deployment focused on the existing app. See [Deploy an existing Worker](../../integrations/cloudflare.md#deploy-an-existing-worker) for requirements and the ISR cache choice.
+既存の Void Worker では、`void deploy` がその Worker をリンクし、ルートの Cloudflare 設定を移行できます。最初のデプロイは、既存のアプリに集中してください。要件と ISR キャッシュの選択については、[既存の Worker をデプロイする](../../integrations/cloudflare.md#deploy-an-existing-worker)を参照してください。
 
-For Drizzle projects, deploy performs a read-only schema drift check. If a new migration would be generated, deploy stops and tells you to run `void db generate`, review the migration, commit it yourself, and rerun `void deploy`.
+Drizzle プロジェクトでは、デプロイ時に読み取り専用のスキーマドリフトチェックが実行されます。新しいマイグレーションが生成される場合、デプロイは停止し、`void db generate` を実行してマイグレーションを確認し、自分でコミットしてから `void deploy` を再実行するよう案内します。
 
-| Flag                            | Purpose                                                                                                                                                              |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--platform <cloudflare\|void>` | Override the platform stored in `.void/project.json`                                                                                                                 |
-| `--project <name>`              | Target a specific Void project by slug; not supported with `--platform cloudflare`                                                                                   |
-| `--dir <path>`                  | Deploy a pre-built static directory (skips build)                                                                                                                    |
-| `--spa`                         | Use SPA mode instead of SSG for static deploys                                                                                                                       |
-| `--skip-build`                  | Skip the build step; on Cloudflare this is supported for static/SPA/SSG deploys only                                                                                 |
-| `--require-email`               | Fail when email cannot be set up instead of deploying without it; requires `--platform cloudflare`                                                                   |
-| `--provision`                   | Run resource provisioning again even when every resource exists, for example to enable D1 read replication on an existing database; requires `--platform cloudflare` |
-| `--atomic`                      | Publish an existing Durable Object Worker directly; readiness is checked after traffic changes                                                                       |
-| `--debug`                       | Mirror the structured deploy log to stderr (also written to `~/.void/logs/`)                                                                                         |
+| フラグ                          | 用途                                                                                                                                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--platform <cloudflare\|void>` | `.void/project.json` に保存されているプラットフォームを上書きします                                                                                                                                      |
+| `--project <name>`              | スラッグで特定の Void プロジェクトを対象にします。`--platform cloudflare` ではサポートされません                                                                                                         |
+| `--dir <path>`                  | ビルド済みの静的ディレクトリをデプロイします（ビルドをスキップ）                                                                                                                                         |
+| `--spa`                         | 静的デプロイで、SSG の代わりに SPA モードを使用します                                                                                                                                                    |
+| `--skip-build`                  | ビルド手順をスキップします。Cloudflare では、静的 / SPA / SSG のデプロイのみサポートされます                                                                                                             |
+| `--require-email`               | メールをセットアップできない場合に、メールなしでデプロイせず失敗させます。`--platform cloudflare` が必要です                                                                                             |
+| `--provision`                   | すべてのリソースが存在していても、リソースのプロビジョニングを再度実行します。たとえば、既存のデータベースで D1 のリードレプリケーションを有効にする場合に使用します。`--platform cloudflare` が必要です |
+| `--atomic`                      | 既存の Durable Object Worker を直接公開します。準備状況はトラフィックの切り替え後に確認されます                                                                                                          |
+| `--debug`                       | 構造化されたデプロイログを stderr にも出力します（`~/.void/logs/` にも書き込まれます）                                                                                                                   |
 
-`--atomic` applies to one deployment. For an existing Durable Object Worker that consistently cannot stage, set `deploy: { cloudflare: { mode: 'atomic' } }` in `void.config.ts` so plain `void deploy` uses atomic publication. The default is `staged`.
+`--atomic` は 1 回のデプロイにのみ適用されます。ステージングが常にできない既存の Durable Object Worker では、`void.config.ts` に `deploy: { cloudflare: { mode: 'atomic' } }` を設定すると、通常の `void deploy` でアトミックな公開が使用されます。既定値は `staged` です。
 
-Every deploy writes a JSONL log to `~/.void/logs/`. Failures print the log path and relevant details. Use `--debug` or `VOID_DEPLOY_DEBUG=1` to mirror it to stderr.
+すべてのデプロイは、`~/.void/logs/` に JSONL 形式のログを書き込みます。失敗時には、ログのパスと関連する詳細が表示されます。`--debug` または `VOID_DEPLOY_DEBUG=1` を使用すると、stderr にも出力できます。
 
-Keep credentials out of build commands and register them as CI secrets so your CI provider can mask them in logs.
+認証情報はビルドコマンドに含めず、CI のシークレットとして登録して、CI プロバイダーがログ内でマスクできるようにしてください。
 
-Platform resolution precedence:
+プラットフォームの解決の優先順位:
 
 1. `--platform <cloudflare|void>`
-2. `platform` in `.void/project.json`
-3. Void for projects initialized by an older SDK without a saved platform
+2. `.void/project.json` の `platform`
+3. プラットフォームが保存されていない、古い SDK で初期化されたプロジェクトでは Void
 
-Selecting Skip deployment setup stores `"platform": "none"`; a later `void deploy` stops with guidance until a platform override is provided.
+Skip deployment setup を選択すると `"platform": "none"` が保存されます。その後の `void deploy` は、プラットフォームの上書きが指定されるまで、案内を表示して停止します。
 
-For the Void platform, project resolution precedence is:
+Void プラットフォームでの、プロジェクトの解決の優先順位:
 
 1. `--project <name>`
 2. `VOID_PROJECT`
-3. linked project in `.void/project.json`
+3. `.void/project.json` にリンクされたプロジェクト
 
-If no project is linked and no override is provided, CLI prompts to link or create one. In CI (non-TTY), `void deploy` errors out instead — set `VOID_PROJECT` or pass `--project <slug>`.
+プロジェクトがリンクされておらず、上書きも指定されていない場合、CLI はリンクまたは作成を促します。CI（非 TTY）では、`void deploy` は代わりにエラーで終了します。`VOID_PROJECT` を設定するか、`--project <slug>` を渡してください。
 
-To deploy to another connected Void platform for one invocation:
+1 回の実行だけ、接続済みの別の Void プラットフォームにデプロイするには、次のようにします。
 
 ```sh
 void connect second.example.com
 VOID_API_URL=https://second.example.com void deploy --platform void --project my-app
 ```
 
-`VOID_API_URL` selects the platform and `--project` selects its project. You must
-name the project when overriding a different platform's saved link. Existing
-project links and deployment preferences remain unchanged, even when the target
-project is created. The same applies to `VOID_PROJECT` and to another project on
-the current platform. A first deployment still links the project when no destination
-is configured. See [Deploy to another Void platform](../../guide/deployment.md#deploy-to-another-void-platform).
+`VOID_API_URL` がプラットフォームを選択し、`--project` がそのプロジェクトを選択します。別のプラットフォームの保存済みリンクを上書きする場合は、プロジェクトを指定する必要があります。ターゲットのプロジェクトが作成される場合でも、既存のプロジェクトのリンクとデプロイの設定は変更されません。`VOID_PROJECT` や、現在のプラットフォーム上の別のプロジェクトでも同様です。デプロイ先が設定されていない場合、最初のデプロイではプロジェクトがリンクされます。[別の Void プラットフォームにデプロイする](../../guide/deployment.md#deploy-to-another-void-platform)を参照してください。
 
 ## `void deploy --platform cloudflare` {#void-deploy-platform-cloudflare}
 
-Build and deploy to your Cloudflare account using `void.config.ts`:
+`void.config.ts` を使用して、お使いの Cloudflare アカウントにビルドしてデプロイします。
 
 ```sh
 void deploy --platform cloudflare
-void deploy --platform cloudflare --require-email   # fail instead of deploying without email
+void deploy --platform cloudflare --require-email   # メールなしでデプロイせず、失敗させる
 ```
 
-Void signs you in through your browser when needed and saves the selected account. In CI, set `CLOUDFLARE_API_TOKEN` and, if the token can access several accounts, `CLOUDFLARE_ACCOUNT_ID`.
+Void は必要に応じてブラウザーでサインインを行い、選択したアカウントを保存します。CI では、`CLOUDFLARE_API_TOKEN` を設定し、トークンが複数のアカウントにアクセスできる場合は `CLOUDFLARE_ACCOUNT_ID` も設定してください。
 
-| Option or setting              | Cloudflare behavior                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------------------- |
-| `--dir`, `--spa`               | Deploy static output through a small Worker and Workers Assets                         |
-| `--skip-build`                 | Reuse existing static, SPA, or SSG output; unavailable for Worker apps                 |
-| `--project`                    | Unavailable; the Worker and account come from `void.config.ts` and `void.lock.json`    |
-| Named environments             | Unavailable; use the top-level `cloudflare` config                                     |
-| `CLOUDFLARE_WORKERS_SUBDOMAIN` | Needed in fresh CI when versions have no preview URL; cached locally after a deploy    |
-| `--require-email`              | Fail instead of deploying without email when the email step cannot run, as in CI       |
-| `DATABASE_URL`                 | Required in the deploy environment for PostgreSQL or MySQL provisioning and migrations |
+| オプションまたは設定           | Cloudflare での動作                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `--dir`, `--spa`               | 小さな Worker と Workers Assets を通じて静的な出力をデプロイします                              |
+| `--skip-build`                 | 既存の静的、SPA、SSG の出力を再利用します。Worker アプリでは利用できません                      |
+| `--project`                    | 利用できません。Worker とアカウントは `void.config.ts` と `void.lock.json` から決まります       |
+| 名前付き環境                   | 利用できません。トップレベルの `cloudflare` 設定を使用してください                              |
+| `CLOUDFLARE_WORKERS_SUBDOMAIN` | バージョンにプレビュー URL がない新しい CI で必要です。デプロイ後はローカルにキャッシュされます |
+| `--require-email`              | CI のようにメールの手順を実行できない場合に、メールなしでデプロイせず失敗させます               |
+| `DATABASE_URL`                 | PostgreSQL または MySQL のプロビジョニングとマイグレーションのため、デプロイ環境で必要です      |
 
-The token needs Workers Scripts: Edit, read access to bound resources, and edit access to products Void provisions. Commit `void.lock.json` after the first deploy before using other machines or CI.
+トークンには、Workers Scripts: Edit、バインドされたリソースへの読み取りアクセス、Void がプロビジョニングする製品への編集アクセスが必要です。他のマシンや CI を使用する前に、最初のデプロイの後で `void.lock.json` をコミットしてください。
 
-Use `void secret put <NAME>` for production server values. Local `.env` values are never deployed. Run `void db generate` and commit schema changes before deploying.
+本番のサーバー側の値には `void secret put <NAME>` を使用します。ローカルの `.env` の値は決してデプロイされません。デプロイの前に `void db generate` を実行して、スキーマの変更をコミットしてください。
 
-Sandbox requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans), Docker, and Containers access. API tokens need Account / Containers: Edit and Account / Cloudchamber: Edit.
+Sandbox には、[Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans)、Docker、Containers へのアクセスが必要です。API トークンには、Account / Containers: Edit と Account / Cloudchamber: Edit が必要です。
 
-For email, set `email.from` and run `void email setup --platform cloudflare` locally. Commit the lock file and pass `--require-email` in CI. See [Email setup](../../guide/email/domains.md#your-own-cloudflare-account).
+メールを使う場合は、`email.from` を設定し、ローカルで `void email setup --platform cloudflare` を実行します。ロックファイルをコミットし、CI では `--require-email` を渡します。[メールのセットアップ](../../guide/email/domains.md#your-own-cloudflare-account)を参照してください。
 
-For Access credentials, Hyperdrive permissions, readiness, and rollback, see [Cloudflare deployment](../../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account).
+Access の認証情報、Hyperdrive の権限、準備状況、ロールバックについては、[Cloudflare へのデプロイ](../../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account)を参照してください。
