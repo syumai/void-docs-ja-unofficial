@@ -2,6 +2,7 @@ import type { IconOption } from '@voidzero-dev/vitepress-theme';
 import { extendConfig } from '@voidzero-dev/vitepress-theme/config';
 import { defineConfig } from 'vitepress';
 import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons';
+import { localizeThemeConfig } from './ja';
 
 const referenceItems = [
   {
@@ -165,241 +166,256 @@ const companyLinks = {
   ],
 };
 
-export default extendConfig(
-  defineConfig({
-    title: 'Void',
-    description: 'Build with Vite. Deploy with Void.',
-    cleanUrls: true,
-    head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' }]],
-    appearance: 'dark',
+const base = defineConfig({
+  title: 'Void',
+  description: 'Build with Vite. Deploy with Void.',
+  cleanUrls: true,
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' }]],
+  appearance: 'dark',
 
-    // ./index.server imports in code blocks are false positives
-    ignoreDeadLinks: [/\/index$/],
+  // ./index.server imports in code blocks are false positives
+  ignoreDeadLinks: [/\/index$/],
 
-    markdown: {
-      config(md) {
-        md.use(groupIconMdPlugin);
-      },
+  markdown: {
+    config(md) {
+      md.use(groupIconMdPlugin);
+    },
+  },
+
+  vite: {
+    plugins: [groupIconVitePlugin()],
+  },
+
+  themeConfig: {
+    search: {
+      provider: 'local',
     },
 
-    vite: {
-      plugins: [groupIconVitePlugin()],
+    nav: [
+      {
+        text: 'Guide',
+        link: '/guide/',
+        activeMatch:
+          '^/guide/(?!platform/|self-hosted-platform|platform-administration|platform-development)',
+      },
+      {
+        text: 'Platform',
+        link: '/guide/self-hosted-platform',
+        activeMatch:
+          '^/guide/(platform/|self-hosted-platform|platform-administration|platform-development)',
+      },
+      referenceLinks,
+      integrationLinks,
+    ],
+
+    socialLinks,
+
+    sidebar: {
+      '/guide/platform/': platformSidebar,
+      '/guide/self-hosted-platform': platformSidebar,
+      '/guide/platform-administration': platformSidebar,
+      '/guide/platform-development': platformSidebar,
+      '/guide/': [
+        {
+          text: 'Getting Started',
+          icon: 'lucide:rocket',
+          collapsed: false,
+          items: [
+            { text: 'Introduction', link: '/guide/' },
+            { text: 'Quickstart', link: '/guide/quickstart' },
+            { text: 'Supported App Types', link: '/guide/app-types' },
+          ],
+        },
+        {
+          text: 'Routing & Rendering',
+          // @ts-expect-error
+          icon: 'lucide:route',
+          collapsed: false,
+          items: [
+            { text: 'Server Routing', link: '/guide/server-routing' },
+            {
+              text: 'Pages Routing',
+              collapsed: true,
+              items: [
+                { text: 'Overview', link: '/guide/pages-routing/overview' },
+                { text: 'Layouts & Shared Data', link: '/guide/pages-routing/layouts' },
+                { text: 'Loaders & Props', link: '/guide/pages-routing/loaders' },
+                { text: 'Actions & Forms', link: '/guide/pages-routing/actions-and-forms' },
+                { text: 'View Transitions', link: '/guide/pages-routing/view-transitions' },
+                { text: 'Head Management', link: '/guide/pages-routing/head' },
+                { text: 'Islands', link: '/guide/pages-routing/islands' },
+                { text: 'Markdown', link: '/guide/pages-routing/markdown' },
+              ],
+            },
+            {
+              text: 'Edge Routing',
+              collapsed: true,
+              items: [
+                { text: 'Static Assets Caching', link: '/guide/edge/static-assets' },
+                { text: 'Revalidation (ISR)', link: '/guide/edge/revalidation' },
+                { text: 'Edge Prerendering', link: '/guide/edge/prerendering' },
+                { text: 'Custom Headers', link: '/guide/edge/headers' },
+                { text: 'Redirects', link: '/guide/edge/redirects' },
+                { text: 'Rewrites', link: '/guide/edge/rewrites' },
+              ],
+            },
+            { text: 'Custom SSR', link: '/guide/ssr' },
+            { text: 'SSG', link: '/guide/ssg' },
+          ],
+        },
+        {
+          text: 'Data',
+          icon: 'lucide:database',
+          collapsed: false,
+          items: [
+            { text: 'Type Safety', link: '/guide/type-safety' },
+            {
+              text: 'Database',
+              collapsed: true,
+              items: [
+                { text: 'Overview', link: '/guide/database' },
+                { text: 'D1 (SQLite)', link: '/guide/database/d1' },
+                { text: 'PostgreSQL', link: '/guide/database/postgresql' },
+                { text: 'MySQL', link: '/guide/database/mysql' },
+              ],
+            },
+            { text: 'Typed Fetch', link: '/guide/typed-fetch' },
+            { text: 'Key-Value Storage', link: '/guide/kv' },
+            { text: 'Object Storage', link: '/guide/storage' },
+            { text: 'Durable State', link: '/guide/durable-state' },
+            { text: 'Environment Variables', link: '/guide/env-vars' },
+          ],
+        },
+        {
+          text: 'Backend Features',
+          icon: 'lucide:blocks',
+          collapsed: false,
+          items: [
+            { text: 'Authentication', link: '/guide/auth' },
+            { text: 'AI', link: '/guide/ai' },
+            {
+              text: 'Email',
+              link: '/guide/email',
+              collapsed: true,
+              items: [
+                { text: 'Sending Email', link: '/guide/email/sending' },
+                { text: 'Receiving Email', link: '/guide/email/receiving' },
+                { text: 'Domains and Setup', link: '/guide/email/domains' },
+              ],
+            },
+            { text: 'Sandboxes', link: '/guide/sandboxes' },
+            { text: 'Cron Jobs', link: '/guide/jobs' },
+            { text: 'Queues', link: '/guide/queues' },
+            { text: 'WebSockets', link: '/guide/websockets' },
+            { text: 'Server-Sent Events', link: '/guide/sse' },
+            { text: 'Live Event Streams', link: '/guide/live' },
+          ],
+        },
+        {
+          text: 'Development & Deployment',
+          icon: 'lucide:rocket',
+          collapsed: false,
+          items: [
+            { text: 'Remote Development', link: '/guide/remote-dev' },
+            { text: 'Deploying Your App', link: '/guide/deployment' },
+            { text: 'Project Collaboration', link: '/guide/project-collaboration' },
+          ],
+        },
+      ],
+      '/integrations/': (() => {
+        const frameworkIcons: Record<string, IconOption> = {
+          'TanStack Start': 'simple-icons:tanstack',
+          'React Router': {
+            light: 'logos:react-router',
+            dark: 'vscode-icons:file-type-reactrouter',
+          },
+          Astro: { light: 'logos:astro-icon', dark: 'simple-icons:astro' },
+          SvelteKit: 'logos:svelte-icon',
+          Nuxt: 'logos:nuxt-icon',
+          Analog: 'logos:analog',
+        };
+        const itemIcons: Record<string, IconOption> = {
+          'Coding Agents': 'lucide:bot',
+          Hono: 'logos:hono',
+          Cloudflare: 'devicon:cloudflare',
+          'Node.js / Bun / Deno': 'material-icon-theme:nodejs-alt',
+        };
+        return integrationItems.map((item) =>
+          item.text === 'Meta Frameworks'
+            ? {
+                ...item,
+                icon: 'lucide:blocks',
+                items: item.items?.map((child) => ({
+                  ...child,
+                  icon: frameworkIcons[child.text],
+                })),
+              }
+            : { ...item, icon: itemIcons[item.text] },
+        );
+      })(),
+      '/reference/': (() => {
+        const icons: Record<string, string> = {
+          General: 'lucide:book-open',
+          'Project Structure': 'lucide:folder-tree',
+          'Resource Inference': 'lucide:scan-search',
+          Config: 'lucide:settings',
+          API: 'lucide:code',
+          CLI: 'lucide:terminal',
+        };
+        return referenceItems.map((item) => ({
+          ...item,
+          icon: icons[item.text],
+          items: item.items?.map((child) => ({
+            ...child,
+            icon: icons[child.text] ?? child.icon,
+          })),
+        }));
+      })(),
     },
 
-    themeConfig: {
-      search: {
-        provider: 'local',
-      },
-
+    footer: {
+      copyright: `© ${new Date().getFullYear()} Cloudflare Inc. All Rights Reserved.`,
       nav: [
         {
-          text: 'Guide',
-          link: '/guide/',
-          activeMatch:
-            '^/guide/(?!platform/|self-hosted-platform|platform-administration|platform-development)',
+          title: 'Docs',
+          items: [
+            { text: 'Guide', link: '/guide/' },
+            { text: 'Integrations', link: '/integrations/frameworks/overview' },
+            { text: 'Reference', link: '/reference/structure' },
+          ],
         },
         {
-          text: 'Platform',
-          link: '/guide/self-hosted-platform',
-          activeMatch:
-            '^/guide/(platform/|self-hosted-platform|platform-administration|platform-development)',
+          title: 'Open Source',
+          items: [
+            { text: 'Vite+', link: 'https://viteplus.dev' },
+            { text: 'Vite', link: 'https://vite.dev' },
+            { text: 'Vitest', link: 'https://vitest.dev' },
+            { text: 'Rolldown', link: 'https://rolldown.rs' },
+            { text: 'Oxc', link: 'https://oxc.rs' },
+          ],
         },
-        referenceLinks,
-        integrationLinks,
+        {
+          title: companyLinks.text,
+          items: companyLinks.items,
+        },
       ],
+      social: socialLinks,
+    },
+  },
+});
 
-      socialLinks,
-
-      sidebar: {
-        '/guide/platform/': platformSidebar,
-        '/guide/self-hosted-platform': platformSidebar,
-        '/guide/platform-administration': platformSidebar,
-        '/guide/platform-development': platformSidebar,
-        '/guide/': [
-          {
-            text: 'Getting Started',
-            icon: 'lucide:rocket',
-            collapsed: false,
-            items: [
-              { text: 'Introduction', link: '/guide/' },
-              { text: 'Quickstart', link: '/guide/quickstart' },
-              { text: 'Supported App Types', link: '/guide/app-types' },
-            ],
-          },
-          {
-            text: 'Routing & Rendering',
-            // @ts-expect-error
-            icon: 'lucide:route',
-            collapsed: false,
-            items: [
-              { text: 'Server Routing', link: '/guide/server-routing' },
-              {
-                text: 'Pages Routing',
-                collapsed: true,
-                items: [
-                  { text: 'Overview', link: '/guide/pages-routing/overview' },
-                  { text: 'Layouts & Shared Data', link: '/guide/pages-routing/layouts' },
-                  { text: 'Loaders & Props', link: '/guide/pages-routing/loaders' },
-                  { text: 'Actions & Forms', link: '/guide/pages-routing/actions-and-forms' },
-                  { text: 'View Transitions', link: '/guide/pages-routing/view-transitions' },
-                  { text: 'Head Management', link: '/guide/pages-routing/head' },
-                  { text: 'Islands', link: '/guide/pages-routing/islands' },
-                  { text: 'Markdown', link: '/guide/pages-routing/markdown' },
-                ],
-              },
-              {
-                text: 'Edge Routing',
-                collapsed: true,
-                items: [
-                  { text: 'Static Assets Caching', link: '/guide/edge/static-assets' },
-                  { text: 'Revalidation (ISR)', link: '/guide/edge/revalidation' },
-                  { text: 'Edge Prerendering', link: '/guide/edge/prerendering' },
-                  { text: 'Custom Headers', link: '/guide/edge/headers' },
-                  { text: 'Redirects', link: '/guide/edge/redirects' },
-                  { text: 'Rewrites', link: '/guide/edge/rewrites' },
-                ],
-              },
-              { text: 'Custom SSR', link: '/guide/ssr' },
-              { text: 'SSG', link: '/guide/ssg' },
-            ],
-          },
-          {
-            text: 'Data',
-            icon: 'lucide:database',
-            collapsed: false,
-            items: [
-              { text: 'Type Safety', link: '/guide/type-safety' },
-              {
-                text: 'Database',
-                collapsed: true,
-                items: [
-                  { text: 'Overview', link: '/guide/database' },
-                  { text: 'D1 (SQLite)', link: '/guide/database/d1' },
-                  { text: 'PostgreSQL', link: '/guide/database/postgresql' },
-                  { text: 'MySQL', link: '/guide/database/mysql' },
-                ],
-              },
-              { text: 'Typed Fetch', link: '/guide/typed-fetch' },
-              { text: 'Key-Value Storage', link: '/guide/kv' },
-              { text: 'Object Storage', link: '/guide/storage' },
-              { text: 'Durable State', link: '/guide/durable-state' },
-              { text: 'Environment Variables', link: '/guide/env-vars' },
-            ],
-          },
-          {
-            text: 'Backend Features',
-            icon: 'lucide:blocks',
-            collapsed: false,
-            items: [
-              { text: 'Authentication', link: '/guide/auth' },
-              { text: 'AI', link: '/guide/ai' },
-              {
-                text: 'Email',
-                link: '/guide/email',
-                collapsed: true,
-                items: [
-                  { text: 'Sending Email', link: '/guide/email/sending' },
-                  { text: 'Receiving Email', link: '/guide/email/receiving' },
-                  { text: 'Domains and Setup', link: '/guide/email/domains' },
-                ],
-              },
-              { text: 'Sandboxes', link: '/guide/sandboxes' },
-              { text: 'Cron Jobs', link: '/guide/jobs' },
-              { text: 'Queues', link: '/guide/queues' },
-              { text: 'WebSockets', link: '/guide/websockets' },
-              { text: 'Server-Sent Events', link: '/guide/sse' },
-              { text: 'Live Event Streams', link: '/guide/live' },
-            ],
-          },
-          {
-            text: 'Development & Deployment',
-            icon: 'lucide:rocket',
-            collapsed: false,
-            items: [
-              { text: 'Remote Development', link: '/guide/remote-dev' },
-              { text: 'Deploying Your App', link: '/guide/deployment' },
-              { text: 'Project Collaboration', link: '/guide/project-collaboration' },
-            ],
-          },
-        ],
-        '/integrations/': (() => {
-          const frameworkIcons: Record<string, IconOption> = {
-            'TanStack Start': 'simple-icons:tanstack',
-            'React Router': {
-              light: 'logos:react-router',
-              dark: 'vscode-icons:file-type-reactrouter',
-            },
-            Astro: { light: 'logos:astro-icon', dark: 'simple-icons:astro' },
-            SvelteKit: 'logos:svelte-icon',
-            Nuxt: 'logos:nuxt-icon',
-            Analog: 'logos:analog',
-          };
-          const itemIcons: Record<string, IconOption> = {
-            'Coding Agents': 'lucide:bot',
-            Hono: 'logos:hono',
-            Cloudflare: 'devicon:cloudflare',
-            'Node.js / Bun / Deno': 'material-icon-theme:nodejs-alt',
-          };
-          return integrationItems.map((item) =>
-            item.text === 'Meta Frameworks'
-              ? {
-                  ...item,
-                  icon: 'lucide:blocks',
-                  items: item.items?.map((child) => ({
-                    ...child,
-                    icon: frameworkIcons[child.text],
-                  })),
-                }
-              : { ...item, icon: itemIcons[item.text] },
-          );
-        })(),
-        '/reference/': (() => {
-          const icons: Record<string, string> = {
-            General: 'lucide:book-open',
-            'Project Structure': 'lucide:folder-tree',
-            'Resource Inference': 'lucide:scan-search',
-            Config: 'lucide:settings',
-            API: 'lucide:code',
-            CLI: 'lucide:terminal',
-          };
-          return referenceItems.map((item) => ({
-            ...item,
-            icon: icons[item.text],
-            items: item.items?.map((child) => ({
-              ...child,
-              icon: icons[child.text] ?? child.icon,
-            })),
-          }));
-        })(),
-      },
-
-      footer: {
-        copyright: `© ${new Date().getFullYear()} Cloudflare Inc. All Rights Reserved.`,
-        nav: [
-          {
-            title: 'Docs',
-            items: [
-              { text: 'Guide', link: '/guide/' },
-              { text: 'Integrations', link: '/integrations/frameworks/overview' },
-              { text: 'Reference', link: '/reference/structure' },
-            ],
-          },
-          {
-            title: 'Open Source',
-            items: [
-              { text: 'Vite+', link: 'https://viteplus.dev' },
-              { text: 'Vite', link: 'https://vite.dev' },
-              { text: 'Vitest', link: 'https://vitest.dev' },
-              { text: 'Rolldown', link: 'https://rolldown.rs' },
-              { text: 'Oxc', link: 'https://oxc.rs' },
-            ],
-          },
-          {
-            title: companyLinks.text,
-            items: companyLinks.items,
-          },
-        ],
-        social: socialLinks,
+export default extendConfig(
+  defineConfig({
+    ...base,
+    locales: {
+      root: { label: 'English', lang: 'en' },
+      ja: {
+        label: '日本語（非公式）',
+        lang: 'ja',
+        link: '/ja/',
+        title: 'Void（非公式日本語版）',
+        description: 'Vite でビルドし、Void でデプロイする。',
+        themeConfig: localizeThemeConfig(base.themeConfig as Record<string, unknown>),
       },
     },
   }),
