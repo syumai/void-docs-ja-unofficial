@@ -1,59 +1,43 @@
-# Void
+# Void ドキュメント 非公式日本語版
 
-Build and deploy full-stack apps with [Vite](https://vite.dev), running on Cloudflare Workers.
+[Void](https://github.com/voidzero-dev/void) の公式ドキュメントを日本語に翻訳した、非公式の個人向けリポジトリです。公式のものではなく、内容の正確性は保証されません。正確な情報は[公式ドキュメント](https://void.cloud)を参照してください。
 
-Void brings together three open-source tools for you and your coding agents:
+- 公開先: https://void-docs-ja-unofficial.syumai.workers.dev/ja/
+- 英語版（原文）: https://void-docs-ja-unofficial.syumai.workers.dev/
 
-- **Void SDK:** Build your server and client together with file-based API routes, server-rendered pages, and typed APIs for databases, storage, and AI. Carry types from database queries to the UI.
-- **Void CLI:** Build your app, provision the Cloudflare resources it uses, apply migrations, and deploy with one command. Manage resources, inspect logs, and roll back through the same CLI.
-- **Void Platform:** Install a shared deployment environment in your Cloudflare account for your team or customers, with access controls, resource limits, usage reporting, and [connected applications](./docs/guide/platform/administration/connected-apps.md) that request user-approved deployments.
+## 構成
 
-The SDK's features are optional and composable. Use React, Vue, Svelte, or Solid for Void pages, or keep a [supported application framework](https://void.cloud/integrations/frameworks/overview) for routing and rendering while Void handles resource APIs, migrations, and deployment.
+- `docs/` — 原文（英語）のVitePressプロジェクト
+- `docs/ja/` — 日本語訳。原文と同じパス構成で、見出しには原文のスラッグを `{#...}` で保持しています
+- `docs/.vitepress/ja.ts` — 日本語ロケールのナビ・サイドバー・フッターのラベルとリンク変換
 
-## Getting Started
+その他のディレクトリ（`packages/`、`platform/` など）はアップストリームのソースをそのまま含んでいます。
 
-Use Node.js 24.21.0 or later. In an empty directory, run:
-
-```sh
-npm install -D void
-npx void init
-npm run dev
-```
-
-Vite+ is the default toolchain; setup installs it for you and keeps your existing package-manager configuration. Choose your UI framework and starter, then select Cloudflare to deploy to your account:
+## ローカルで確認する
 
 ```sh
-npx void deploy
+cd docs
+npx vitepress dev     # 開発サーバー
+npx vitepress build   # docs/.vitepress/dist に出力
 ```
 
-Void builds the app, provisions resources, applies database migrations, and prints your deployed URL. Follow the [Quickstart](https://void.cloud/guide/quickstart) for your first app or to add Void to an existing Vite project.
+## デプロイ
 
-To deploy to a team platform, run `npx void connect <url>` first, then use the same deploy command. See [Install a Void Platform](https://void.cloud/guide/self-hosted-platform) to host one in your Cloudflare account or customize its open-source runtime.
-
-## Documentation
-
-Read the [Void documentation](https://void.cloud) online or use the Markdown guides and references in `node_modules/void/docs/`, included with the `void` package.
-
-`void init` adds a minimal `AGENTS.md` in new projects and asks before changing instructions in existing projects. It also links bundled skills for detected coding agents.
-
-- [Server routes](https://void.cloud/guide/server-routing) and [pages](https://void.cloud/guide/pages-routing/overview)
-- [Database](https://void.cloud/guide/database) and [type safety](https://void.cloud/guide/type-safety)
-- [Deployment](https://void.cloud/guide/deployment)
-- [Framework integrations](https://void.cloud/integrations/frameworks/overview)
-- [API](https://void.cloud/reference/api) and [CLI](https://void.cloud/reference/cli) reference
-- [Coding agents](https://void.cloud/integrations/agents)
-
-## Contributing
+Cloudflare Workers の静的アセットとしてデプロイします（`docs/wrangler.jsonc`、worker名: `void-docs-ja-unofficial`）。
 
 ```sh
-git clone https://github.com/voidzero-dev/void.git
-cd void
-vp install
-vp run build:all
+cd docs
+npx wrangler login    # 初回のみ
+npx vitepress build
+npx wrangler deploy
 ```
 
-Use `vp run dev:docs` to preview the docs. See [TESTING.md](./TESTING.md) for verification, [Platform Development](https://void.cloud/guide/platform-development) for platform changes, and [operations](./platform/meta/operations.md) for repository deployments.
+## 翻訳の方針
 
-## License
+- 文体は「です・ます」調。コード、コマンド、API名、設定キー、製品名は翻訳しません。
+- サイト内リンクは `/ja/` を前置します。
+- 原文が更新された場合は `docs/` の差分を `docs/ja/` に反映します。
 
-MIT
+## ライセンスと帰属
+
+原文・ソースコードの著作権はアップストリームの権利者に帰属します。ライセンスは [LICENSE](./LICENSE) を参照してください。
